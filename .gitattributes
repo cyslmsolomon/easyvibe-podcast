@@ -1,0 +1,17 @@
+# 锁死换行符：本机 git core.autocrlf=true（系统级），会把文本文件在提交时
+# LF→CRLF 来回转换，导致 srt / md / txt / json 反复变化、字节级校验失效。
+# 新仓库一旦 git init，这份文件必须第一个提交。
+* text=auto eol=lf
+
+*.mp3 binary
+*.png binary
+*.jpg binary
+*.webp binary
+*.zip binary
+*.gz binary
+
+*.srt text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.json text eol=lf
+*.py text eol=lf
