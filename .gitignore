@@ -1,0 +1,8 @@
+# 站点仓库额外屏蔽：凭证与临时文件绝不进发布仓库
+.env
+.env.*
+!.env.example
+*.tmp
+*.log
+Thumbs.db
+desktop.ini
