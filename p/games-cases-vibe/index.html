@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>对话编程的边界，和那些被 AI 点亮的游戏</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 2 · EP 4</span>
+<h1>对话编程的边界，和那些被 AI 点亮的游戏</h1>
+<p class="sub">第 2 章 · 第 4 讲 · 15:11</p>
+<div class="meta"><span>时长 <b>15:11</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>2</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/games-cases-vibe-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/games-cases-vibe-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="games-cases-vibe-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="games-cases-vibe-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="../../chapter-2.html">← 第 2 章目录</a>
+<a href="../games-first-taste/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:14</span></div>
+<div class="ch" data-t="74.448"><span class="t">1:14</span><span class="n">一个下午，十款街机游戏</span><span class="d">1:59</span></div>
+<div class="ch" data-t="194.04"><span class="t">3:14</span><span class="n">小球星球与单文件我的世界</span><span class="d">1:51</span></div>
+<div class="ch" data-t="305.736"><span class="t">5:05</span><span class="n">无限关卡与两美元</span><span class="d">1:45</span></div>
+<div class="ch" data-t="411.168"><span class="t">6:51</span><span class="n">官方下场</span><span class="d">1:17</span></div>
+<div class="ch" data-t="488.736"><span class="t">8:08</span><span class="n">共同配方</span><span class="d">1:15</span></div>
+<div class="ch" data-t="563.808"><span class="t">9:23</span><span class="n">零基础的两块功课</span><span class="d">2:26</span></div>
+<div class="ch" data-t="710.448"><span class="t">11:50</span><span class="n">读懂 A I 的两个底层设定</span><span class="d">2:01</span></div>
+<div class="ch" data-t="832.32"><span class="t">13:52</span><span class="n">收尾与预告</span><span class="d">1:19</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe 第 4 站 · 对话编程的边界，和那些被 AI 点亮的游戏 — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-1/ai-capabilities-through-games/index.md</code>），为<strong>二次演绎配音版</strong>。原文作者与贡献者来自清华大学深圳国际研究生院及开源社区。本文在原文基础上做了口语化改写、结构重组与实践补充，观点与例子由演接入添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>games-cases-vibe</code></li>
+<li>所属章节：第 2 章 · 通过游戏初识 AI 能力</li>
+<li>对应音频：<code>games-cases-vibe-播客.mp3</code></li>
+<li>字幕：<code>games-cases-vibe-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>上一集回答了「现在的 AI 能帮你做到什么程度」，但用的是课程内部的演示。这一集要回答一个更尖锐的问题：<strong>脱离教程的温室，真实世界里，普通人用对话到底做出了什么？</strong> 原文的答案是八个全网公开的真实案例，外加四个回答零基础者概念疑问的附录。</p>
+<p>八个案例不是随意罗列，而是一条从易到难的完整光谱：单玩法小游戏（Blooming Garden，约两小时）→ 经典复刻合集（WotAI Games，十款街机）→ 三维联机（Planet Jumper）→ 上百款量产（mini-browser-games）→ 大型复刻（CraftMine，六千八百二十行单文件）→ 玩法创新（AI 实时生成关卡的超级马里奥）→ 单提示词三维游戏（Kimi K3，约两美元）→ 官方平台（K399，几十款游戏）。</p>
+<p>一句话概括这一集：<strong>贪吃蛇只是 AI 编程能力的冰山一角。真正决定你能做出什么的，不是工具，是把想法说清楚并愿意多轮打磨。</strong></p>
+<h2>二、能力地图</h2>
+<p>原文的能力点散落在案例叙述与四个附录里。我按「看见 → 拆解 → 表达 → 底功」四个环节重新排列，并标注每个能力在整门课中的位置。</p>
+<table>
+<tr><th>能力项</th><th>原文怎么说的</th><th>演接入的解读</th><th>所属环节</th></tr>
+<tr><td>案例鉴赏力</td><td>八个案例的工具、规模与完成度</td><td>会看案例的「含 AI 量」，分清哪些是演示、哪些是产品</td><td>看见</td></tr>
+<tr><td>规模感</td><td>从两小时到一百款到六千行单文件</td><td>对「AI 能扛多重的活」建立数量级直觉</td><td>看见</td></tr>
+<tr><td>共同配方识别</td><td>说清楚想法 + 多轮对话打磨</td><td>所有案例剥到底是同一件事的重复</td><td>拆解</td></tr>
+<tr><td>前端三件套概念</td><td>HTML 管有什么、CSS 管长相、JavaScript 管动作</td><td>不需要会写，需要能描述</td><td>表达</td></tr>
+<tr><td>Vibe Coding 认知</td><td>Karpathy 二零二五年二月提出该词</td><td>知道范式名字，便于检索、交流与建立身份认同</td><td>表达</td></tr>
+<tr><td>上下文管理</td><td>模型短期记忆、token、上限症状、成本</td><td>把上下文当稀缺资源经营</td><td>底功</td></tr>
+<tr><td>指令遵循</td><td>数量准、要素全、格式对、不延伸</td><td>把指令当合同写</td><td>底功</td></tr>
+</table>
+<p><strong>这张表怎么用</strong>：竖着看是进阶顺序。前两行是「开眼界」，解决不敢动手的心理问题；中间两行是「会描述」，这是全课核心能力的前置；后两行是「走得远」，决定你能从演示版走向敢给别人用的东西。多数零基础者的误区是只做第一行——案例看得很爽，自己的点子一个没讲清楚。</p>
+<h2>三、八个案例全景</h2>
+<p>下表是这一集的事实底座。所有信息均出自原文，未做外部补充；在线地址与源码链接以原文为准。</p>
+<table>
+<tr><th>#</th><th>案例</th><th>开发者</th><th>工具</th><th>规模</th><th>亮点</th></tr>
+<tr><td>一</td><td>WotAI Games</td><td>未具名</td><td>Claude Code，不使用游戏引擎</td><td>十款经典街机</td><td>一个下午完成；每款可在线玩，自带排行榜</td></tr>
+<tr><td>二</td><td>Blooming Garden</td><td>in0ho1no，完全零基础</td><td>Claude 纯对话</td><td>二零四八风格</td><td>约两小时；合成升级、粒子动画、音效、手机适配</td></tr>
+<tr><td>三</td><td>Planet Jumper</td><td>Ricardo de Zoete，设计师</td><td>OpenAI 模型 + three.js</td><td>三维多人平台跳跃</td><td>小球状星球表面竞技；球形引力、联网同步、跳跃手感</td></tr>
+<tr><td>四</td><td>mini-browser-games</td><td>wangzifan396-wzf</td><td>对话编程</td><td>一百款浏览器游戏</td><td>单文件零依赖双击即玩；MIT 协议开源；部分达产品级深度</td></tr>
+<tr><td>五</td><td>CraftMine</td><td>Trent Sterling</td><td>Claude Code 纯对话</td><td>六千八百二十行单文件</td><td>四十六种方块、二十一种地狱主题方块、三十六种生物、十九种武器、五种生物群系、昼夜循环、点对点联机</td></tr>
+<tr><td>六</td><td>AI 版超级马里奥</td><td>未具名</td><td>开源马里奥 + OpenAI 模型</td><td>无限模式</td><td>实时生成场景与敌人；实测连玩四十五分钟；游戏内文字改关卡</td></tr>
+<tr><td>七</td><td>Kimi K3 三维游戏</td><td>Josh Simmons</td><td>Kimi K3，一个提示词</td><td>第一人称三维</td><td>一次生成可玩，两轮对话修两个错；全程约两美元</td></tr>
+<tr><td>八</td><td>K399 平台</td><td>月之暗面官方</td><td>K3 模型</td><td>几十款</td><td>品类全覆盖；含完成度远超演示版的原创游戏</td></tr>
+</table>
+<p>三个观察角度，建议听音频时留意：</p>
+<p><strong>第一，看工具分布。</strong> 八个案例里，Claude 系工具出现三次，OpenAI 系出现两次，Kimi K3 出现两次。没有一个案例依赖某个「秘密工具」。这从侧面印证上一集的判断：入门阶段挑一个顺手的用下去，比反复横比重要。</p>
+<p><strong>第二，看开发者背景。</strong> 有程序员，有完全不懂编程的日本开发者，有设计师，有给侄子做游戏的叔叔，还有官方团队。背景不是门槛，表达才是。</p>
+<p><strong>第三，看完成度的天花板。</strong> 原创完成度最高的两个案例——一百款合集与官方平台——都不是「一个提示词的奇迹」，而是持续打磨的产物；CraftMine 也是单文件但功能极其密集。这恰好复刻了原文的边界判断：AI 负责从零到一，人负责从一到稳。</p>
+<h2>四、共同配方：剥开八个案例</h2>
+<p>原文在案例末尾给出了总结，音频里我用「配方」来转述。八个案例的共同点只有两条：</p>
+<ol>
+<li><strong>把想法说清楚。</strong> 每个案例的作者都必须先把「做什么、长什么样、怎么算完成」讲成 AI 能执行的话；</li>
+<li><strong>愿意多轮对话去打磨。</strong> Blooming Garden 的两个小时是打磨出来的，CraftMine 的六千行是打磨出来的，K399 的完成度更是打磨出来的。唯一接近「一把梭」的 Kimi K3 案例，也还补了两轮对话修错误。</li>
+</ol>
+<p>同时要清醒：这些案例是上限的证据，不是边界的反证。它们全部落在「小而清晰」或「持续打磨的中等复杂度」区间，没有一个敢声称端到端交付了商用系统。这与上一集的三层信任划分完全一致——<strong>看见上限，同时守住边界，两个认知缺一不可。</strong></p>
+<h2>五、附录概念：零基础的四块地基</h2>
+<p>本章附录是整门课被低估的部分。口播稿讲了四块，这里补全细节。</p>
+<h3>前端三件套（附录一）</h3>
+<p>原文用「房子」比喻三种代码：HTML 管页面上有什么，好比盖房先画图纸；CSS 管长什么样，好比刷墙、摆家具；JavaScript 管怎么动，好比电灯开关，一按就亮。浏览器的工作顺序是先搭骨架、再装修、最后通电。React、Vue 这类框架是「盖复杂网页的预制板工具」，零基础者不需要会，知道是帮手就行。前端与后端的划分也值得知道：前端是用户能看到、点到的所有内容，后端是运行在服务器上的数据处理，比如分数存储、登录验证、关卡内容分配。<strong>在 Vibe Coding 里，这些概念的价值不是让你写代码，而是让你能描述代码。</strong> 原文给的描述示例是：「用 React 做个排行榜：右侧分数列表，点一行下方显示玩家详情，风格简洁现代。」——注意这句话里出现了具体技术名，但不妨碍你照葫芦画瓢。</p>
+<h3>到底什么是 Vibe Coding（附录二）</h3>
+<p>计算机科学家 Andrej Karpathy（OpenAI 联合创始人之一、特斯拉前 AI 负责人）于二零二五年二月提出 vibe coding 一词，指一种依赖大模型的编码方法：<strong>允许通过自然语言描述而不是手动编写代码，来生成可工作的代码。</strong> 它的工作循环是三件事——说清楚要做什么、看到结果后判断哪里不对、再提出新的修改。语法错了编译器会告诉你，需求模糊了 AI 只会给你一个模糊的东西，所以难点从「语法」换挡到了「表达」。原文还教了一个实用技巧：遇到看不懂的段落，直接复制给 AI，请它用「完全小白能看懂」的方式再解释一遍。</p>
+<h3>模型上下文（附录三）</h3>
+<p>上下文是 AI 的短期记忆，指一次对话中模型能看到和记住的所有文本。每个模型有有效上下文长度，以 token（可粗略理解为字词片段）计，主流模型目前多在 32k～128k 之间。接近上限的典型症状有三个：遗忘前面长文本中的细节、话题偏离最初目标、对同一材料的不同问答引用不一致。<strong>这不是模型变笨，是容量将满。</strong> 经营上下文的三条策略出自原文：真正需要长期保留的信息提炼后再给；不再需要的细节不要一遍又一遍原样塞入；长期记忆交给外部知识库，而不是全塞进对话。同时要意识到，上下文越长，占用的算力与费用也越高，设计应用时需要在「看得足够多」与「控制成本」之间做平衡。</p>
+<h3>指令遵循能力（附录四）</h3>
+<p>指模型理解指令后能否准确、完整地执行。原文给出四个特征：按要求的数量输出（要三个要点就不给五条）、覆盖所有指定要素（要作者时间事件就不遗漏）、遵守指定格式与语气（要正式就不口语化）、不做不必要的额外延伸（只让翻译造句就不附赠解释）。它的价值在稳定性、可复现性与系统集成。<strong>对工业级应用来说，稳定准确地执行指令，往往比偶尔一次惊艳的回答更重要。</strong> 这句话对零基础者同样是选工具的金标准：把「听话」排在「聪明」前面。</p>
+<h2>六、审查清单</h2>
+<p>把 AI 生成的游戏或小工具分享给别人之前，拿这张清单过一遍。条目源自原文的边界讨论与案例细节：</p>
+<p><strong>通用项（任何产物都查）</strong></p>
+<ul>
+<li>能打开吗？在浏览器里实际点过一遍吗？</li>
+<li>核心功能按预期工作吗？还是只是没报错？</li>
+<li>报错是否完整丢回给 AI 并确认修复，而不是刷新一下假装没问题？</li>
+</ul>
+<p><strong>游戏类专项</strong></p>
+<ul>
+<li>手感过了自己这关吗？移动、跳跃、反馈延迟能接受吗？</li>
+<li>极端情况试过吗？快速连点、刷新页面、断网重连？</li>
+<li>手机上能玩吗？还是只在你的电脑上好看？</li>
+</ul>
+<p><strong>分享与开源前</strong></p>
+<ul>
+<li>复刻经典 IP 时，是否留意了版权边界？（原文案例多为个人学习用途）</li>
+<li>若要开源，是否明确了协议？（mini-browser-games 采用 MIT 协议，是可参考的做法）</li>
+<li>是否标注了「AI 辅助制作」？诚实标注是这类作品的基本礼貌。</li>
+</ul>
+<p><strong>面向真实用户前</strong></p>
+<ul>
+<li>架构是否有人看得懂、接得住、改得动？</li>
+<li>是否引入了严格的审查与测试流程？没有就停。</li>
+</ul>
+<h2>七、约束说明</h2>
+<p><strong>内容约束</strong>：本集八个案例的全部事实（开发者、工具、规模、时间、费用）均出自原文，未做外部补充；比喻、串联与行动建议为演接入添加，已与原文表述区分。案例的在线地址与源码链接见原文，产品状态可能随时间变化，以各项目官方信息为准。</p>
+<p><strong>能力约束（源自原文，务必牢记）</strong>：</p>
+<ol>
+<li>贪吃蛇只是冰山一角，但冰山一角也是有限的——当前 AI 适合从零到一，不适合端到端交付商用系统；</li>
+<li>所有「很快做出」的案例都建立在多轮打磨之上，不存在纯粹的「一个提示词定终身」；</li>
+<li>复刻商业 IP 的案例多为个人学习用途，分享与商用前需自行评估版权风险；</li>
+<li>零基础者不补任何概念也能起步，但补上「三件套 + Vibe Coding + 上下文 + 指令遵循」四块地基，会明显提高描述需求的精度。</li>
+</ol>
+<p><strong>使用约束</strong>：本集案例的看点不是「复刻一个同款」，而是识别共同配方。照抄案例清单不会长本事，把配方用在自己的点子上才会。</p>
+<h2>八、给零基础者的行动建议</h2>
+<p><strong>第一周，开眼界。</strong> 每天精读一个案例，回答三个问题：它用了什么工具、作者是什么背景、最难的可能是哪个系统。一周后，你会对「AI 能扛多重的活」有数量级直觉。</p>
+<p><strong>第二周，用配方。</strong> 挑一个自己的点子，严格按两条配方走：先用三句话讲清楚（做什么、长什么样、怎么算完成），再至少打磨三轮。每轮只改一个点，改完记录 AI 的理解偏差。</p>
+<p><strong>贯穿两周的底功。</strong> 每次开新对话前，用一句话写下这次的目标；每次觉得 AI「变笨」时，检查是不是上下文快满了；每次收到不合格产出，先反思指令是否写清了数量、要素、格式。</p>
+<h2>九、实践提示</h2>
+<h3>提示1 · 用「含 AI 量」拆解一个案例</h3>
+<p>选八个案例里你最眼红的一个，逐项标注：哪些部分可能是 AI 一把生成的，哪些一定是多轮打磨的。比如 CraftMine 的六千行不可能一次生成，点对点联机一定是反复调试的结果。<strong>练的是</strong>：把「惊艳」还原成「流程」，惊艳就不能骗你了。</p>
+<h3>提示2 · 给自己做一次「规模阶梯」测试</h3>
+<p>用同一个点子，按四个规模各做一版：一句话版、半页需求版、带编号的完整需求版、再加验收标准版。对比四版的质量差。<strong>判断标准</strong>：如果第三版开始你能预判 AI 的输出结构，说明「描述的具体程度」这项能力已经入门。</p>
+<h3>提示3 · 用「房子比喻」向 AI 描述一个网页需求</h3>
+<p>把附录一的比喻用起来。对 AI 说：这个页面分三层，结构上要有……，长相上要……，动作上要……。说的时候强制自己分开说，不要混。<strong>为什么有效</strong>：三层分离的描述，恰好对应前端三种代码的分离，AI 出错时你也更容易定位是哪层的问题。</p>
+<h3>提示4 · 建一份「上下文预算表」</h3>
+<p>开一次长对话前，先写三行：这次要保住的核心信息是什么、哪些细节可以随时丢、超过多少轮就该总结重启。<strong>练的是</strong>：把上下文当稀缺资源。表格不用复杂，写在你自己的笔记里就行。</p>
+<h3>提示5 · 把指令当合同写一次</h3>
+<p>给 AI 派一次活，指令里必须写清四件事：数量、要素、格式、不要出现什么。然后检查产出是否四条全中。<strong>复盘要点</strong>：没中的那条，就是你下次写指令时要补的洞。这个习惯会直接决定你未来用 AI 协作的下限。</p>
+<h2>十、音频与字幕说明</h2>
+<ul>
+<li>本集口播稿按 9 个段落组织，段名仅作结构标记，合成时会被剥离，不进入朗读。</li>
+<li>口播正文约 4,623 字符（不含段名与空白），按实测语速约 314 字每分钟估算，成片时长约 15 分钟。</li>
+<li>字幕文件随音频一并生成，段落边界与口播稿段名对应，便于按章节跳转。</li>
+<li>所有数字在口播稿中均已改为中文读法（如「二零二六年」「六千八百二十行」），TTS 无需额外做数字归一化。</li>
+<li>所有英文缩写均改为分读写法或中文译名（如「A I」「H T M L」「C S S」「M I T」），平台与产品名保留原文拼写。</li>
+</ul>
+<hr>
+<p><strong>来源</strong>：Easy-Vibe（<code>datawhalechina/easy-vibe</code>）<code>stage-1/ai-capabilities-through-games</code>。本内容为二次演绎配音版，解读部分由演接入添加。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s1.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
