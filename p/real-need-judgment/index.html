@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>什么是真需求：用户为什么愿意买单</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 4 · EP 9</span>
+<h1>什么是真需求：用户为什么愿意买单</h1>
+<p class="sub">第 4 章 · 第 9 讲 · 15:53</p>
+<div class="meta"><span>时长 <b>15:53</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>4</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/real-need-judgment-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/real-need-judgment-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="real-need-judgment-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="real-need-judgment-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="../../chapter-4.html">← 第 4 章目录</a>
+<a href="../ai-terms-cheatsheet/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:28</span></div>
+<div class="ch" data-t="88.896"><span class="t">1:28</span><span class="n">为什么先学找需求</span><span class="d">1:22</span></div>
+<div class="ch" data-t="171.024"><span class="t">2:51</span><span class="n">一年亏二十万</span><span class="d">1:24</span></div>
+<div class="ch" data-t="255.288"><span class="t">4:15</span><span class="n">三位朋友的大实话</span><span class="d">1:57</span></div>
+<div class="ch" data-t="373.008"><span class="t">6:13</span><span class="n">什么是真需求</span><span class="d">2:20</span></div>
+<div class="ch" data-t="513.168"><span class="t">8:33</span><span class="n">痛点爽点痒点</span><span class="d">1:57</span></div>
+<div class="ch" data-t="630.288"><span class="t">10:30</span><span class="n">五步验证法</span><span class="d">2:17</span></div>
+<div class="ch" data-t="767.856"><span class="t">12:47</span><span class="n">从姐姐身上挖需求</span><span class="d">1:40</span></div>
+<div class="ch" data-t="867.96"><span class="t">14:27</span><span class="n">收尾</span><span class="d">1:25</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe 第 4 章 · 什么是真需求 — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-1/finding-great-idea/index.md</code>），为<strong>二次演绎配音版</strong>。本文在原文基础上做了口语化改写、结构重组与实践补充，解读与例子由演接入添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>real-need-judgment</code></li>
+<li>所属章节：第 4 章 · 找到好点子</li>
+<li>对应音频：<code>real-need-judgment-播客.mp3</code></li>
+<li>字幕：<code>real-need-judgment-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集到底在解决什么问题</h2>
+<p>这一集回答一个非常前置的问题：<strong>想法和值得做的想法，中间隔着一道什么墙？</strong></p>
+<p>原文用独立开发者小明的故事把这道墙画了出来。小明技术不差、产品不丑、功能齐全，但一年亏掉二十万，用户用一次就卸载。问题不在执行，在起点——他从来没问过&quot;用户真的需要吗&quot;。</p>
+<p>这一集给出的全套答案是三层递进的：</p>
+<ol>
+<li><strong>真需求的标准</strong>：用户愿意付费、愿意改变行为、愿意忍受不便。真需求是用脚投票投出来的，不是拍脑袋拍出来的。</li>
+<li><strong>需求的分类</strong>：痛点、爽点、痒点，优先级是痛点大于爽点，爽点大于痒点。</li>
+<li><strong>验证的方法</strong>：产品经理常用的五步判断法，把想法放进现实里筛一遍。</li>
+</ol>
+<p>如果只用一句话概括这一集：<strong>用户买单的从来不是功能，是解决恐惧、消除焦虑。恐惧驱动付费，焦虑驱动行动。</strong></p>
+<hr>
+<h2>一之补、这一集在整套课程里的位置</h2>
+<p>把这一集放回课程主线里，位置会更清楚。原文的本章导读交代了来龙去脉：上一章从日常经历、公开讨论和产品评价中收集了一批原始线索；本章的任务不是立刻写代码，而是把线索整理成方向，再选出更值得验证的一个；而下一章，会进一步分析用户真正想完成的事情。</p>
+<p>本章自身分三幕，是一条完整的递进链：<strong>第一幕，找到真需求</strong>，建立判断标准，搞清楚什么样的需求用户愿意买单；<strong>第二幕，挖出好点子</strong>，学会从普通想法中挖掘有价值的商业机会；<strong>第三幕，人工智能对话打磨</strong>，用人工智能把想法变成可落地的产品方案。</p>
+<p>这一集音频覆盖到第一幕主体，并在第二幕开篇的姐姐案例处收束。也就是说，听完这一集，你拿到的是&quot;尺子&quot;和&quot;筛子&quot;，还差最后一步&quot;开工&quot;——那是后面两集的事。这个进度本身也是个提醒：找需求在流程里排在写代码前面，跳过它，后面的每一步都在给错误的方向添砖加瓦。</p>
+<hr>
+<h2>二、能力地图</h2>
+<p>原文散着讲了不少判断工具，我按&quot;拿到想法后动用的顺序&quot;重新排了序。第三列是演接入的解读，第四列是建议的上手顺序，不是原文内容。</p>
+<table>
+<tr><th>能力项</th><th>原文怎么说的</th><th>演接入的解读</th><th>上手顺序</th></tr>
+<tr><td>判断方向真伪</td><td>不能只听起来的，要观察频率、影响、现有做法、付费意愿</td><td>这是整套方法的总开关，先装尺子再量东西</td><td>1</td></tr>
+<tr><td>识别真需求</td><td>愿意付费、愿意改变行为、愿意忍受不便</td><td>三个&quot;愿意&quot;一个比一个狠，是最好的试金石</td><td>2</td></tr>
+<tr><td>需求分层</td><td>痛点、爽点、痒点</td><td>分层的用途是防止&quot;拿痒点当痛点卖&quot;</td><td>3</td></tr>
+<tr><td>案例复盘</td><td>美菜网让老板睡好觉，小红书解决选择困难与信任缺失</td><td>看案例要看到&quot;恐惧&quot;那一层，别停在功能列表</td><td>4</td></tr>
+<tr><td>用户访谈</td><td>找十个目标用户，问现在怎么解决</td><td>说法和做法要分开验证，访谈之外最好看他做一次</td><td>5</td></tr>
+<tr><td>替代方案分析</td><td>别的产品、电子表格、靠记忆、忍着</td><td>用户的对手不是竞品，是&quot;现在的将就&quot;</td><td>6</td></tr>
+<tr><td>付费测试</td><td>预售或收定金，统计比例</td><td>超过百分之十才值得投入，这是最硬的一条线</td><td>7</td></tr>
+<tr><td>市场规模估算</td><td>用户总数乘付费意愿乘客单价</td><td>算出来太小，再热爱也别做主线</td><td>8</td></tr>
+<tr><td>护城河思考</td><td>技术难度、网络效应、品牌、成本优势</td><td>早期想不到壁垒没关系，但要知道会有人抄</td><td>9</td></tr>
+<tr><td>从身边挖需求</td><td>从最熟悉的人和事开始</td><td>姐姐的抱怨就是需求样本，认真聊一次顶想十天</td><td>10</td></tr>
+<tr><td>观察现场</td><td>先看现场，再想功能</td><td>用户拿起手机不等于需要新应用，要看到她卡在哪一步</td><td>11</td></tr>
+</table>
+<p><strong>这张表要怎么用</strong>：从上往下走。第 1 到 4 项是观念，读故事就能建立；第 5 到 11 项是动作，必须真找真人聊才能练到。多数人卡在第 7 项——从不敢开口谈钱，于是永远得不到最真实的答案。</p>
+<hr>
+<h2>三、故事复盘：二十万学费买到了什么</h2>
+<p>小明的故事值得逐段拆，因为每一段都对应一类常见死法。</p>
+<p><strong>第一段，起点错。</strong> 他看到健身市场大、别人估值高，就觉得是好机会。但&quot;市场大&quot;不等于&quot;有机会&quot;，中间隔着三个他没问的问题：用户为什么需要另一个健身应用，和成熟产品比差异化在哪，用户愿意为此付费吗。</p>
+<p><strong>第二段，执行猛。</strong> 一年业余时间全搭进去，课程、打卡、社区、数据分析全做了。执行力拉满，但方向错了，越深入错得越多。完善一个错误的方向，只是离成功越来越远。</p>
+<p><strong>第三段，假开局。</strong> 花钱推广换来头一个月五万人下载，看着像开门红。但七日留存只有百分之五，说明产品没有真正被需要。下载量是虚荣指标，留存和付费才是体温计。</p>
+<p><strong>第四段，真反馈。</strong> 三位朋友的三句话，其实是三种典型的拒绝理由，每一句都对应一个结构性问题：已经在用别的，是迁移成本问题；记录太麻烦，是习惯改变问题；免费够用了，是价值独有问题。</p>
+<p>这一集的用法就是把自己代入小明：你手里那个想法，经得起这三问吗？经得起三位朋友那种直白的反馈吗？</p>
+<p><strong>第五段，复盘的价值。</strong> 小明没有停在沮丧里，而是把失败拆成了可学习的部件：朋友的话是用户研究的原始素材，成熟产品的存在是竞争分析的起点，&quot;我挺好的为什么没人用&quot;这个问题本身，就是转向真需求研究的入口。原文借这个故事传递的态度很明确，失败不可怕，可怕的是花了一年时间，只得到一个&quot;我做得挺好&quot;的结论，却没有得到任何可复用的判断。把二十万变成学费而不是沉没成本，靠的就是复盘。</p>
+<hr>
+<h2>四、需求三层：痛点、爽点、痒点</h2>
+<p>原文把需求分成三层，各配了例子和比喻，这套分类的真正用途是<strong>防止自欺</strong>。</p>
+<p><strong>痛点</strong>，用户正在经历的痛苦、焦虑、不便，不解决会很难受，甚至威胁生存与安全。原文的例子，糖尿病患者不知道吃多少碳水会血糖飙升，小餐馆老板凌晨四点起床去批发市场。它像止痛药，用户不得不买单。</p>
+<p><strong>爽点</strong>，需求能被立刻满足，产生即时愉悦。外卖三十分钟送达，一键生成精美幻灯片。它像让人上瘾的即时奖赏，是留存的关键，但单独当付费点偏弱。</p>
+<p><strong>痒点</strong>，想变得更好更酷更精致，但不是必须。记录每天喝多少水，给照片加艺术滤镜。它像维生素、像奢侈品，不解决也没事，付费意愿最弱。</p>
+<p><strong>优先级：痛点大于爽点，爽点大于痒点。</strong></p>
+<p>最常见的翻车方式，原文点得很明白：用痛点的方式推销痒点的产品。&quot;记录喝水能让你更健康&quot;就是把痒点包装成痛点——喝水确实健康，不记录也不会不健康，用户不会买账。检验方法很简单：把你的宣传语里的形容词全删掉，看看剩下的是不是一句&quot;不解决会很难受&quot;的事实。</p>
+<hr>
+<h2>五、验证真需求的五步法</h2>
+<p>想法拿到手，按这五步过筛子。原文说明详细内容在附录，这一集讲主干。</p>
+<p><strong>第一步，和真实用户聊天。</strong> 找到十个目标用户，只问一句，你现在怎么解决这个问题？已经在用某种方法，说明问题存在；说不需要解决，很可能不是真需求。关键是说法和做法分开验证——访谈了解平时做法，最好再看他实际操作一次，观察他在哪一步停下来。说自己省钱的人，账本可能一片空白。</p>
+<p><strong>第二步，分析现有替代方案。</strong> 用户现在可能用别的产品、用电子表格、靠记忆，或者干脆忍着。把这些方案的缺点列出来，你的产品得比它们好很多，用户才愿意换。记住，用户换不换，不取决于你多好，取决于搬家麻不麻烦。</p>
+<p><strong>第三步，测试付费意愿。</strong> 做预售，收定金，统计愿意掏定金的比例。原文给了三条参考线，超过百分之十，需求真实，值得投入；百分之五到百分之十，需求存在，但需要打磨；低于百分之五，需求可能不成立。越早赚上钱，说明需求越正确。口头说好不算好，真金白银才算数。</p>
+<p><strong>第四步，估算市场规模。</strong> 目标用户总数，乘付费意愿，乘客单价，乘出来就是市场规模。市场太小，很难支撑商业模式，再热爱也只能当业余项目。</p>
+<p><strong>第五步，想护城河。</strong> 技术难度、网络效应、品牌、成本优势，这些壁垒帮你挡住抄袭。早期可以弱，但不能不想，因为想到和没想到，决定了你是闷头做还是边做边攒。</p>
+<p>同时避开三种典型假需求：痒点当痛点；市场太小撑不起商业模式；方案比问题还复杂，用户直接放弃。</p>
+<hr>
+<h2>六、审查清单</h2>
+<p>动手做下一个想法之前，拿这张清单过一遍。任何一项答不上来，就先别写代码。</p>
+<ul>
+<li>我能用一句话说清，这个想法帮谁解决什么问题</li>
+<li>我至少和十个目标用户聊过，他们现在已经在用某种方法凑合</li>
+<li>我看过至少一位用户的实际操作，而不只是听他描述</li>
+<li>我列出了三种以上现有替代方案，并说得出它们各自差在哪</li>
+<li>我的产品比现有方案好很多，而不是只好一点</li>
+<li>我测过付费意愿，愿意掏定金的人超过百分之十</li>
+<li>我算过市场规模，用户总数乘付费意愿乘客单价，数字说得过去</li>
+<li>我想过护城河，哪怕现在还很薄</li>
+<li>我确认过需求层次，这是痛点，不是包装成痛点的痒点</li>
+<li>我的方案比问题本身更简单，用户不需要改掉三个以上的习惯</li>
+<li>如果所有人都说不好，我能靠什么证据继续，而不是靠热情</li>
+</ul>
+<hr>
+<h2>七、约束说明</h2>
+<p>这一集内容和边界的几点说明，关系到你怎样正确使用它：</p>
+<ol>
+<li><strong>五步法是主干，不是全文。</strong> 原文注明五步判断法的详细内容在附录，本切片未包含附录，想做深度执行的读者需要回原文附录补齐。</li>
+<li><strong>故事是教学叙事。</strong> 小明、姐姐以及两位朋友均为原文虚构人物；五万下载、七日留存百分之五、亏损二十万、私教一节课三百到五百元等数字是故事设定，不是真实企业数据，不要当经营参考。</li>
+<li><strong>案例是原文引用的公开产品观察。</strong> 美菜网、小红书的相关描述来自原文案例，属转述性质；本解读未新增任何经营数据，也未对其现状做任何更新判断。</li>
+<li><strong>本集只讲到第二幕开篇。</strong> 姐姐的产后健身需求刚浮出来，&quot;从普通想法里挖出商业机会&quot;和&quot;用人工智能对话打磨方案&quot;分别是下一集和后续内容，本集不覆盖。</li>
+<li><strong>照片图注未进入音频。</strong> 原文配了四张照片及说明，分别关于训练现场观察、蔬菜批发市场采购全过程、用户体验测试、产后训练约束。口播只转述了其中的方法要点，图片来源与授权信息以原文为准。</li>
+<li><strong>样本量是经验值。</strong> &quot;十个目标用户&quot;&quot;超过百分之十&quot;等数字是原文给出的参考线，用于快速筛查，不等于统计学意义上的严格证明。</li>
+<li><strong>方法有时效与场景边界。</strong> 五步法适合早期方向验证，产品做大之后的增长、组织、合规问题不在这一集范围内。</li>
+<li><strong>口播为守时做了压缩。</strong> 音频时长受栏目约束，原文的部分铺陈（如笔者私语、照片说明）做了缩写或移植，逐字对照请以原文为准。</li>
+<li><strong>姐姐案例只开到提问。</strong> 音频停在姐姐说出四种尝试及其困难，后续如何把这个需求做成方案，属于第二幕与第三幕，本集不代劳。</li>
+</ol>
+<hr>
+<h2>八、实践提示</h2>
+<h3>提示1 · 用&quot;三个愿意&quot;审你自己的想法</h3>
+<p>拿一张纸，把你最近半年想过的所有想法列出来，每个想法后面写三行，用户愿意为它付钱吗，用户愿意为它改变行为吗，没有它用户会有很大损失吗。三行都填不出来的，直接划掉。这个过程通常很残忍，但比花一年时间验证一个错误方向便宜得多。</p>
+<h3>提示2 · 做一次&quot;现在的做法&quot;访谈</h3>
+<p>找一个你身边真有某个困扰的人，别推销你的想法，只问一句，你现在怎么解决这个问题？然后追问，上一次被这个问题麻烦到是什么时候，当时你具体做了哪几步。重点不是他说什么，是他在哪一步会卡住。说法和做法分开验证，这一课比任何工具书都值钱。</p>
+<h3>提示3 · 先谈钱，再动手</h3>
+<p>哪怕只是口头预售，也要在写第一行代码之前问出那个最硬的问题，这个东西如果要你付钱，你付吗？愿意付多少？原文的参考线是超过百分之十值得投入。你会发现，十个人里有八个人说好，但愿意掏钱的常常只有一两个，那一两个才是你的第一批用户。</p>
+<h3>提示4 · 给自己画一张需求分层表</h3>
+<p>把你观察到的用户抱怨分成三栏，痛点、爽点、痒点，各写三条。然后检查你的产品主打哪一栏。如果主打在痒点栏，就老老实实按痒点做，别写&quot;让你更健康&quot;这种包装语。分层的意义不是贬低痒点，是让你别用错力。</p>
+<h3>提示5 · 把假需求清单贴在显示器旁边</h3>
+<p>痒点当痛点、市场太小、方案比问题还复杂，这三种死法各写一句话贴在显示器边。每次想通宵写代码之前看一遍，问自己我现在是不是正在把这三个坑再踩一遍。冲动的代价是时间，而时间是很宝贵的。</p>
+<h3>提示6 · 给&quot;身边的抱怨&quot;建一个档案</h3>
+<p>像小明留意到姐姐那样，给自己建一个文档，专门记录身边人抱怨过的麻烦，每条注明，谁在什么场景下卡在哪一步、现在怎么凑合、上次被麻烦到是什么时候。积累两周你就有了一个属于你的需求池，而且每一条都自带用户和场景。这比任何创意榜单都更接近你能做、你敢验证的方向。</p>
+<h3>提示7 · 用四问复盘一次过去的失败</h3>
+<p>挑一次你过去搞砸过的小项目，回答四个问题，当时我以为的需求是什么，用户实际怎么做的，我跳过了哪一步验证，如果重来我会先问谁什么问题。四问答完，你就完成了一次小明的复盘训练。这套动作二十分钟能做完，但它能把&quot;失败&quot;从情绪变成方法。</p>
+<hr>
+<h2>九、音频与字幕说明</h2>
+<ul>
+<li>音色：<code>zh-CN-YunjianNeural</code>，语速 <code>+4%</code>，码率 32k 单声道，采样率 24000</li>
+<li>口播稿共 9 段，正文 4714 字符，预计成片约 15 分钟</li>
+<li>字幕为滚动字幕，与音频同步；段名（<code>===</code> 标记）在合成前已剥离，不会出现在字幕与朗读中</li>
+<li>数字均按中文口播处理，例如百分之五、二十万、三百到五百</li>
+<li>下一集预告：跟着小明挖出姐姐案例里的商业机会，第二幕&quot;挖出好点子&quot;</li>
+</ul>
+<hr>
+<p>*本稿件为 Easy-Vibe 开源教程的二次演绎配音版本，仅供学习交流。原文请访问 <code>https://github.com/datawhalechina/easy-vibe</code>。*</p>
+<p>*来源：Easy-Vibe（datawhalechina/easy-vibe）stage-1/finding-great-idea*</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s1.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
