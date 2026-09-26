@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>给原型接入 AI 能力</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 5 · EP 13</span>
+<h1>给原型接入 AI 能力</h1>
+<p class="sub">第 5 章 · 第 13 讲 · 16:15</p>
+<div class="meta"><span>时长 <b>16:15</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>5</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/add-ai-to-prototype-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/add-ai-to-prototype-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="add-ai-to-prototype-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="add-ai-to-prototype-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="../../chapter-5.html">← 第 5 章目录</a>
+<a href="../prototype-from-requirement/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:09</span></div>
+<div class="ch" data-t="69.024"><span class="t">1:09</span><span class="n">先想清楚要接什么能力</span><span class="d">1:50</span></div>
+<div class="ch" data-t="179.112"><span class="t">2:59</span><span class="n">打开服务台，先找四样东西</span><span class="d">1:41</span></div>
+<div class="ch" data-t="280.32"><span class="t">4:40</span><span class="n">先在体验页面把格式试出来</span><span class="d">1:08</span></div>
+<div class="ch" data-t="349.032"><span class="t">5:49</span><span class="n">从终端里的第一次请求开始</span><span class="d">1:11</span></div>
+<div class="ch" data-t="420.984"><span class="t">7:00</span><span class="n">密钥、用量和额度</span><span class="d">2:18</span></div>
+<div class="ch" data-t="559.92"><span class="t">9:19</span><span class="n">把调用安全地接进页面</span><span class="d">2:21</span></div>
+<div class="ch" data-t="701.424"><span class="t">11:41</span><span class="n">图片、语音和视频怎么看</span><span class="d">3:02</span></div>
+<div class="ch" data-t="884.28"><span class="t">14:44</span><span class="n">收尾</span><span class="d">1:31</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe 第 5 章 · 给原型接入 AI 能力 — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-1/integrating-ai-capabilities/index.md</code>），为<strong>二次演绎配音版</strong>。本文在原文基础上做了口语化改写、结构重组与实践补充，解读与例子由演接入添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>add-ai-to-prototype</code></li>
+<li>所属章节：第 5 章 · 制作产品原型（本章末篇，第一阶段收官）</li>
+<li>对应音频：<code>add-ai-to-prototype-播客.mp3</code></li>
+<li>字幕：<code>add-ai-to-prototype-播客.srt</code></li>
+<li>上游篇目：<code>prototype-from-requirement</code>（第 5 章，写代码之前先把需求问清楚）</li>
+<li>下游篇目：无，本集为 stage-1 全部十三篇目的末篇</li>
+</ul>
+<hr>
+<h2>一、这一集到底在解决什么问题</h2>
+<p>这一集回答一个非常具体的问题：<strong>原型已经能演示了，怎样把其中一个核心动作接到真实的 AI 服务上？</strong></p>
+<p>上一章交付了一个能点击、能操作的电商内容工作台，页面结构和操作流程已经可以验证，但生成结果仍然来自模拟数据。本章的任务，是让生成文案这个按钮真正工作起来。原文把这件事拆成一个通用方法加五种能力，通用方法讲三件事，怎样描述任务、怎样读懂官方文档、怎样把调用安全地放进产品流程，五种能力是文本、图片理解、图片生成、语音和视频。</p>
+<p>如果只用一句话概括这一集：<strong>接入 AI 不是复制一段接口代码，是先想清楚要什么能力，再读懂文档，最后小步验证；模型会更新，套路不变。</strong></p>
+<p>原文有一句重要的免责说明，模型名称和控制台界面会持续更新，因此文中的示例只用来说明结构，实际接入时应从对应服务的当前文档中复制模型 ID 和参数。本集音频与本文同样遵循这一原则，不绑定任何具体版本号。</p>
+<hr>
+<h2>二、能力地图</h2>
+<p>原文把方法散在十节正文里，我按从确定能力到验收上线的实际动工顺序重排成一张表。第三列是演接入的解读，第四列是上手顺序，均非原文内容。</p>
+<table>
+<tr><th>能力项</th><th>原文怎么说的</th><th>演接入的解读</th><th>上手顺序</th></tr>
+<tr><td>确定接入功能</td><td>用户填商品名称、材质、卖点，点击按钮，页面返回文案，输入输出都是文字，找文本生成模型</td><td>先看页面两端，用户提交什么，希望看到什么</td><td>1</td></tr>
+<tr><td>能力对照</td><td>照片识别颜色款式用图片理解，制作海报用图片生成，录音整理纪要先转文字再整理，文章转音频用语音合成，商品图动起来用图生视频</td><td>一张对照表，省得盲目翻文档</td><td>2</td></tr>
+<tr><td>功能分步</td><td>上传照片生成卖点，先读懂照片再写文案，公司资料回答问题，先找到内容再组织答案</td><td>顺着用户操作拆步，不顺着模型名称拆</td><td>3</td></tr>
+<tr><td>边界划分</td><td>登录、支付、保存文件和页面跳转有明确规则，仍用普通程序完成</td><td>AI 只接适合它的那段，别什么都往里塞</td><td>4</td></tr>
+<tr><td>打开服务台</td><td>平台负责账号、计费和调用入口，真正处理请求的是选择的模型</td><td>平台是柜台，模型是厨师，别混为一谈</td><td>5</td></tr>
+<tr><td>首访四件事</td><td>创建 API Key，记下 Model ID，找最小 curl 或 JavaScript 示例，看清额度价格和调用限制</td><td>第一次只看这四样，别的菜单不用逛</td><td>6</td></tr>
+<tr><td>三个名称分清</td><td>服务平台名称、模型 ID 和 API 地址不是一回事，以官方示例为准</td><td>把体验页网址当接口地址是最高频错误</td><td>7</td></tr>
+<tr><td>看不懂的接口</td><td>Embedding、Rerank、Function Calling、OCR、内容审核，做知识库、读票据、调外部工具时才会用到</td><td>用不到的接口现在不用学</td><td>8</td></tr>
+<tr><td>体验页面试格式</td><td>确认的不是会不会写文案，而是能不能按页面需要的格式返回</td><td>先试格式再写代码，返工少一半</td><td>9</td></tr>
+<tr><td>固定要求归程序</td><td>用户只填名称、材质和颜色，不要编造价格和销量、标题不要太长、按指定格式返回由程序附加</td><td>规则写进程序，不考用户</td><td>10</td></tr>
+<tr><td>三字段返回</td><td>页面要分别显示标题、简介和卖点时，由程序要求模型返回三个字段</td><td>用户输入自然，页面读取稳定</td><td>11</td></tr>
+<tr><td>破坏性测试</td><td>换几组资料，故意少填一个字段，看模型会不会擅自补充</td><td>先试它会不会编，再信它</td><td>12</td></tr>
+<tr><td>文档四件事</td><td>请求发到哪个地址，密钥放在哪里，model 填什么，最小示例怎么写</td><td>快速上手和接口参考，先各看一遍</td><td>13</td></tr>
+<tr><td>终端先行</td><td>复制官方示例只替换模型 ID 和测试内容，终端跑通再进项目</td><td>先证明账号密钥模型没问题</td><td>14</td></tr>
+<tr><td>看清返回结构</td><td>文本藏在 JSON 字段，图片返回 URL，语音返回二进制，视频先返回任务编号</td><td>页面怎么写，取决于接口返回什么</td><td>15</td></tr>
+<tr><td>交给 AI IDE</td><td>把官方示例连同要实现的功能一起交给 AI IDE 接到现有页面</td><td>有示例它就不猜，没示例它只能编</td><td>16</td></tr>
+<tr><td>密钥管理</td><td>放进本地环境变量，不贴截图、聊天记录和前端代码，怀疑泄露立即撤销重建</td><td>密钥是凭证，泄了就是钱没了</td><td>17</td></tr>
+<tr><td>用量核对</td><td>打开 Usage 或 Billing 看调用记录、余额和额度，记下 Request ID 或 Trace ID</td><td>请求到没到平台，一查便知</td><td>18</td></tr>
+<tr><td>选模型</td><td>从模型广场复制代码中使用的 Model ID，它可能和中文名称不同</td><td>认编号不认名字</td><td>19</td></tr>
+<tr><td>区域与推理服务</td><td>有些平台要先选 Region 或创建 Deployment，才给出 Base URL 和 Endpoint</td><td>跟着快速接入向导走，别拿控制台网址当接口</td><td>20</td></tr>
+<tr><td>用量限制</td><td>文本标 RPM 和 TPM，图片语音视频限 Concurrency，超限返回 429 稍后重试</td><td>被限流时重试，别狂点</td><td>21</td></tr>
+<tr><td>长任务</td><td>视频先给 Task ID，查询进度或用 Callback 通知，File ID 和临时地址可能过期</td><td>异步任务先设计状态再写页面</td><td>22</td></tr>
+<tr><td>参数策略</td><td>max_tokens、temperature、stream，第一版沿用官方示例，按需再调</td><td>参数一个位一个位动，出事才知道找谁</td><td>23</td></tr>
+<tr><td>接入顺序</td><td>密钥进 .env.local，服务端或 Serverless 调用，页面调自己的 /api/，按钮补状态，Usage 确认</td><td>五步顺序就是安全边界</td><td>24</td></tr>
+<tr><td>前端红线</td><td>密钥不写进 Vue、React 或普通 HTML，带公开前缀也可能被打包进浏览器</td><td>浏览器里的东西，用户都看得见</td><td>25</td></tr>
+<tr><td>返回节奏</td><td>短文本一次返回，对话和实时语音流式，图片视频异步任务编号</td><td>页面状态跟着返回节奏设计</td><td>26</td></tr>
+<tr><td>文本最小接通</td><td>DeepSeek 示例，终端跑通后连同一组固定商品资料交给 AI IDE</td><td>先一个按钮一组数据，再扩表单</td><td>27</td></tr>
+<tr><td>两组验收</td><td>两组资料各点一次，删字段看编造，填错密钥看失败提示，Usage 确认真实调用</td><td>页面有字不等于来自接口</td><td>28</td></tr>
+<tr><td>图片理解</td><td>视觉模型收图片加问题，需要什么信息就直接问，先让用户确认识别结果再生成文案</td><td>问得具体，答得才有用</td><td>29</td></tr>
+<tr><td>图片生成</td><td>Seedream 文字生图或参考图修改，明确不能改的地方，先查商品变形再看构图</td><td>商品图保真优先于风格词</td><td>30</td></tr>
+<tr><td>语音两条线</td><td>ASR 转文字与 TTS 合成是两条接口，输入输出和交互都不同</td><td>一个模糊的语音按钮背后是两个世界</td><td>31</td></tr>
+<tr><td>朗读预处理</td><td>数字、英文缩写和停顿改成适合朗读的文本，不送排版标记、链接和按钮文字</td><td>TTS 的提示词是脚本加参数</td><td>32</td></tr>
+<tr><td>语音合规</td><td>告知用途、保存时间和删除方式，声音克隆须获明确授权</td><td>授权不清，功能不上</td><td>33</td></tr>
+<tr><td>视频三步</td><td>创建任务得任务编号，查询状态得文件编号，最后拿下载地址，页面显示五种状态</td><td>异步三请求，轮询有间隔有停止条件</td><td>34</td></tr>
+<tr><td>素材合规</td><td>真人照片、声音、商标和版权素材要确认授权，可能要求人脸验证、资产登记、内容审核</td><td>合规不是前端能绕过的步骤</td><td>35</td></tr>
+</table>
+<p><strong>这张表要怎么用</strong>：第 1 到 16 项是动手前的方法，决定接入顺不顺；第 17 到 28 项是动手时的操作，决定接入安不安全；第 29 到 35 项是能力扩展，全是同一套路的换用。多数人卡在第 6 到第 8 项，要么在服务台里迷路，要么把体验页网址当成接口地址。</p>
+<hr>
+<h2>三、确定能力，先看页面的两端</h2>
+<p>原文第一节先把问题锚定，上一章做出的电商内容工作台，已经有了商品信息和生成文案按钮，只是结果还来自模拟数据。现在先让这个按钮真正工作起来。这个过程是，用户填写商品名称、材质和卖点，点击按钮，页面返回一段商品文案，输入和结果都是文字，因此要找一个能够生成文本的模型。</p>
+<p>如果页面上的功能不同，需要的能力也跟着变化，原文列了五种情况。上传商品照片让系统识别颜色和款式，用到图片理解。根据商品资料制作海报，用到图片生成。把一段录音整理成会议纪要，要先把语音转成文字，再让文本模型整理。把文章做成可以播放的音频，用到文字转语音。让一张商品图动起来，用到图片生成视频的能力。</p>
+<p>原文给出的判断方法只有一句话，接入前先看一遍页面，用户会提交什么，最后希望在页面上看到什么，把这两件事说清楚，通常就能判断该去找文本、图片、语音还是视频模型。</p>
+<h3>一个功能有时需要分成几步</h3>
+<p>原文提醒，并不是每个功能都能交给一个模型一次完成。上传商品照片并生成卖点，要先读懂照片中的商品，再根据识别结果写文案。根据公司资料回答问题，也要先从文档中找到相关内容，再组织答案。</p>
+<p>拆解时不用从模型名称出发，只要顺着用户的操作往下看，哪一步是在理解现有内容，哪一步是在生成新内容，哪一步只是查找资料，需要时可以把两三种能力依次接起来。这里有一条边界，AI 只负责其中适合它的部分，登录、支付、保存文件和页面跳转都有明确规则，仍然使用普通程序来完成。演接入的解读是，能画出用户操作路径图的功能，才能拆；画不出来的，先回去补流程。</p>
+<hr>
+<h2>四、服务台首访，只看四样东西</h2>
+<p>确定要做文本生成以后，就可以打开 DeepSeek、SiliconFlow、火山方舟或 MiniMax 等服务平台。原文先分清了一个关系，平台负责账号、计费和调用入口，真正处理这次请求的是我们选择的模型。</p>
+<p>第一次接入不用看完服务台里的所有菜单，先找到四样，创建一个用于调用接口的 API Key，记下准备使用的 Model ID，在官方文档中找到一段最小的 curl 或 JavaScript 示例，看清接口的额度、价格和调用限制。</p>
+<p>应用通过 API 把商品资料发给模型。文档如果提供了 JavaScript 或 Python 的 SDK，也可以直接使用，它只是把请求代码封装得更方便。请求中那段请根据商品信息生成标题和卖点的文字，就是交给模型的提示词。</p>
+<p>原文特别强调，服务平台的名称、模型 ID 和 API 地址不是一回事，填写代码时以官方示例中的地址和 Model ID 为准，不要把在线体验页面的网址复制进去。</p>
+<p>服务台中还可能出现 Embedding、Rerank、Function Calling、OCR 和内容审核等接口。做知识库时会用到 Embedding 和 Rerank，读取 PDF 或票据时会用到 OCR，让模型调用搜索、数据库等外部工具时，会用到 Function Calling。原文的态度是，这一阶段不需要一次学完，先接通一个和页面功能直接相关的 API，等产品需要新的能力时，再回来查对应的接口。</p>
+<hr>
+<h2>五、先在体验页面把格式试出来</h2>
+<p>在写接口代码之前，可以先到服务平台的在线体验页面试一试。原文点明了这一步的目的，我们要确认的不是模型会不会写文案，而是它能不能按照页面需要的格式返回结果。</p>
+<p>在在线体验页面中，可以先像真实用户一样输入。真正做成页面以后，用户可能连这段话也不用自己组织，他只需填写商品名称、材质和颜色，再点击生成文案。程序会读取这些字段，并在请求中补上固定要求，不要编造价格和销量、标题不要太长、结果按照指定格式返回。</p>
+<p>这些规则不应该交给每位用户重复填写。比如页面需要分别显示标题、简介和卖点时，可以由程序要求模型返回三个固定字段。这样用户输入仍然自然，页面也能稳定读取结果。</p>
+<p>第一次测试时，可以换几组商品资料，再故意少填一个字段，看看模型会不会擅自补充信息。如果返回格式不稳定，再去调整程序附加的固定要求，而不是让用户学习怎样写提示词。原文这条边界很重要，格式问题是产品的责任，不是用户的作业。</p>
+<hr>
+<h2>六、跟着官方示例发出第一次请求</h2>
+<p>提示词试好以后，下一步是让它从代码中发出去。打开官方文档，先找 Quick Start 或 API Reference。不同平台的文档虽然长得不一样，但第一次调用只需要看清四件事，请求发到哪个地址、API Key 放在哪里、model 填什么，以及官方的最小示例怎样写。</p>
+<p>先复制官方提供的示例，只替换模型 ID 和测试内容。能在终端中得到一次正常响应以后，再把代码放进项目。原文给出了理由，这样如果接入页面后报错，我们至少知道账号、Key 和模型本身是可用的。这是一个简单的二分法排错顺序，先证明环境没问题，再证明代码没问题。</p>
+<p>还要看一眼返回结果。文本通常藏在某个 JSON 字段里，图片可能返回 URL，语音可能直接返回二进制内容，视频则常常先返回一个任务编号。页面后面怎样写，取决于接口实际返回了什么。</p>
+<p>官方文档通常会给出一段示例代码，我们可以把这段示例连同要实现的功能一起交给 AI IDE，让它帮我们接到现有页面中。有了页面位置和官方示例，AI IDE 就不必自己猜接口格式。先确认一次请求能够正常返回，以后接入图片、语音或视频时，换掉功能描述和官方示例就可以了。原文这一句点出了这套方法的复用性，接入的骨架只有一副，换能力就是换描述和换示例。</p>
+<hr>
+<h2>七、服务台操作，密钥、模型与额度</h2>
+<p>创建 Key、选择模型和查看用量，通常都在服务台中完成，各家的菜单名称会有差别，但要做的事情大致相同。</p>
+<h3>创建 Key，并确认请求有没有到达平台</h3>
+<p>API Key 是应用调用模型时使用的凭证。创建以后，把它放进本地环境变量，不要贴进截图、聊天记录或前端代码。如果怀疑已经泄露，应立即到服务台撤销并重新创建。</p>
+<p>发出第一次请求后，可以打开 Usage 或 Billing 页面看看是否出现了新的调用记录，这里还会显示余额和 Quota。遇到请求失败时，先确认是代码没有发出去、平台拒绝了请求，还是账号已经没有可用额度。原文给了一个排错顺序，先定位失败发生在哪一段，再谈修复。</p>
+<p>如果错误信息中带有 Request ID 或 Trace ID，也把它记下来。同一时间可能有很多请求，这个编号可以帮助我们在日志里找到刚才失败的那一次。</p>
+<h3>选择模型，并复制准确的调用名称</h3>
+<p>模型广场或 Models 页面用来查看平台当前提供哪些文本、图片、语音和视频模型。点进详情页以后，注意复制代码中使用的 Model ID，它可能和页面上显示的中文名称不同。</p>
+<p>有些平台还要求先选择 Region，或者创建一个 Deployment，然后才会给出 Base URL 和 Endpoint。遇到这种情况，直接跟着平台的快速接入向导完成，不要把控制台页面的网址当成 API 地址。</p>
+<h3>用量限制和长任务</h3>
+<p>文本接口通常会标出 RPM 和 TPM，分别表示每分钟允许的请求数和 Token 数。图片、语音和视频还可能限制 Concurrency，即同时生成的任务数。超过限制时，接口通常会返回 429，这时应该稍后重试，而不是不断重复点击。</p>
+<p>视频等耗时较长的任务不会马上返回文件，而是先给出一个 Task ID。程序可以使用它查询进度，也可以提供 Callback 或 Webhook，让平台在完成后主动通知。最后拿到的 File ID 或临时下载地址可能会过期，准备正式上线时需要考虑是否把文件保存到自己的存储中。</p>
+<p>文档里还会出现 max_tokens、temperature、stream 等参数。第一版先沿用官方示例，只有输出被截断时再调整 max_tokens，需要边生成边显示时再打开 stream。不确定某个参数的作用时，查对应模型的文档，不必一次全部修改。演接入把这条理解为参数卫生，一次只动一个参数，改完记一笔，否则出错时无法归因。</p>
+<hr>
+<h2>八、从官方示例接到页面</h2>
+<p>终端中的最小示例能够返回结果以后，再把它接进原型，原文给了五步顺序。第一，把 Key 写进 .env.local 等不会提交到 Git 的环境文件。第二，在服务端或 Serverless Function 中调用模型。第三，让页面调用自己的 /api/ 接口，而不是直接携带第三方 Key。第四，给按钮补上等待、成功和失败状态。第五，回到 Usage 页面，确认这次操作产生了真实调用。</p>
+<p>原文用一段加粗划了红线，不要把 API Key 写进 Vue、React 或普通 HTML 的前端代码，即使变量名称带有 VITE_、NEXT_PUBLIC_ 前缀，它仍可能被打包进浏览器。准备公开部署时，应由后端、Serverless Function 或受保护的网关调用模型。演接入补一句实操判断，凡是用户能打开开发者工具看到的东西，都不算私密，密钥的位置只有一条标准，它有没有离开你的服务器。</p>
+<h3>有些接口不会马上返回结果</h3>
+<p>短文本、图片理解和短音频识别通常会在一次请求中直接返回结果，页面显示生成中即可。对话或实时语音可能采用流式返回，内容会一段一段到达，页面可以边接收边展示。</p>
+<p>图片和视频生成则常常是异步任务，第一次请求只得到 task_id，随后还要查询任务是排队中、生成中、成功还是失败。这类功能可能要等待几十秒，页面不能一直停在一个没有变化的加载中。</p>
+<hr>
+<h2>九、先接通文本生成，再做两组验收</h2>
+<p>DeepSeek API 文档提供兼容常见 SDK 的文本接口。模型会持续更新，接入前应从模型列表复制当前 ID。原文先用 curl 发出一次请求，使用的商品资料和前面在线体验中的内容相同，这样更容易比较两边的结果。</p>
+<p>先把环境变量中的 Key 配好，再在终端运行这段命令。得到正常结果后，把同一段官方示例和体验页试好的提示词交给 AI IDE。第一版只保留一个按钮和一组固定的商品资料，确认能从页面得到结果以后，再接入完整表单。</p>
+<p>验收分三步。换一组商品名称、材质和颜色，再点击一次生成，如果两次结果都对应各自的输入，并且能被页面正确显示，说明最小接入已经跑通。接着删掉一个字段，检查模型是否会编造价格、功效或销量，也可以暂时填错 Key，看看页面有没有给出失败提示。最后到 Usage 页面确认出现了这几次调用。原文在这一节点出了全章最重要的一句提醒，页面显示了文字，并不一定代表它真的来自 API，原型中残留的模拟数据也可能产生相似效果。演接入的建议是，把 Usage 页面的调用记录截图存进项目文档，它是唯一可信的接入证据。</p>
+<hr>
+<h2>十、其他能力，同一套路的换用</h2>
+<h3>图片理解</h3>
+<p>视觉模型接收一张图片和一个问题。页面需要什么信息，就直接问什么，如果只问这张图里有什么，得到的往往是一段很宽泛的描述。原文以 SiliconFlow 模型广场中筛选的视觉模型为例说明输入结构，运行前仍要确认当前 Model ID。原文还给了一个流程建议，先让用户确认模型识别出的商品信息，再生成文案，通常比直接从图片生成最终文案更容易发现错误。这是把第七章的验证思想搬到了接入环节，中间多一次人工确认，错误就少往前传一级。</p>
+<h3>生成和修改商品图片</h3>
+<p>Seedream 可以根据文字生成图片，也可以在参考图的基础上进行修改。商品图片最怕看起来很好，但商品本身变了，因此除了描述背景、构图和光线，还要明确哪些地方不能改变。原文示例的描述交代了图片用途、商品位置、画面风格和需要保留的结构。第一次生成后，先检查商品本身有没有变形，再看背景和构图是否合适，不要一开始就在提示词里堆很多风格词。从火山方舟控制台复制当前图像模型 ID 和最小请求，不要长期照抄教程中的版本号。图片 URL 往往有有效期，原型可以直接展示，准备上线时要根据服务条款决定是否转存，并记录提示词、模型版本和生成时间。</p>
+<h3>语音，识别与合成是两条接口</h3>
+<p>接入语音至少包含两个方向，ASR 或 STT 把用户说的话或音频文件变成文字，TTS 把文本变成可以播放的语音。它们的输入、输出和页面交互不同，不要放进一个模糊的语音 API 按钮中。</p>
+<p>SiliconFlow 语音转文字文档使用 multipart/form-data 上传文件，它与前面的 JSON 请求不同，把官方示例交给 AI IDE 时，要一并说明页面功能。</p>
+<p>MiniMax 的同步语音合成接口，当前文档示例使用 speech-2.8-hd，实际模型和音色应以平台页面为准。语音合成的提示词主要体现在朗读脚本和声音参数中，先把数字、英文缩写和停顿改成适合朗读的文本，再选择音色、语速、音量、情绪和输出格式，不要直接把页面上的 Markdown、URL 和按钮文字整段送去朗读。语音页面通常还要提供试听、停止、重新生成和下载，流式 TTS 需要 WebSocket 或流式 HTTP，并在音频到达时逐段播放。合规两条线，上传录音前要告诉用户用途、保存时间和删除方式，声音克隆必须获得音色拥有者的明确授权，不要使用来源不明的公众人物或他人录音。</p>
+<h3>视频生成，先创建任务，再等待结果</h3>
+<p>视频生成通常是异步接口。MiniMax 视频生成文档把流程分成三步，创建任务得到 task_id，查询状态得到 file_id，最后获取下载地址。创建与查询是两个请求，页面至少需要显示 Preparing、Queueing、Processing、Success 和 Fail 五种状态。轮询要设置间隔和停止条件，正式产品可以使用文档提供的 callback_url，由平台在任务状态变化时通知服务端。最后是合规，使用真人照片、声音、商标或版权素材生成视频时，要确认授权范围和平台规则，有些服务还要求人脸验证、素材资产登记或内容审核，这不是可以从前端绕过的技术步骤。</p>
+<hr>
+<h2>十一、审查清单</h2>
+<p>这一节把原文散在各节的要求整理成一份可勾选的接入前审查清单。任何一项答不上来，就说明这次接入还停留在能演示层面，不建议扩到完整表单。</p>
+<p><strong>动笔前，能力与方法</strong></p>
+<ul>
+<li>我说得清用户会提交什么、希望在页面看到什么</li>
+<li>这个功能分几步，每步是理解、生成还是查找，画得出来</li>
+<li>登录、支付、保存、跳转这些非 AI 环节确认留给普通程序</li>
+<li>服务台首访四件事都办过，密钥、模型编号、最小示例、额度价格</li>
+<li>我抄进代码的是官方示例的地址和模型编号，不是体验页网址</li>
+<li>在体验页面试过格式，而且试过故意少填一个字段</li>
+<li>固定要求写进了程序，没有丢给用户重复填写</li>
+</ul>
+<p><strong>动手时，安全与验证</strong></p>
+<ul>
+<li>密钥在环境变量里，不在截图、聊天记录和前端代码里</li>
+<li>第一次请求在终端跑通过，才进的项目</li>
+<li>调用发生在服务端或无服务器函数里，页面只调自己的接口</li>
+<li>前端代码里没有第三方密钥，公开前缀的环境变量也没用</li>
+<li>按钮有等待、成功、失败三种状态</li>
+<li>Usage 页面能看到这次调用，记录截图已存档</li>
+<li>换过两组资料验收过，删字段测试过是否编造，填错密钥测试过失败提示</li>
+<li>异步任务设计了排队中、生成中、成功、失败状态和轮询停止条件</li>
+<li>超限流的处理是稍后重试，不是让用户狂点</li>
+<li>临时下载地址过期的问题有对策，转存或重新生成</li>
+</ul>
+<p><strong>能力扩展与合规</strong></p>
+<ul>
+<li>图片理解问的是页面需要的信息，不是这张图里有什么</li>
+<li>图片生成写明了不能改变的部分，先查商品变形再看构图</li>
+<li>图片链接有效期有处理方案，提示词、模型版本、生成时间有记录</li>
+<li>语音的识别和合成是两个入口，没有合成一个模糊按钮</li>
+<li>朗读文本做过预处理，数字、缩写、停顿适合朗读</li>
+<li>录音用途、保存时间、删除方式已告知用户</li>
+<li>声音克隆拿到了音色拥有者的明确授权</li>
+<li>真人照片、声音、商标、版权素材的授权范围和平台规则已确认</li>
+<li>人脸验证、素材登记、内容审核这类要求没有打算从前端绕过</li>
+</ul>
+<hr>
+<h2>十二、约束说明</h2>
+<p>这一集内容和边界的几点说明，关系到你怎样正确使用它：</p>
+<ol>
+<li><strong>模型名称与版本号会持续过期。</strong> 原文明确模型名称和控制台界面会持续更新，本集提到的平台、模型编号和参数均只用来说明结构，实际接入时必须从对应服务的当前文档复制，不要长期照抄任何教程中的版本号。</li>
+<li><strong>平台与菜单名称因家而异。</strong> 创建 Key、查看用量、选择模型的菜单名称各家不同，本集只保留要做的事情，具体位置以你当前使用的平台为准。</li>
+<li><strong>接入顺序是安全边界，不是代码规范。</strong> 五步顺序解决的是密钥不泄、调用可查，它不覆盖性能、成本和错误重试等工程问题，那些需要更完整的服务端设计。</li>
+<li><strong>验收方法是教学最小集。</strong> 两组资料、删字段、填错密钥三个动作用来验证最小接入，不等于完整的测试体系，上线前仍需按产品要求补测试。</li>
+<li><strong>合规要求是底线提示，不是法律意见。</strong> 声音克隆授权、真人素材授权、人脸验证、内容审核等要求以对应服务条款和当期法规为准，本集只做提醒，不构成合规方案。</li>
+<li><strong>本集只接通了文本生成。</strong> 图片理解、图片生成、语音、视频在原文中只讲到输入结构和接入思路，没有完整实现，按下生成按钮出现的是真实模型输出，但完整工作台仍属后续工程。</li>
+<li><strong>口播为守时做了压缩。</strong> 五种能力对照、参数说明、视频三请求等均做了口语化缩写，逐字对照请以原文为准。</li>
+<li><strong>本集为第一阶段末篇。</strong> 全季十三集到此完结，本集收尾对前十二集做了回顾，回顾仅为串场，不展开任何前集细节。</li>
+</ol>
+<hr>
+<h2>十三、实践提示</h2>
+<h3>提示1 · 给你页面的每个按钮写一张能力卡</h3>
+<p>打开你正在做的原型，给每个会触发 AI 的按钮写一张卡，四栏，用户提交什么，页面显示什么，中间分几步，每步是理解还是生成。写不出四栏的按钮，就是还没想清楚的按钮，先补流程再开服务台。这张卡以后每次接入新能力都能复用，它是你和 AI IDE 之间最短的说明文档。</p>
+<h3>提示2 · 做一次服务台首访，只找四样东西</h3>
+<p>选一个平台，注册或登录后严格按原文的四件事走一遍，创建密钥、复制模型编号、找到最小请求示例、看清额度价格和限制，计时二十分钟，到点就停，不逛别的菜单。走完把这四样贴进一个本地密码管理工具或环境文件，再打开用量页面截一张图。第一次走这四步会慢，第二次就是肌肉记忆。</p>
+<h3>提示3 · 在终端里完成第一次请求，再碰页面</h3>
+<p>不要直接把示例代码贴进项目。先在终端跑通一次，然后故意做三次破坏，把密钥改错一个字符、把模型编号删掉一位、把地址换成体验页网址，分别看错误信息长什么样。这三个错误覆盖了大多数新手第一次接入的失败原因，认识它们比记住正确姿势更省时间。</p>
+<h3>提示4 · 给按钮做一次带证据的验收</h3>
+<p>按原文方法验收，换两组资料各点一次，删掉一个字段看模型是否编造，填错密钥看失败提示。关键动作是最后一步，验收通过后把 Usage 页面的调用记录截图，连同两组输入和输出一起存进项目文档。下次有人问这功能是不是真的接了 AI，你有三样证据，输入、输出、平台账单。</p>
+<h3>提示5 · 给你的接入流程画一张五步安全卡</h3>
+<p>按原文五步顺序，给你自己的项目画一张卡，密钥放在哪个文件、调用发生在哪一层、页面调的是哪个接口、按钮有哪三种状态、用量在哪核对。每接一个新能力，对照卡片走一遍。接得越多你越会发现，变的只有功能描述和官方示例，安全这五步一次都不用改。</p>
+<hr>
+<h2>十四、音频与字幕说明</h2>
+<ul>
+<li>音色与参数以制作侧为准，口播稿共 9 段，正文约四千九百字符，预计成片约十六分钟</li>
+<li>字幕为滚动字幕，与音频同步，段名标记在合成前已剥离，不会出现在字幕与朗读中</li>
+<li>数字均按中文口播处理，例如四样东西、三个字段、两组资料、三种状态、两条接口</li>
+<li>英文缩写按字母拆读，例如 A P I、S D K、A I、A I I D E，平台与模型名称保留原文称谓</li>
+<li>接口参数名以功能描述口播，例如限制输出长度的参数、控制随机性的参数，具体名称以官方文档为准</li>
+<li>本集为第一阶段收官，收尾段回顾前十二集篇目，回顾仅为串场</li>
+</ul>
+<hr>
+<p>*本稿件为 Easy-Vibe 开源教程的二次演绎配音版本，仅供学习交流。原文请访问 <code>https://github.com/datawhalechina/easy-vibe</code>。*</p>
+<p>*来源：Easy-Vibe（datawhalechina/easy-vibe）stage-1/integrating-ai-capabilities*</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s1.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
