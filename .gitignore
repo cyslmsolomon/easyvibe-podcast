@@ -4,5 +4,6 @@
 !.env.example
 *.tmp
 *.log
+.publish.lock
 Thumbs.db
 desktop.ini
