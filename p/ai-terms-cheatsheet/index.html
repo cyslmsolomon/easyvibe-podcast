@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>零基础术语急救包：这些词以后都会遇到</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 3 · EP 8</span>
+<h1>零基础术语急救包：这些词以后都会遇到</h1>
+<p class="sub">第 3 章 · 第 8 讲 · 16:54</p>
+<div class="meta"><span>时长 <b>16:54</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>3</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/ai-terms-cheatsheet-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/ai-terms-cheatsheet-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="ai-terms-cheatsheet-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="ai-terms-cheatsheet-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="../../chapter-3.html">← 第 3 章目录</a>
+<a href="../talk-to-ai-well/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">2:00</span></div>
+<div class="ch" data-t="120.912"><span class="t">2:00</span><span class="n">工具界面</span><span class="d">2:51</span></div>
+<div class="ch" data-t="292.032"><span class="t">4:52</span><span class="n">网络服务</span><span class="d">1:47</span></div>
+<div class="ch" data-t="399.096"><span class="t">6:39</span><span class="n">前端与后端</span><span class="d">2:02</span></div>
+<div class="ch" data-t="521.952"><span class="t">8:41</span><span class="n">代码基础</span><span class="d">2:13</span></div>
+<div class="ch" data-t="655.2"><span class="t">10:55</span><span class="n">调试查错</span><span class="d">2:10</span></div>
+<div class="ch" data-t="785.328"><span class="t">13:05</span><span class="n">项目与 AI 工具</span><span class="d">2:35</span></div>
+<div class="ch" data-t="941.112"><span class="t">15:41</span><span class="n">收尾</span><span class="d">1:12</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>零基础术语急救包 · 解读与音频稿件</h1>
+<ul>
+<li>篇目：ai-terms-cheatsheet（第 8 集）</li>
+<li>标题：零基础术语急救包：这些词以后都会遇到</li>
+<li>章节：第 3 章</li>
+<li>口播稿：content-slices/ai-terms-cheatsheet/script.txt（八段，正文五千零七十一字符）</li>
+<li>预计时长：按实测语速三百一十四字每分钟折算，约十六分钟</li>
+<li>源切片：content-slices/ai-terms-cheatsheet.md（源自 Easy-Vibe 教程附录）</li>
+</ul>
+<h2>一、能力地图</h2>
+<p>这一集的定位不是教会听众写代码，而是给零基础听众一张可以反复回来查的术语地图。Easy-Vibe 教程把附录定位成「随查随用」的补充资料，遇到术语看不懂、界面找不到入口时再回来；本集音频稿把这份静态速查表翻译成了可以通勤时收听的语音版。听众不需要记住每一个词，只需要在脑子里建立起「哪个词大概管什么用」的印象。</p>
+<p>按源切片的内容，本集覆盖八组词、七个地盘，地图结构如下。</p>
+<p>第一组，工具界面。这是听众打开编程工具后第一眼看到的东西。核心词包括 I D E（集成开发环境，可以想象成程序员的工作台，一边是写字的桌面即编辑器，一边有管运行和调试的电源插座与按钮，抽屉里还有搜索、版本管理等小工具）、代码编辑器（更像高级记事本，只负责让你打字写代码、用颜色区分内容即语法高亮、给你自动补全这三件事）、终端或命令行（黑底白字的窗口，输入命令让电脑干活，可以想象成给电脑发一条条短信命令、它用文字回复执行结果）。源切片举例，输入启动命令表示帮我启动开发服务器，输入运行命令表示运行这个 Python 文件。界面区域方面，最左边一排竖着的小图标叫活动栏，像功能选项卡，点文件图标左边显示文件列表，点放大镜左边变成搜索，点版本管理图标左边显示改动；活动栏右边那一大块叫侧边栏，文件模式展示项目里的文件和文件夹，搜索模式展示结果列表，源代码管理模式展示有哪些文件被改动；中间最大区域叫编辑区，是打开文件后真正看到和修改内容的地方，上方标签页表示当前打开了哪些文件；最下方的底部面板常见四种，终端输入命令跑项目，问题面板列出出错的文件和行号，输出面板打印工具的运行信息，调试控制台负责调试时的输出；最下面那条细细的状态栏显示当前文件语言、缩进是两个空格还是四个空格、有没有错误、当前 Git 分支，可以当作当前编辑环境的一张小体检单。源切片特别提醒，V S Code、Trae、Cursor 都属于 I D E 或基于 I D E 改的工具；不知道 A I 版 I D E 的界面有什么用时，可以拿菜单栏解析跟 A I 对话查阅，或者直接查看。</p>
+<p>第二组，网络服务。包括 U R L（浏览器地址栏那一串东西，就像互联网世界里某个房间的完整地址）、H T T P 与 H T T P S（在地址开头看到的两种传输方式，前者普通传输，后者多一层加密更安全）、端口（把一台电脑想象成一栋大楼，端口就是每个房间的门牌号，冒号后面的数字表示房间号，同一台电脑可以同时开多个服务各占一个端口）、本地与 localhost（本地指你自己的电脑，localhost 可以理解成这台机器自己，访问本地地址其实是跟自己电脑上运行的程序打交道，不是上网访问别人家的服务器）、服务（一直在后台运行、随时听你指令的程序，网页服务在浏览器访问一个地址时返回网页内容，游戏服务负责管理对局、存档、排行榜，在终端执行启动命令本质上就是在本地开了一个网页服务）。</p>
+<p>第三组，前后端与数据。前端是用户看得见、点得到的部分，包括网页上的按钮、文字、图片、动画，以及用 React 或 Vue 写出来的页面，负责展示界面和响应用户操作。后端是用户看不见、在服务器上跑的那部分，负责存和读数据（用户信息、订单、分数等），以及执行业务规则（登录验证、权限判断）。接口也叫 A P I，是前端和后端事先约定好的一套提问加答复的规则，前端说用这个地址这个格式来问，后端说用这个格式把结果回给你。请求是前端发给后端的一次提问，要说清请求去哪、用什么方式、带了什么参数比如用户编号。响应是后端给前端的答复，包含状态码（二百成功、四零四找不到、五百服务器出错）和实际数据（多半是 J S O N）。J S O N 是一种用很像 J S 代码的写法来表示数据的格式，可以理解成机器版的键值对记事本，前后端经常用它交换数据。</p>
+<p>第四组，代码基础。变量是给一块数据贴上的标签，例如把分数记作 score，以后用这个名字就能读写这块数据。标识符是自己起的各种名字的统称，变量名叫 score，函数名叫移动蛇，组件名叫贪吃蛇游戏，就像给文件夹起名照片、工作、账单，方便在代码里区分不同东西。状态是程序当前的关键情况记录，比如游戏是不是已经结束、蛇现在在第几格、当前分数是多少，在 React 里一般理解为状态一改界面就要跟着更新。函数是把一件可以反复做的事打包起来起个名字，以后喊这个名字就等于把里面那几行再次执行一遍。组件是前端里可以重复用的一块小界面加小逻辑，一个按钮、一个顶部导航、整个游戏区域都可以是组件，组件之间可以拼装，就像搭乐高。模块是一组相关代码组成的文件，一个文件专门放蛇怎么动的代码，一个文件专门放算分数的代码，模块之间互相导入导出，像不同抽屉里的工具。语法是某门编程语言的规则和标点习惯，字符串要加引号，语句末尾要不要写分号，代码块要用花括号包起来，写错语法工具会直接报语法错误。编程语言是和计算机沟通的一整套规则和词汇，比如 J S、Python、Java、Go，不同语言适合的事情、写法和工具生态不同。框架是别人帮你先搭好骨架的一大套代码和套路，前端有 React、Vue，后端有 Django、Spring Boot，你等于在现成的骨架上填内容，比从头造轮子轻松很多。</p>
+<p>第五组，调试查错。Bug 指程序表现和你想的不一样，比如本来应该出现按钮结果没有，本来应该加十分结果多加了一堆，页面一打开就白屏。报错信息是程序崩了之后屏幕或终端里那段看起来很吓人的英文，虽然难看，但通常会告诉你大致哪里错了、哪个文件第几行附近需要检查，可以直接复制丢给 A I 让它翻译和分析。日志是程序在运行过程中自己说的话，最常见的是前端的 console 点 log，可以理解成在关键步骤主动报个数，方便确认程序是不是按你想的在走，console 是调试用的小黑板，log 是在小黑板上写一行字，浏览器按 F 十二打开开发者工具里的控制台面板就能看到这些输出。调试指出问题时不是上来就乱改，而是让程序在某一行停一下、看当前每个变量的值、一步一步往下走，观察从哪里开始不对劲。断点可以想成在某行插了一个暂停按钮，程序平时一路往下跑，跑到插断点的那行会暂时停住等你检查。单步执行指从断点停下来之后，可以一行一行往下执行，也可以进入某个函数内部详细看，就像看一段舞蹈的分解动作而不是快放视频。快照的简化理解是在某个时间点把当前状态拍一张照片方便以后对比，在实际工具里可能指一次提交时刻项目的完整状态，也可能指调试时某个时间点内存和变量的整体情况，记住快照约等于某一刻状态的留影就够用。</p>
+<p>第六组，项目管理。项目是为实现一个应用而放在同一个文件夹里的源代码文件、配置文件和素材。工作区是 V S Code 或 Trae 用来描述当前这一次打开了一组什么东西的概念，打开一个文件夹是一个简单工作区，有时也会把多个文件夹合并成一个多项目工作区。Git 是版本控制工具，可以理解成项目的时光机，每次改完一批内容可以拍一张版本合照，以后需要时能回到某个历史状态。仓库是开启 Git 之后那个带版本记录的项目文件夹。提交指每次你觉得这波改动算一个阶段性成果，就写一条说明（比如添加计分板），把当前全部修改打包成一个版本，Git 会把这一刻的状态存下来，这一次动作就叫做了一次提交。</p>
+<p>第七组，A I 工具。A I 版 I D E 是在普通 I D E 基础上多了一层能听懂人话、能自己动手的 A I，你说做个贪吃蛇它能帮你搭项目写代码，你把报错截图给它它能先解释再尝试修复，它能跨多个文件一起改而不是一行一行补全。Agent 即智能体，可以想象成一个长期待命的 A I 小工程师，它会读你的项目结构，会拆解任务（先装依赖、再生成代码、再跑项目），跑出错之后会根据错误信息自己调整方案。SOLO 模式以 Trae 为例，表示你只需要把终点说清楚，它自己规划路线，在本地一步步执行，中途才在关键节点问你要不要继续。模型这里特指大语言模型，可以理解为背后那一大坨 A I 大脑，比如 G P T、Claude、Kimi、G L M，不同模型在理解中文、写代码、推理上水平不一样，A I 版 I D E 里通常可以在下拉菜单里换不同模型使用。密钥即 A P I Key，是一个很长的高级密码加身份证号，作用只有一个，告诉别人的服务器我是哪个用户、请允许我使用你们的 A I 服务并帮我记账；要点是它通常是一长串随机字母数字，不能发到公开的地方（仓库、截图、群聊），别人拿到就可以冒用你的账号，在工具里填密钥等于把钥匙插进锁里，之后工具就能帮你调用对应的 A I 服务。</p>
+<p>听完整张地图，听众获得的不是词汇量，而是定位能力：再遇到一句看不懂的教程语言，能先判断这句话属于哪个地盘，再决定是查表、问 A I，还是先动手试。</p>
+<h2>二、审查清单</h2>
+<p>本集音频稿播放完毕后，建议用下面这份清单自审。每一项都对应源切片中的明确知识点，不设记忆负担，只查印象是否建立。</p>
+<p>界面定位。听到 I D E，能否说出它等于工作台，包含编辑器、运行调试按钮和各种小工具。听到终端，能否想起那是给电脑发短信的窗口。听到活动栏、侧边栏、编辑区、面板、状态栏，能否在脑海里指出它们各自在屏幕的什么位置、分别管什么。</p>
+<p>地址与端口。听到 U R L，能否想起它是互联网世界的房间地址。听到端口，能否想起它是楼里房间的门牌号，三千端口就是三千号房间。听到 localhost，能否想起那是自己家电脑，访问它不是上网。</p>
+<p>前后端分工。听到前端调不通后端，能否反应过来这是店面在和仓库对话时出了问题，问题可能出在接口约定、请求格式或响应状态码上。听到二百、四零四、五百三个状态码，能否分别对应成功、找不到、服务器出错。听到 J S O N，能否想起机器版键值对记事本。</p>
+<p>代码词汇。听到变量、函数、组件、模块，能否用标签、打包复用、乐高积木、抽屉工具四个比喻各说一句。听到状态，能否想起状态一改界面跟着更新这条 React 世界的基本规律。听到语法与框架，能否区分一个是标点习惯、一个是现成骨架。</p>
+<p>查错动作。听到报错信息，能否想起第一动作是复制给 A I 翻译分析，而不是自己硬啃。听到断点与单步执行，能否想起那是舞蹈分解动作不是快放视频。听到快照，能否想起它约等于某一刻状态的留影。听到日志，能否想起在关键步骤主动报个数。</p>
+<p>项目与 A I。听到 Git，能否想起时光机和版本合照。听到提交，能否想起写说明、打包、存档三个动作。听到 Agent，能否想起那个会读项目、会拆任务、出错自己调整方案的小工程师。听到 A P I Key，能否立刻警觉它不能进仓库、不能进截图、不能进群聊。</p>
+<p>容易混淆的几对词，单独过一遍。编辑器和 I D E，前者只是高级记事本，后者是带各种工具的工作台。本地和云端，前者是自己的电脑，后者是别人家的服务器。请求和响应，一个是提问，一个是答复。变量和状态，变量是贴标签的数据，状态是会驱动界面更新的关键情况记录。仓库和提交，仓库是带版本记录的文件夹，提交是一次打包存档的动作。日志和报错，日志是程序主动说的话，报错是程序崩了之后的呼救。组件和模块，组件是界面加逻辑的积木，模块是代码文件的抽屉。模型和密钥，模型是 A I 大脑，密钥是调用大脑的钥匙。</p>
+<h2>三、约束说明</h2>
+<p>这一集的约束主要来自源切片的定位和产线规范，写作时逐条遵守。</p>
+<p>约束一，不虚构。源切片是附录速查表，条理清晰但案例精简。音频稿中的所有比喻，工作台、门牌号、店面仓库、乐高、抽屉、时光机、暂停按钮、舞蹈分解，全部能在源文中找到对应表述；所有例子，包括启动命令、运行 Python 文件、本地三千端口、二百四零四五百状态码、score 与移动蛇与贪吃蛇游戏三个标识符、蛇怎么动的文件与算分数的文件、添加计分板的提交说明、G P T 与 Claude 与 Kimi 与 G L M 四个模型、做个贪吃蛇与报错截图两个 A I 场景，均出自源文，未添加源文之外的数据、案例与引文。</p>
+<p>约束二，不要求背诵。源切片开篇即声明这一部分不需要刻意背诵，重要的是先在脑子里建立一个印象。音频稿因此把不用背放在开场和收尾两次强调，并把教程给的实用招，复制新词让 A I 用小白模式解释，作为本集真正希望听众带走的动作。</p>
+<p>约束三，口播规范。全文八段，段名仅作结构标记，合成时会被剥离不朗读；正文净字数五千零七十一，落在四千六百至五千三百区间；无半角冒号、无禁用符号、无 emoji；数字一律转中文，如三千端口、F 十二、十分；英文缩写一律拆读，如 I D E、A P I、U R L、J S O N、G P T、G L M、A I，完整单词与品牌名如 Python、React、Vue、Trae、Cursor、Django、Claude、Kimi、Git、Bug 保留原词；开头包含二次演绎声明，本内容改编自开源项目 Easy-Vibe，为二次演绎配音版。</p>
+<p>约束四，边界不越界。本集只负责把术语地图讲清楚，不展开任何工具的操作教学，不评测任何具体产品，不给出源文之外的选型建议；涉及工具差异处只做与源文一致的并列陈述。制作、合成、上传与发布由制作环节负责，本稿不涉及。</p>
+<h2>四、实践提示</h2>
+<h3>提示1 · 把术语地图贴在显眼处</h3>
+<p>源切片开头就是一张八组词的术语地图。建议把本集音频稿开场的八组词清单抄一遍，贴在书桌前或设为电脑桌面。它的用法不是背诵，而是定位：每次看不懂教程里的某句话，先在地图上指一指这句话属于哪一组，再决定下一步。定位所花的时间通常不超过十秒，但它能把完全懵变成知道去哪查，这是零基础阶段最值钱的状态。地图本身也回答了先学什么的问题，按打开工具、启动项目、调接口、写代码、查错的顺序，正好是动手做东西的自然顺序。</p>
+<h3>提示2 · 遇到新词，复制给 A I 用小白模式解释</h3>
+<p>源切片明确支持这个做法，按 Ctrl 加 F 搜索关键词，遇到新词可复制报错让 A I 用小白模式解释。建议现在就试一次：随便找一条你曾经看不懂的报错信息或术语，粘贴给任意一个对话式 A I，附一句请用小白能懂的话解释，并举一个生活中的例子。把 A I 的回答和本集的比喻对照着看，你会更清楚哪些解释适合自己。这个动作重复十次，你对术语的陌生感会明显下降。需要提醒的是，A I 的解释偶尔也会出错，涉及 A P I Key 这类安全相关的内容，一律以本集口播稿里的三条要点为准，不外泄、不进仓库、不进群聊。</p>
+<h3>提示3 · 用界面五区域法建立空间感</h3>
+<p>源切片把 I D E 界面拆成活动栏、侧边栏、编辑区、底部面板、状态栏五个区域。建议打开任意一个编程工具（没有就装一个 V S Code），对照本集工具界面一段，用手指依次点过这五个区域，每点一个默念它的职责：最左是选项卡，往右是内容区，中间是写字台，下面是工具箱，底条是体检单。整个过程不超过五分钟，但它能把面对界面发懵变成知道东西大概在哪。教程还建议，不知道 A I 版 I D E 的界面有什么用时，拿菜单栏解析直接跟 A I 对话查阅，这个姿势同样适用于其他陌生界面，问一遍比瞎点十分钟高效得多。</p>
+<h3>提示4 · 给报错建立标准处理流程</h3>
+<p>本集在调试部分给了一条主线，值得固化成流程：看到报错，第一步完整复制，丢给 A I 翻译分析；第二步按 A I 的提示定位文件和行号；第三步在关键步骤主动报个数，也就是加日志确认程序是不是按你想的在走；第四步仍定位不了，再用断点让程序停下来，看变量值，一步一步走。这套流程的顺序不要乱，绝大多数小问题走不到第四步。配套的两个习惯：一是每次完成一个阶段性成果就做一次提交，写清楚说明，让时光机真的能带你回到过去；二是把本集的口播稿收藏成查词入口，听到哪个词想不起来，直接回来重听对应那一段。</p>
+<h2>来源</h2>
+<p>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe）stage-1/introduction-to-ai-ide 附录「常见计算机术语速查表」，为二次演绎配音版；口播稿与解读稿中的所有术语、比喻、例子均以该源切片为准，未添加源文之外的数据与案例。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s1.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
