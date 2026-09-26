@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>挖出好点子的三条路</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 4 · EP 10</span>
+<h1>挖出好点子的三条路</h1>
+<p class="sub">第 4 章 · 第 10 讲 · 16:28</p>
+<div class="meta"><span>时长 <b>16:28</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>4</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/dig-good-ideas-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/dig-good-ideas-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="dig-good-ideas-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="dig-good-ideas-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="../../chapter-4.html">← 第 4 章目录</a>
+<a href="../real-need-judgment/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:45</span></div>
+<div class="ch" data-t="105.528"><span class="t">1:45</span><span class="n">想法太泛</span><span class="d">1:52</span></div>
+<div class="ch" data-t="217.992"><span class="t">3:37</span><span class="n">横向切分</span><span class="d">1:45</span></div>
+<div class="ch" data-t="322.992"><span class="t">5:22</span><span class="n">纵向深挖</span><span class="d">1:36</span></div>
+<div class="ch" data-t="419.208"><span class="t">6:59</span><span class="n">痛点的真面目</span><span class="d">1:54</span></div>
+<div class="ch" data-t="533.904"><span class="t">8:53</span><span class="n">价值重构</span><span class="d">1:50</span></div>
+<div class="ch" data-t="644.4"><span class="t">10:44</span><span class="n">商业模式与市场</span><span class="d">1:57</span></div>
+<div class="ch" data-t="761.448"><span class="t">12:41</span><span class="n">三个旁证</span><span class="d">2:26</span></div>
+<div class="ch" data-t="908.184"><span class="t">15:08</span><span class="n">收尾</span><span class="d">1:20</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe 第 4 章 · 挖出好点子的三条路 — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-1/finding-great-idea/index.md</code>），为<strong>二次演绎配音版</strong>。本文在原文基础上做了口语化改写、结构重组与实践补充，解读与例子由演接入添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>dig-good-ideas</code></li>
+<li>所属章节：第 4 章 · 找到好点子（第二幕）</li>
+<li>对应音频：<code>dig-good-ideas-播客.mp3</code></li>
+<li>字幕：<code>dig-good-ideas-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集到底在解决什么问题</h2>
+<p>这一集回答一个非常具体的问题：<strong>手上已经有一个模糊的想法，怎么把它从一句废话，变成一个有人买单的产品概念？</strong></p>
+<p>上一集解决了&quot;什么叫真需求&quot;，这一集解决&quot;好点子从哪来&quot;。原文给出的答案是一条三段式流水线：<strong>横向切分人群，纵向深挖场景，价值重构。</strong> 三个动作连起来，就是把一个大而泛的想法，一刀一刀切出形状的过程。</p>
+<p>还是小明的故事。上一集结尾，他从姐姐的抱怨里摸到了一个方向。这一集，他把这个方向做成了完整的产品概念：</p>
+<ol>
+<li><strong>横向切分</strong>：把&quot;想健身的人&quot;切成五类，逐类对比痛点与付费意愿，选定产后妈妈。</li>
+<li><strong>纵向深挖</strong>：还原姐姐一天里的四个片段，发现真痛点不是缺课程，是恐惧与焦虑。</li>
+<li><strong>价值重构</strong>：产品从&quot;健身应用&quot;重做为&quot;产后妈妈恢复助手&quot;，定位、功能、定价、壁垒全部重排。</li>
+</ol>
+<p>如果只用一句话概括这一集：<strong>不要服务所有人，找到最痛的那个人群，钻进她的生活，把功能重做成解决方案。</strong></p>
+<hr>
+<h2>一之补、这一集在整套课程里的位置</h2>
+<p>本章三幕是一条递进链：第一幕找到真需求，建立判断标准；第二幕挖出好点子，从普通想法里挖掘商业机会；第三幕用人工智能对话打磨，把想法变成可落地方案。</p>
+<p>这一集覆盖第二幕主体，从横向切分讲到价值重构，并用三个旁证例子收束。也就是说，听完这一集，你手里有了一个成型的产品概念，但还不知道&quot;怎么动手把它做出来&quot;——那是第三幕的事，属于下一集。这个进度本身也是个提醒：概念没打磨好就写代码，等于把错误的方向执行得更快。</p>
+<hr>
+<h2>二、能力地图</h2>
+<p>原文散着讲了三个动作，我按&quot;从想法到概念的实际动工顺序&quot;重排。第三列是演接入的解读，第四列是上手顺序，均非原文内容。</p>
+<table>
+<tr><th>能力项</th><th>原文怎么说的</th><th>演接入的解读</th><th>上手顺序</th></tr>
+<tr><td>人群横向切分</td><td>把&quot;想健身的人&quot;分成增肌、糖尿病、产后妈妈、外卖党、考研学生等</td><td>想法太泛是万病之源，先切开再谈别的</td><td>1</td></tr>
+<tr><td>目标人群筛选</td><td>自己就是用户、痛点够痛、付费意愿强、竞争不激烈</td><td>四个理由按理解成本排序，离自己近的排最前</td><td>2</td></tr>
+<tr><td>切分的价值判断</td><td>通用工具很难赢，细分需求更痛，小群体口碑更强</td><td>别怕把路走窄，口子窄力气才使得上</td><td>3</td></tr>
+<tr><td>场景纵向深挖</td><td>还原姐姐一天：早六点、上午十点、下午三点、晚上八点</td><td>痛点藏在时间流里，不跟一天看不出全貌</td><td>4</td></tr>
+<tr><td>情绪痛点识别</td><td>恐惧、焦虑、无助、孤独四层，痛点等于场景中的情绪加付费意愿</td><td>功能语言翻译成情绪语言，付费点才浮出来</td><td>5</td></tr>
+<tr><td>客户旅程图</td><td>把一天画在同一条时间线上；但图本身不是证据</td><td>图是整理工具，判断仍要靠访谈或观察</td><td>6</td></tr>
+<tr><td>价值重构</td><td>从&quot;健身应用&quot;到&quot;产后妈妈恢复助手&quot;，从工具到专属教练加心理支持者</td><td>每个功能对应一种情绪，功能是情绪的承接</td><td>7</td></tr>
+<tr><td>商业模式设计</td><td>基础免费、高级每月九十九、私教每月两百九十九、社群每年一百九十九</td><td>定价跟着人群付费意愿走，不是拍脑袋</td><td>8</td></tr>
+<tr><td>市场规模估算</td><td>每年新生儿约一千万，产后康复市场约五百亿，服务百分之一即十万用户</td><td>粗算用来判断量级，验证仍靠付费比例</td><td>9</td></tr>
+<tr><td>竞争壁垒</td><td>专业性、社区粘性、数据积累</td><td>早期壁垒可以薄，但不能不想</td><td>10</td></tr>
+<tr><td>案例迁移</td><td>糖友安心吃、投研情报官、毕业清仓助手</td><td>同一套路换个题目再跑一遍，方法才练得会</td><td>11</td></tr>
+</table>
+<p><strong>这张表要怎么用</strong>：从上往下走。第 1 到 3 项是选择，决定你服务谁；第 4 到 6 项是理解，决定你懂不懂她；第 7 到 10 项是设计，决定产品长什么样；第 11 项是训练，用别人的题目练手。多数人卡在第 4 项——从没完整看过一个用户的一天，于是只能凭想象做功能。</p>
+<hr>
+<h2>三、三条路逐条拆解</h2>
+<h3>第一条路：横向切分人群</h3>
+<p>小明的起点是一个典型的大而泛的想法，&quot;做一个健身应用&quot;。原文用五类人的对照说明它的问题：健身增肌人群要精确计算蛋白质摄入，付费意愿高；糖尿病患者必须严格控制碳水，外出就餐难以估算，是刚需且复购高；产后妈妈想恢复身材但没时间，需要简单方案；外卖党场景高频但付费意愿中等；考研学生是刚需但客单价低。</p>
+<p>五类人并排放在一起，结论自己浮出来：一个想法打五种人，往往一种都打不中。</p>
+<p>小明选产后妈妈的四个理由值得逐条记：<strong>自己就是用户</strong>（姐姐就是产后妈妈，天然理解，理解成本最低）；<strong>痛点够痛</strong>（产后恢复焦虑是真实恐惧，不是痒点）；<strong>付费意愿强</strong>（妈妈们愿意为恢复身材花钱）；<strong>竞争相对不激烈</strong>（市面上没有专门产品）。</p>
+<p>原文随后给出切分的四条价值，也是这一集最重要的观念：通用工具很难赢，大平台已占据通用市场；细分人群需求更痛，产后妈妈是刚需，普通健身者只是&quot;有也行&quot;；服务好小群体比讨好所有人更容易建立口碑；细分人群痛点更具体，更愿意付费。一句话，<strong>越细分，越有机会。</strong></p>
+<h3>第二条路：纵向深挖场景</h3>
+<p>找到人群只是开始。原文特意强调&quot;完整&quot;二字——痛点很少孤立出现，它藏在一天的时间流里。小明观察姐姐一天，还原出四个片段：</p>
+<ul>
+<li><strong>早上六点</strong>：宝宝刚睡着，三十分钟空闲。想动，但怕吵醒宝宝，也不知道什么动作安全。</li>
+<li><strong>上午十点</strong>：抱着宝宝哄睡，腰很酸。想做修复运动，但手没空。</li>
+<li><strong>下午三点</strong>：宝宝睡了，想运动。身体累，心里没底，不知道还能不能做。</li>
+<li><strong>晚上八点</strong>：终于有空，却开始焦虑。看着镜子里的自己，翻着以前的照片偷偷哭。</li>
+</ul>
+<p>四个片段连起来，真正的痛点才现形：<strong>不是&quot;没有健身课程&quot;，而是&quot;产后恢复的恐惧和焦虑&quot;。</strong> 市面上的课程一大堆，缺的是有人接住这些情绪。</p>
+<p>原文对痛点的定义值得背下来：<strong>痛点是场景中的情绪，加上付费意愿。</strong> 姐姐的情绪分四层——恐惧（担心恢复不好、留后遗症）、焦虑（身材走样的失控感）、无助（不知从何开始、没人指导）、孤独（别人随便生，自己要恢复这么久）。四层没有一层是&quot;动作不对&quot;，全是情绪。所以好的产品设计解决的是情绪，不只是功能。</p>
+<p>音频里还保留了一个原文图注里的提醒：可以把一天画成客户旅程图，但<strong>图本身不是用户证据</strong>，图里的每个判断仍要靠访谈或观察支持。别让一张漂亮的图代替你和用户说话。</p>
+<h3>第三条路：价值重构</h3>
+<p>基于前两条路，小明把产品整个重做。原文的重构结果是一个完整的产品方案，摘其主干：</p>
+<ul>
+<li><strong>核心定位</strong>：不只是健身工具，而是产后妈妈的&quot;专属康复教练加心理支持者&quot;。</li>
+<li><strong>碎片化训练</strong>：每次十到十五分钟，宝宝睡觉时也能练，提供&quot;抱着宝宝也能做&quot;的动作。</li>
+<li><strong>产后专属课程</strong>：按产后阶段分级（零到三个月、三到六个月、六个月以上），针对腹直肌分离、盆底肌修复做专项训练，每个动作附产后注意事项。</li>
+<li><strong>人工智能动作纠正</strong>：手机摄像头识别动作，实时提醒&quot;膝盖太弯了&quot;&quot;背部要挺直&quot;，避免错误动作伤害身体。</li>
+<li><strong>心理支持社区</strong>：只有产后妈妈的私密社区，分享恢复进度、互相鼓励，专业心理咨询师入驻。</li>
+<li><strong>个性化方案</strong>：按顺产或剖腹产、身体情况、哺乳期特殊需求定制。</li>
+</ul>
+<p>音频里点破了一层对应关系：五块功能，每一块都对应前面挖出来的一种情绪。功能不再是堆砌，是情绪的承接。这就是价值重构的本意——从功能升级为解决方案，从工具升级为助手、管家、伙伴。</p>
+<hr>
+<h2>四、案例深拆：商业模式与壁垒</h2>
+<p>价值重构不只改功能，也改算法。原文小明的方案里，商业模式分四层：基础课程免费引流；高级课程每月九十九元，含人工智能动作纠正与专属方案；一对一私教每月两百九十九元；社群会员每年一百九十九元，含心理支持与专家答疑。免费课负责让她进来，高级功能负责让她留下，一对一负责把最痛的人筛出来。</p>
+<p>市场粗算：中国每年新生儿约一千万，产后康复市场约五百亿；目标服务百分之一的产后妈妈，即十万用户；每用户平均收入按每年五百元算，潜在收入每年五千万。<strong>注意这是原文故事里的粗算框架，不是真实经营数据。</strong></p>
+<p>壁垒有三层：专业性（与产后康复机构合作，有医学背书）、社区粘性（产后妈妈的情感连接强，用户舍不得走）、数据积累（身体数据越多，方案越精准）。原文用一张对照表收尾，差别很刺眼：目标用户从&quot;所有健身人群&quot;收缩到&quot;产后妈妈&quot;；解决的痛点从&quot;记录训练&quot;这个痒点变成&quot;产后恢复焦虑&quot;这个痛点；竞争壁垒从&quot;容易被复制的技术&quot;变成&quot;专业性、社区、数据&quot;；付费意愿从低到高；扩展空间从有限变成可延伸到孕期、备孕期。</p>
+<hr>
+<h2>五、三个旁证例子</h2>
+<p>原文用三个例子验证方法的通用性，音频全部转述：</p>
+<ol>
+<li><strong>从&quot;卡路里测量&quot;到&quot;糖友安心吃&quot;</strong>：普通想法是拍照识别热量，但薄荷健康等成熟产品已在。切分后发现糖尿病患者必须严格控制碳水、外出就餐难估算；深挖场景得到餐前（这个菜能不能吃）、餐中（实时提醒已摄入碳水）、餐后（记录血糖与饮食的关系）三段需求。重构后定位为糖尿病患者的&quot;饮食安全助手&quot;。</li>
+<li><strong>从&quot;新闻助手&quot;到&quot;投研情报官&quot;</strong>：普通想法是聚合新闻，但今日头条、腾讯新闻已做得很好。切分后发现金融分析师要追踪特定行业动态、信息太分散；深挖场景得到早上看隔夜美股与汇率、上午追踪持仓公司公告、下午研究潜在标的。重构后定位为金融从业者的&quot;信息雷达和决策助手&quot;。</li>
+<li><strong>从&quot;校园二手平台&quot;到&quot;毕业清仓助手&quot;</strong>：普通想法是校园二手交易，但闲鱼、转转已做得很好。切分后发现毕业生东西太多、一个个卖太费劲；深挖场景得到毕业前一周离校没时间卖、不知道谁需要、议价交货收款繁琐。重构后定位为毕业生的&quot;离校资产管家&quot;。</li>
+</ol>
+<p>三个例子同一个套路：<strong>切分、深挖、重构</strong>。还有一个音频里点出的细节：重构之后的名字全都不是功能名，是身份名——糖友、投研、毕业生。叫出用户的名字，用户才觉得这东西是给自己做的。</p>
+<hr>
+<h2>六、审查清单</h2>
+<p>把想法变成产品概念之前，拿这张清单过一遍。任何一项答不上来，就先别进入设计与开发。</p>
+<ul>
+<li>我能说出我的想法现在服务谁，而且这个人小于&quot;所有人&quot;</li>
+<li>我把目标人群做了横向切分，并对比过各类人群的痛点与付费意愿</li>
+<li>我选定的人群满足四条里的至少三条，自己就是用户、痛点够痛、付费意愿强、竞争不激烈</li>
+<li>我完整还原过目标用户一天里的至少三个时间片段</li>
+<li>我把痛点写成了情绪语言，恐惧、焦虑、无助、孤独，能对应上具体场景</li>
+<li>我的每一个核心功能，都能指回一个具体场景或一种具体情绪</li>
+<li>我的产品定位从工具升级成了助手、管家或伙伴，而不只是功能集合</li>
+<li>我设计了分层商业模式，说得出每一层分别负责引流、留存还是筛人</li>
+<li>我粗算过市场规模，知道量级大概有多大</li>
+<li>我想过至少一层竞争壁垒，哪怕现在还很薄</li>
+<li>重构之后的产品名或定位，叫得出目标用户的名字</li>
+</ul>
+<hr>
+<h2>七、约束说明</h2>
+<p>这一集内容和边界的几点说明，关系到你怎样正确使用它：</p>
+<ol>
+<li><strong>附录未包含在本切片。</strong> 原文注明横向切分的详细方法在附录 B、纵向深挖的详细方法在附录 C、更多案例在附录 D，本切片均未收录，想做深度执行的读者需要回原文附录补齐。</li>
+<li><strong>故事是教学叙事。</strong> 小明、姐姐均为原文虚构人物；五类人群的痛点描述、四个时间片段、商业模式与市场规模（每年新生儿约一千万、市场约五百亿、十万用户、每年五千万）均为故事设定，不是真实企业经营数据，不要当经营参考。</li>
+<li><strong>三个旁证例子是原文教学案例。</strong> 糖友安心吃、投研情报官、毕业清仓助手及其中的薄荷健康、今日头条、腾讯新闻、闲鱼、转转等产品名，均为原文行文中的举例，属转述性质；本解读未新增任何经营数据，也未对相关产品现状做更新判断。</li>
+<li><strong>客户旅程图的证据边界。</strong> 原文图注明确，旅程图可以把经历放在同一条时间线上，但图表本身不是用户证据，其中的判断仍要由访谈或观察支持。音频转述了这一提醒，未把图当作结论使用。</li>
+<li><strong>第三幕不在本集范围。</strong> 人工智能对话打磨、分阶段计划、内容合作与推广策略等内容属于本章第三幕，是下一集的主题，本集不覆盖；本集讲到价值重构完成、三个旁证例子收束为止。</li>
+<li><strong>口播为守时做了压缩。</strong> 音频时长受栏目约束，原文功能清单、商业模式、对照表的铺陈做了口语化缩写，逐字对照请以原文为准。</li>
+<li><strong>方法有时效与场景边界。</strong> 切分、深挖、重构三步适合早期产品概念打磨，不覆盖技术选型、团队搭建、合规与规模化问题。</li>
+<li><strong>样本量是经验值。</strong> 原文的案例是单人教学叙事，方法的有效性依赖使用者真正走近用户，不听课本身不产生需求洞察。</li>
+</ol>
+<hr>
+<h2>八、实践提示</h2>
+<h3>提示1 · 给你手里的想法做一次横向切分</h3>
+<p>拿一张纸，把你现在的想法写在最上面，然后强制自己列出至少五类可能的人群，每类写三行，他们的痛点是什么，付费意愿高还是低，现在用什么凑合。写完对比，你会发现自己原来的想法多半覆盖的是&quot;付费意愿中等&quot;那一栏。这个对比过程十分钟就能做完，但它能省掉你一年的弯路。</p>
+<h3>提示2 · 陪一个真实用户过一天，或者深聊一次</h3>
+<p>选一个你身边真有某个困扰的人，请她讲讲昨天。重点不是她的总结，是时间点，早上几点发生了什么，上午卡在哪，下午情绪怎么变化的，睡前在想什么。像小明还原姐姐那样，攒够三个以上的片段，你再回头看自己的产品规划，会看见完全不同的东西。一个人一天的信息量，顶得上十份问卷。</p>
+<h3>提示3 · 把痛点从功能语言翻译成情绪语言</h3>
+<p>写下你认为的用户痛点，然后逐条问，这是功能不会用，还是情绪过不去。把&quot;不知道怎么练&quot;改写成&quot;怕练伤，没人指导&quot;；把&quot;记录麻烦&quot;改写成&quot;对失控的焦虑&quot;。翻译完再检查，你的每个功能分别接住哪一种情绪。接不住情绪的功能，多半是自嗨的功能。</p>
+<h3>提示4 · 用五问做一次价值重构</h3>
+<p>对着现有概念问五个问题，服务谁，她的一天怎么过，她真正在怕什么，我的定位是工具还是助手，收钱的方式是哪几层。五问答完，把答案重写成一段产品定位，再和原来的版本并排放。差别有多大，就是你重构的收获有多大。小明的对照表，你也可以给自己画一张。</p>
+<h3>提示5 · 拿三个普通想法练手</h3>
+<p>找三个你听过但觉得普通的想法，比如共享自习室、社区团购、读书打卡，对每个分别跑一遍三步，切分出三类人群，深挖一类人的两个场景，写一句重构后的定位。不求结果正确，只求把套路跑顺。三个练完，你再听到&quot;做个什么应用&quot;这种话，第一反应就会从&quot;怎么实现&quot;变成&quot;服务谁&quot;。</p>
+<hr>
+<h2>九、音频与字幕说明</h2>
+<ul>
+<li>音色：<code>zh-CN-YunjianNeural</code>，语速 <code>+4%</code>，码率 32k 单声道，采样率 24000</li>
+<li>口播稿共 9 段，正文 4769 字符，预计成片约 15 分钟</li>
+<li>字幕为滚动字幕，与音频同步；段名（<code>===</code> 标记）在合成前已剥离，不会出现在字幕与朗读中</li>
+<li>数字均按中文口播处理，例如十到十五分钟、九十九元、一千万、百分之一</li>
+<li>下一集预告：跟着小明用人工智能对话，把产品概念磨成能落地的计划，本章第三幕</li>
+</ul>
+<hr>
+<p>*本稿件为 Easy-Vibe 开源教程的二次演绎配音版本，仅供学习交流。原文请访问 <code>https://github.com/datawhalechina/easy-vibe</code>。*</p>
+<p>*来源：Easy-Vibe（datawhalechina/easy-vibe）stage-1/finding-great-idea*</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s1.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
