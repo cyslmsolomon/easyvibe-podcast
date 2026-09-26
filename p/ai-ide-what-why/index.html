@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI IDE 是什么，和普通 IDE 差在哪</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 3 · EP 5</span>
+<h1>AI IDE 是什么，和普通 IDE 差在哪</h1>
+<p class="sub">第 3 章 · 第 5 讲 · 16:37</p>
+<div class="meta"><span>时长 <b>16:37</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>3</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/ai-ide-what-why-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/ai-ide-what-why-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="ai-ide-what-why-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="ai-ide-what-why-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="../../chapter-3.html">← 第 3 章目录</a>
+<a href="../games-cases-vibe/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:10</span></div>
+<div class="ch" data-t="70.512"><span class="t">1:10</span><span class="n">遇到问题，先问 A I</span><span class="d">2:06</span></div>
+<div class="ch" data-t="197.256"><span class="t">3:17</span><span class="n">问得好，才能答得好</span><span class="d">1:56</span></div>
+<div class="ch" data-t="313.296"><span class="t">5:13</span><span class="n">从记事本到 I D E</span><span class="d">2:30</span></div>
+<div class="ch" data-t="463.32"><span class="t">7:43</span><span class="n">A I I D E 差在哪</span><span class="d">3:43</span></div>
+<div class="ch" data-t="686.592"><span class="t">11:26</span><span class="n">几款主流 A I I D E</span><span class="d">3:53</span></div>
+<div class="ch" data-t="920.136"><span class="t">15:20</span><span class="n">收尾</span><span class="d">1:17</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe 第 5 站 · AI IDE 是什么，和普通 IDE 差在哪 — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-1/introduction-to-ai-ide/index.md</code>），为<strong>二次演绎配音版</strong>。原文作者与贡献者来自清华大学深圳国际研究生院及开源社区。本文在原文基础上做了口语化改写、结构重组与实践补充，观点与例子由演接入添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>ai-ide-what-why</code></li>
+<li>所属章节：第 3 章 · AI 编程工具介绍与使用</li>
+<li>对应音频：<code>ai-ide-what-why-播客.mp3</code></li>
+<li>字幕：<code>ai-ide-what-why-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>这一集是第三章的开篇，也是整个课程从「网页体验」切换到「本地实战」的转折点。</p>
+<p>前两章我们做了一件重要的事：证明「不写代码也能做出东西」。但那些演示都发生在浏览器里——打开网页、输入一句话、看结果。原文在本章导读里点破了这种方式的三个硬伤：<strong>不能随时保存、不好管理文件、也没法做复杂项目</strong>。这一章的任务，就是把开发环境搬到你自己的电脑上，让你能真正独立做东西。</p>
+<p>围绕这个目标，原文铺了四层内容：</p>
+<ol>
+<li><strong>思维层</strong>——遇到问题先问 AI，把 AI 当成第一求助对象，并给出「问得好才能答得好」的提问模板；</li>
+<li><strong>概念层</strong>——IDE 是什么，为什么需要 IDE，从记事本到现代 IDE 的演进；</li>
+<li><strong>对比层</strong>——AI IDE 和普通 IDE 的本质差别，以及 AI IDE 的五条核心能力；</li>
+<li><strong>选型层</strong>——七款主流 AI IDE 的定位、差异与适用场景。</li>
+</ol>
+<p>音频稿按「先换脑筋、再认工具、再分高下、最后选型」的顺序重排了这四层。一句话概括这一集：<strong>AI IDE 不是更花哨的编辑器，是把「说清楚需求」直接变成「能跑的项目」的工作台。</strong></p>
+<hr>
+<h2>二、能力地图</h2>
+<p>原文的能力点散落在思维习惯、工具科普和产品对比三块里。我按「敢提问 → 认工具 → 分高下 → 会选型 → 守边界」五个环节重新排序：</p>
+<table>
+<tr><th>能力项</th><th>原文怎么说的</th><th>演接入的解读</th><th>所属环节</th></tr>
+<tr><td>第一求助对象意识</td><td>概念、环境、命令、报错，先问 AI 再动手</td><td>这是全课的地基技能，工具会过时，这个习惯不会</td><td>敢提问</td></tr>
+<tr><td>AI 原生学习闭环</td><td>遇到问题就问，得到答案就试，出现新问题再继续问</td><td>闭环的重点不是「问」，是「试」，AI 省下的时间要花在验证上</td><td>敢提问</td></tr>
+<tr><td>结构化提问</td><td>七个高频场景的问法 + 一个万能模板</td><td>问法质量直接决定答案质量，模板可以原样搬走</td><td>敢提问</td></tr>
+<tr><td>IDE 基础认知</td><td>编辑、管理、运行、调试四件事</td><td>不懂 IDE 就无法理解 AI IDE 多了什么</td><td>认工具</td></tr>
+<tr><td>记事本的四大痛点</td><td>无高亮、无提示、文件乱、出错只能猜</td><td>四个痛点对应 IDE 的四项核心功能，一一对照着记</td><td>认工具</td></tr>
+<tr><td>VS Code 插件理念</td><td>一切皆插件</td><td>理解这点，才能理解「大多数 AI IDE 都是 VS Code 二次开发」</td><td>认工具</td></tr>
+<tr><td>普通 IDE vs AI IDE</td><td>工具箱 vs 直接对话干活</td><td>差别不在按钮多少，在「谁主导」：人查文档 vs 人说人话</td><td>分高下</td></tr>
+<tr><td>AI IDE 五条核心能力</td><td>生成补全、理解问答、重构优化、生成测试、智能体执行</td><td>五条是按「替代体力」程度排序的，第五条分量最重</td><td>分高下</td></tr>
+<tr><td>选型四维</td><td>价格、模型种类、智能体能力、速度性能</td><td>没有最好，只有最适合，以自己的实测为准</td><td>会选型</td></tr>
+<tr><td>工具边界意识</td><td>网页版的三个硬伤、VS Code 并非 AI 能力最强</td><td>知道每个工具的边界，才不会在一棵树吊死</td><td>守边界</td></tr>
+</table>
+<p><strong>这张表怎么用</strong>：竖着看是依赖顺序。没有「敢提问」，后面全是空谈；没有「认工具」，「分高下」无从比起；不懂「守边界」，选型就会变成参数崇拜。多数零基础者的误区是从第五行直接开始——连 IDE 都没装过，就开始比较哪家模型强，比较完热情也耗光了。</p>
+<hr>
+<h2>三、先问 AI：思维转变的三个层次</h2>
+<p>这一节对应原文「如何搭配 AI 主动学习」和「1.1 思维转变」。它看起来是鸡汤，其实是全课最被低估的实操节。</p>
+<p>原文对传统路径的描写非常传神：装 Python、配 Conda、解决 npm 安装失败，每一步都是「搜索引擎 → 翻教程 → 照着做 → 再报错 → 再搜」。这个路径的真正成本不是时间，是<strong>情绪</strong>——它会让初学者把「遇到问题」和「我很可能不行」绑定在一起。</p>
+<p>AI 时代的核心原则只有一句：<strong>任何操作，都可以先问一遍 AI，甚至让它直接帮你做。</strong> 原文给了三个最典型的场景，音频稿基本原样保留：</p>
+<ul>
+<li><strong>环境不会装</strong>——「我想写 Python，帮我检查一下有没有安装 Python，如果没有请帮我安装。」</li>
+<li><strong>网络卡住</strong>——「下载失败了，是不是网络问题？能不能帮我换个国内的镜像源？」</li>
+<li><strong>命令记不住</strong>——「帮我创建一个新的虚拟环境，名字叫 demo。」</li>
+</ul>
+<p>第二个层次是<strong>闭环</strong>。原文的表述是「遇到问题就问，得到答案就试，出现新问题再继续问」。这里要特别强调「试」：AI 主动学习不是把任务丢给 AI 自己等结果，而是让 AI 缩短等待答案的时间，把精力用在动手、验证和理解上。只听不试，闭环就断成了「问 → 存起来忘掉」。</p>
+<p>第三个层次是<strong>具体化</strong>。原文那句「信息越具体，AI 越容易给出真正适合你的回答」，是这一节的句眼。音频稿把七个场景问法全部念了出来，因为它们共同指向一个万能模板：</p>
+<blockquote>我的目标是……；我目前做到……；我尝试了……；实际结果或完整报错是……；请先解释原因，再告诉我下一步最小的操作。</blockquote>
+<p>这个模板的价值在于，它同时满足了 AI 的两个需求：<strong>上下文</strong>（目标与现状）和<strong>边界</strong>（最小下一步）。第一次回答没解决也很正常，把新结果继续发给它——这本身就是 AI 原生学习的一部分。</p>
+<hr>
+<h2>四、IDE 是什么：从记事本到现代 IDE</h2>
+<p>这一节对应原文「1.2 为什么需要环境和工具」和「2. 什么是 IDE」。</p>
+<p>原文先摆出记事本的四大痛点，写得非常具体，值得逐条对照：代码全是黑色文字，关键字、字符串、注释混在一起；没有智能提示，每个单词都要完整手敲；文件一多就乱套；出错只能猜，只能一行行打印日志试错。这四个痛点，正好对应 IDE 的四项功能——语法高亮、自动补全、项目管理、调试追踪。</p>
+<p>IDE 的演进线也很清晰：早期「简单文本编辑器 + 语言处理器」就够了；项目变复杂后，需要能高效管理文件、支持语法高亮和调试的工具，集成开发环境应运而生；早期 IDE 几乎完全靠键盘操作（比如常用于服务器远程操作的 Vim）；后来出现支持鼠标的现代 IDE，通常包含三件套——源代码编辑器（语法高亮、自动补全）、构建与运行工具（内置编译器或解释器）、调试器（断点调试、变量查看），很多还内置 Git 等版本管理工具。</p>
+<p>关于 VS Code，原文有两个判断值得记住。第一，它轻量、可扩展，对初学者最友好（JetBrains 全家桶更专业，但入门不必碰）。第二，它的核心理念是「一切皆插件」——装 Python 插件就是 Python IDE，装 C++ 插件就是 C++ IDE，不装插件只是个高级文本编辑器。第二点是下一节的钥匙：正因为 VS Code 开源，市面上绝大多数 AI IDE 都是在它基础上二次开发来的。</p>
+<hr>
+<h2>五、AI IDE 和普通 IDE 的差别</h2>
+<p>这是全集的标题问题，原文用了一组非常干净的对比：</p>
+<table>
+<tr><th>维度</th><th>普通 IDE（如原版 VS Code）</th><th>AI IDE</th></tr>
+<tr><td>本质</td><td>工具箱</td><td>会说人话的搭档</td></tr>
+<tr><td>报错时</td><td>自己读提示、自己查哪一行</td><td>把报错和代码丢给它，先分析原因再给修改建议</td></tr>
+<tr><td>加功能时</td><td>自己找文件、自己写代码</td><td>直接说「做一个登录页」，先生成基础结构</td></tr>
+<tr><td>跨文件体力活</td><td>手动逐个文件改</td><td>确认后自动新建文件、批量改代码</td></tr>
+<tr><td>代码看不懂</td><td>自己查文档</td><td>选中让它「重构一下」「加注释」，或问「这个项目怎么设计的」</td></tr>
+<tr><td>指定上下文</td><td>手动翻文件</td><td>通过 <code>@文件名</code> 或 <code>@整个项目</code> 圈定参考范围</td></tr>
+<tr><td>环境与打包</td><td>自己查文档按步骤操作</td><td>可以派内置编码智能体自动配置</td></tr>
+</table>
+<p>普通 IDE 的前提是「你知道要做什么、怎么做」；AI IDE 把这个前提换成了「你能说清楚要什么，并判断它给得对不对」。</p>
+<p>原文同时如实指出：最新版 VS Code 已经内置了大语言模型助手，可以针对整个仓库、某个文件甚至某个函数对话。但 VS Code 并不是 AI 能力最强的 IDE——需要大量 AI 辅助编码时，还是要用专门的 AI IDE，好的 AI IDE 能显著节省写代码和改 Bug 的时间。</p>
+<p>原文列的 AI IDE 五条核心能力，建议按「替代体力的程度」来记：</p>
+<ol>
+<li><strong>智能代码生成与补全</strong>——从「补全变量名」进化到「写几行伪代码或说明需求，生成完整逻辑」；</li>
+<li><strong>代码理解与问答</strong>——理解并回答某段代码、某个文件、整个工程目录结构的问题；</li>
+<li><strong>代码重构与优化</strong>——按意图重写或优化指定片段；</li>
+<li><strong>自动生成测试</strong>——针对函数和模块生成测试代码；</li>
+<li><strong>智能体式任务执行</strong>——自动生成、打包、安装、运行、修改代码，在很多任务上能部分替代初级软件工程师。这一条是分水岭：前四条还在「辅助人」，第五条已经开始「替代流程」。</li>
+</ol>
+<hr>
+<h2>六、七款主流 AI IDE 怎么选</h2>
+<p>原文一口气介绍了七款工具，音频稿按「官方定位一句话 + 关键差异 + 适合谁」的口播结构做了压缩。汇总如下：</p>
+<table>
+<tr><th>工具</th><th>出品方</th><th>关键差异</th><th>适合谁</th><th>注意点</th></tr>
+<tr><td>Antigravity</td><td>谷歌</td><td>智能体优先模式，AI 代理可直接操作编辑器、终端、浏览器；支持 Gemini 三 Pro、Claude Sonnet 四点五 等多模型</td><td>想体验「提意图、看结果」的人</td><td>二零二五年十一月发布，公开预览阶段</td></tr>
+<tr><td>Trae</td><td>字节跳动</td><td>支持一百多种语言；自然语言生成代码、自动调试、设计稿转网页组件；SOLO 模式支持后端与架构文档</td><td>本课程实战指定工具</td><td>二零二五年八月大更新后功能扩张明显</td></tr>
+<tr><td>Cursor</td><td>Anysphere</td><td>大规模仓库与多文件协同优化最好之一；专业版不限请求次数</td><td>复杂项目、企业级场景</td><td>专业版约每月二十美元，价格是最大门槛</td></tr>
+<tr><td>Qoder</td><td>阿里巴巴</td><td>强调透明协作与上下文工程；Action Flow 拆解任务、实时跟踪；多模型动态路由</td><td>中大型项目的架构治理、遗留系统分析</td><td>概念较多，建议边用边学</td></tr>
+<tr><td>CodeBuddy</td><td>腾讯云</td><td>中文指令支持、企业级合规；Craft 智能体做多文件生成与接口集成</td><td>金融、医疗等数据敏感行业</td><td>企业版支持私有化部署，通过三级等保</td></tr>
+<tr><td>VS Code + Cline</td><td>社区插件</td><td>灵活切换模型端点；多模态输入；成本监控；操作需用户确认</td><td>不想换工具、想先零成本起步的人</td><td>基础免费，企业版支持私有部署</td></tr>
+<tr><td>Kiro</td><td>亚马逊云科技</td><td>深度集成亚马逊云服务生态；支持 Claude、Nova 等模型</td><td>云原生、与云服务紧密集成的场景</td><td>脱离该生态后优势打折</td></tr>
+</table>
+<p>原文还给了一条重要备注：<strong>想用 Anthropic 的 Claude 系列模型，优先选 Cursor、Kiro 或 Antigravity</strong>——它们与 Anthropic 有官方合作或深度集成，体验更稳定完整。</p>
+<p>选型上，原文的态度值得学习：差异主要集中在价格、模型种类（部分高级模型在某些地区可能受限）、智能体能力、运行速度四方面，<strong>根据自己的实际测试效果选用，适合自己的才是最好的</strong>。音频稿把这句话落到了三条可执行标准上：熟悉的生态、要用的模型、预算。</p>
+<hr>
+<h2>七、约束说明</h2>
+<p>这一集的内容边界，听之前要心里有数：</p>
+<ol>
+<li><strong>这一集只解决「是什么」和「怎么选」，不教安装。</strong> 原文把动手部分（用 Trae 做贪吃蛇）放在了下一集，本集所有工具介绍都停留在认知层，不要指望听完就会用。</li>
+<li><strong>工具迭代极快，产品信息有时效。</strong> 原文中的模型版本、价格、功能列表都是成文时点的快照（如 Antigravity 为公开预览、Cursor 专业版约每月二十美元）。选型前请以各工具官网的当前信息为准，本解读稿与音频稿均不对后续变化负责。</li>
+<li><strong>模型可用性受地区限制。</strong> 原文明确提示「部分高级模型在某些地区可能受限」，这是客观约束，不是某款工具的缺陷。遇到模型不可用，换工具之前先确认是账号权限还是网络环境问题。</li>
+<li><strong>AI IDE 降低的是操作门槛，不是判断门槛。</strong> 原文说 AI IDE「能部分替代初级软件工程师的工作」，注意是「部分」。需求描述、方案取舍、结果验收，仍然在人这边。把 AI IDE 当许愿机，是这一集唯一需要警惕的用法。</li>
+<li><strong>企业场景注意合规。</strong> 原文特别提到 CodeBuddy 的企业版私有化部署与三级等保认证，指向的是金融、医疗等对数据安全要求高的行业。公司项目选型时，合规能力应优先于功能炫酷度。</li>
+<li><strong>口播稿对原文做了口语化压缩。</strong> 七款工具的介绍省去了部分技术细节（如各工具完整的模型清单、架构名词的展开解释），需要精确信息的读者请回到原文对应章节。</li>
+</ol>
+<hr>
+<h2>八、审查清单</h2>
+<p>进入下一集动手实战之前，用这份清单自查一遍。任何一项答不上来，就回到音频对应段重听：</p>
+<ul>
+<li>我能说清楚网页版编程的三个硬伤是什么，以及为什么本地开发能解决它们。</li>
+<li>我记住了「遇到问题先问 AI」的原则，并能复述三个典型问法（装环境、换镜像、建虚拟环境）。</li>
+<li>我能背出万能提问模板的五个要素：目标、现状、尝试、结果或报错、最小下一步。</li>
+<li>我能解释记事本的四大痛点分别对应 IDE 的哪项功能。</li>
+<li>我说得出来现代 IDE 的三件套，以及 VS Code「一切皆插件」意味着什么。</li>
+<li>我能用三句话讲清普通 IDE 和 AI IDE 的本质差别（工具箱 vs 说人话的搭档）。</li>
+<li>我能列出 AI IDE 五条核心能力，并指出哪一条分量最重。</li>
+<li>我知道七款工具各自的出品方和一句话定位，并想好了自己先用哪一款。</li>
+<li>我理解选型的四条标准：价格、模型种类、智能体能力、速度性能，且不迷信参数。</li>
+<li>如果我要用 Claude 系列模型，我知道该在 Cursor、Kiro、Antigravity 里选。</li>
+</ul>
+<hr>
+<h2>九、实践提示</h2>
+<h3>提示1 · 用「记事本痛点法」检验你的工具观</h3>
+<p>打开你最常用的编辑器，依次检查四件事：关键字有没有颜色、输入有没有提示、多文件切换顺不顺手、报错好不好定位。四个都没有，你就亲身体会了原文为什么要讲 IDE。这个自测只要五分钟，比任何概念讲解都牢固。</p>
+<h3>提示2 · 把万能提问模板设为你的「第一条消息」</h3>
+<p>无论你最终选了哪款 AI IDE，第一次对话就把模板填满发过去：「我的目标是做一个贪吃蛇，目前刚装好软件，尝试过直接说帮我做游戏，得到的结果太简单。请先解释原因，再告诉我下一步最小的操作。」刻意用模板问三次，它就会变成你的本能。</p>
+<h3>提示3 · 做一张七工具选型打分表</h3>
+<p>按「价格、模型、智能体能力、速度」四列，给你听说过的 AI IDE 打分，每项一分到五分。打分的目的不是选出冠军，是逼你想清楚自己最在意什么——很多初学者打完分才发现，自己在意的其实是「免费」和「中文好用」。</p>
+<h3>提示4 · 体验一次「艾特上下文」再决定要不要深度使用</h3>
+<p>在支持上下文指定的 AI IDE 里（或用 V S Code 内置助手），试着问：「这个项目是怎么设计的？」先用单个文件作答答范围，再用整个项目。对比两次回答的质量差异，你就懂了原文为什么把「指定参考范围」单列为一项能力。</p>
+<h3>提示5 · 给「模型地域限制」提前做一次验证</h3>
+<p>选型阶段就用一个小问题（比如「用一句话解释什么是接口」）测试你打算用的模型是否真的可用。不要把「模型不可用」留到实战当晚才发现——那一晚你本来应该用来做贪吃蛇，而不是排查权限。</p>
+<hr>
+<p><strong>来源</strong>：Easy-Vibe（<code>datawhalechina/easy-vibe</code>）<code>stage-1/introduction-to-ai-ide</code>。本内容为二次演绎配音版，解读部分由演接入添加。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s1.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
