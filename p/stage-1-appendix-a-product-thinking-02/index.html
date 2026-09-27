@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>产品思维基础 · 从公开场域中挖掘需求</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 6 · EP 2</span>
+<h1>产品思维基础 · 从公开场域中挖掘需求</h1>
+<p class="sub">第 6 章 · 第 2 讲 · 16:20</p>
+<div class="meta"><span>时长 <b>16:20</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>6</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-1-appendix-a-product-thinking-02-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-1-appendix-a-product-thinking-02-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-1-appendix-a-product-thinking-02/stage-1-appendix-a-product-thinking-02-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-1-appendix-a-product-thinking-02/stage-1-appendix-a-product-thinking-02-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-6.html">← 第 6 章目录</a>
+<a href="/p/stage-1-appendix-a-product-thinking-01/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:28</span></div>
+<div class="ch" data-t="88.464"><span class="t">1:28</span><span class="n">公开场域里的抱怨声</span><span class="d">1:59</span></div>
+<div class="ch" data-t="207.792"><span class="t">3:27</span><span class="n">站在巨人的肩膀上</span><span class="d">1:47</span></div>
+<div class="ch" data-t="314.856"><span class="t">5:14</span><span class="n">一句话讲清楚你的点子</span><span class="d">2:17</span></div>
+<div class="ch" data-t="451.944"><span class="t">7:31</span><span class="n">让人工智能帮你发散</span><span class="d">3:12</span></div>
+<div class="ch" data-t="644.28"><span class="t">10:44</span><span class="n">双钻模型的第一钻</span><span class="d">2:06</span></div>
+<div class="ch" data-t="771.024"><span class="t">12:51</span><span class="n">双钻模型的第二钻</span><span class="d">2:09</span></div>
+<div class="ch" data-t="900.912"><span class="t">15:00</span><span class="n">收尾</span><span class="d">1:19</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>产品思维基础 · 从公开场域中挖掘需求 —— 解读与音频稿件</h1>
+<blockquote>本集对应 Easy-Vibe 教程「产品思维基础」附录 A 的第二段内容，覆盖四条挖素材的路径（公开场域、现有作品、一句话概括、人工智能发散），以及从想法收敛到方案的经典框架「双钻模型」。</blockquote>
+<blockquote>音频为二次演绎配音版，不是原文朗读；本稿件是对音频内容的整理与补充，可以和音频对照使用。</blockquote>
+<hr>
+<h2>一、本集在讲什么</h2>
+<p>上一集回答了「什么才算一个点子」，这一集回答紧接着的两个问题：<strong>点子从哪里来</strong>，以及<strong>怎么把一堆点子收敛成一个能动手的方案</strong>。</p>
+<p>上半场是四条取材路径：</p>
+<ol>
+<li>到公开场域里去听抱怨，把别人反复提起的问题和笨拙的临时办法记下来。</li>
+<li>站在现有产品的肩膀上，从黑客松作品、开源项目、工具榜单、线下低效场景里找起点。</li>
+<li>用一句话把点子讲清楚，逼出「帮谁 / 什么场景 / 多久 / 什么结果」这四个空。</li>
+<li>把人工智能当成发散伙伴，摊开一张更大的地图，但决定权仍然在人手里。</li>
+</ol>
+<p>下半场是双钻模型：<strong>第一钻管问题，第二钻管方案，每一钻都是先发散、再收敛。</strong> 第一钻用「出现频次 × 痛感强度」收敛出唯一的核心问题，第二钻用「用户价值 × 可行性 × 时间成本」收敛出最小可行版本的功能清单。</p>
+<p>一句话概括本集的主旨：<strong>点子不是等来的灵感，而是用方法从现实里挖出来的副产品；方案不是想出来的全集，而是用框架砍出来的子集。</strong></p>
+<p>值得提前说明的是，这四条取材路径和双钻模型并不是两套互不相干的东西。四条路径负责往里加素材，把候选池做大；双钻负责往外砍，把候选池缩小。<strong>只挖不砍，你会淹没在想法里；只砍不挖，你会在一个贫瘠的池子里挑来挑去。</strong> 两个阶段必须配套使用，这也是本集把它们放在同一集里讲的原因。</p>
+<hr>
+<h2>二、能力地图</h2>
+<p>本集训练的能力可以分成三层，从低到高依次是：</p>
+<h3>第一层：捕捉层</h3>
+<ul>
+<li><strong>关键字巡逻</strong>：能在目标平台用带情绪色彩的关键字做定期搜索，而不是被动刷信息流。</li>
+<li><strong>两类信号识别</strong>：能分辨「长期反复出现的问题」和「用户正在用笨办法硬撑的场景」这两种高价值信号。</li>
+<li><strong>素材入库</strong>：能把看到的案例按「人群 / 场景 / 现有做法 / 痛感」四个字段记下来，形成自己的点子库，而不是看过就算。</li>
+</ul>
+<h3>第二层：判别层</h3>
+<ul>
+<li><strong>一句话压缩</strong>：能用一个句子交代清楚用户、场景、成本、结果，并据此判断这个点子是否已经成形。</li>
+<li><strong>常见不等于失效</strong>：能摆脱「别人做过的就没机会」的直觉，转而判断「我是否更懂某一小群人」。</li>
+<li><strong>差异化三问</strong>：能对任何常见点子施加「换人群 / 换场景 / 把结果呈现做到极致」这三个变形操作，找到切口。</li>
+</ul>
+<h3>第三层：收敛层</h3>
+<ul>
+<li><strong>第一钻收敛</strong>：能从一堆场景里挑出频次最高、痛感最强的那一个，敢于放弃其余。</li>
+<li><strong>第二钻打分</strong>：能用「用户价值 × 可行性 × 时间成本」三个维度给候选功能打一到五分，排出做与不做的顺序。</li>
+<li><strong>时间边界</strong>：能给第一版画出明确的时间盒，并把超期功能主动移入「以后再看」清单。</li>
+</ul>
+<hr>
+<h2>三、核心概念卡</h2>
+<h3>概念一：公开场域的两类信号</h3>
+<p>教程把公开场域里的有效信息分成两类：</p>
+<ul>
+<li><strong>反复出现的问题</strong>：求职板块的简历与面试追问、宝妈群的辅食与作息、小微商家的库存与排班。特点是周期性复现，说明是系统性痛点而非偶发麻烦。</li>
+<li><strong>笨拙的临时办法</strong>：写在纸上再拍照上传、跨应用反复复制粘贴、手工把多渠道数据汇总成一张表。特点是用户已经在自己解决问题，说明需求足够真实且足够痛。</li>
+</ul>
+<p>判断口诀：<strong>有人愿意用笨办法硬撑的事，都值得被认真做一遍。</strong></p>
+<h3>概念二：一句话概括的四要素</h3>
+<p>一个合格的一句话描述，至少要交代四件事：</p>
+<table>
+<tr><th>要素</th><th>要回答的问题</th><th>反例</th><th>正例</th></tr>
+<tr><td>帮谁</td><td>是哪一类具体的人</td><td>所有想学英语的人</td><td>零基础、只有通勤时间的职场新人</td></tr>
+<tr><td>什么场景</td><td>在什么时间地点被想起</td><td>随时随地</td><td>每天上班的地铁上</td></tr>
+<tr><td>多少成本</td><td>要付出多少时间或金钱</td><td>未说明</td><td>每天十分钟</td></tr>
+<tr><td>什么结果</td><td>多久能拿到什么改变</td><td>提高英语水平</td><td>一个月记住一百个核心单词</td></tr>
+</table>
+<p>对照这张表，「帮助用户提高英语水平的应用」是典型的不合格描述——四个要素全部缺失或含糊。</p>
+<h3>概念三：常见点子的差异化三问</h3>
+<p>面对背单词、待办事项、记账、打卡这类「新手最容易想到」的方向，不要急着否定，而是连问三句：</p>
+<ol>
+<li><strong>换人群</strong>：如果只服务设计师、律师、新手妈妈、在校研究生中的一类，它会长成什么样？</li>
+<li><strong>换场景</strong>：如果只服务通勤路上、午休十分钟、睡前半小时，功能和呈现可以更聚焦到什么程度？</li>
+<li><strong>换结果呈现</strong>：如果把「结果好不好拿、好不好分享、好不好打印、好不好导入别的系统」做到极致，会不会就足以构成差异？</li>
+</ol>
+<h3>概念四：双钻模型</h3>
+<p>由英国设计委员会提出的创新与设计流程框架，用连续的两个菱形描述整个过程：</p>
+<ul>
+<li><strong>第一钻（问题域）</strong>：发现问题 → 广泛发散调研 → 收敛定义出真正要解决的核心问题。</li>
+<li><strong>第二钻（方案域）</strong>：发展解决方案 → 大胆发散原型与玩法 → 收敛筛选出可落地的最优方案。</li>
+</ul>
+<p>关键不在图形，而在纪律：<strong>每个阶段都必须完整走完「发散—收敛」这一对动作，不允许从模糊认知直接跳到最终方案。</strong></p>
+<h3>概念五：时间盒与「以后再看」清单</h3>
+<p>时间盒是给第一版划定的硬约束，比如「一个月内必须交出一个可用版本」。它的作用不是催你快，而是给你一把尺子：<strong>凡是在发散阶段冒出来、但明显超出这个时间盒的功能，一律移入「以后再看」清单。</strong> 这条规则的好处在于，你不必当场否定一个好想法，只是把它推迟，心理阻力会小很多；同时清单必须真的写下来，写下来的东西才有约束力，脑子里说的「以后再说」等于永远不做。</p>
+<h3>概念六：最小可行版本的取舍标准</h3>
+<p>第一版要回答的不是「这个产品完整吗」，而是「在某个具体任务上，它表现得够不够像样」。取舍时优先保留三件事：<strong>用户价值明显、可行性高、时间成本低。</strong> 反过来，那些用户价值不错但技术整合成本偏高的功能（比如语音播报），即使再吸引人也应该先放一放。判断一句话版本：<strong>宁可在一个任务上做到八十分，也不要在十个任务上各做三十分。</strong></p>
+<hr>
+<h2>四、四条取材路径的操作说明</h2>
+<h3>路径一：公开场域巡逻</h3>
+<ul>
+<li>选定二到三个与目标行业相关的平台，固定频率（建议每周一次）搜索情绪化关键字：好烦、有没有推荐、怎么解决、真的很麻烦、有没有更好的办法。</li>
+<li>只记录两类：反复出现的问题、用户在用笨办法硬撑的场景。</li>
+<li>记录字段建议固定为：人群、场景、当前做法、痛感强度、出现频次。</li>
+</ul>
+<h3>路径二：站在巨人肩膀上</h3>
+<ul>
+<li>关注黑客松、创新大赛、项目演示日的获奖作品，重点看它们「时间紧、资源少」的前提下保留了什么。</li>
+<li>拆两个问题：如果只服务更窄的人群，会不会更容易落地；如果砍掉三分之二的功能，会不会反而更清晰。</li>
+<li>拆解产品榜单、开源项目、工具集合站里的条目，问三句：帮谁解决什么、现有形态的缺口在哪、换个场景或国家会长出什么区别。</li>
+<li>线下同理：排队、等号、重复填表、反复手写相同信息，都是自动化空间。</li>
+</ul>
+<h3>路径三：一句话压缩训练</h3>
+<ul>
+<li>给每个候选点子写一句话，然后对照上一节的四要素表逐格检查。</li>
+<li>把训练反向用在自己身上：给未来三年写一句话，说清主要为哪类人解决哪类问题、已有哪些可见成果。</li>
+<li>参考素材：应用市场的一句话简介、游戏与工具产品的官网主标题、各类产品落地页的核心文案。抄下来拆结构，再基于人工智能写一版自己的。</li>
+</ul>
+<h3>路径四：人工智能辅助发散</h3>
+<ul>
+<li>先把自己的点子描述清楚，再请模型做三类扩展：列出二十种不同用户群体；从不同身份视角重述使用方式；从不同职能角色（产品、运营、市场、技术）提出各自的关注点。</li>
+<li>对结果不照单全收，只挑自己最有理解力和资源优势的那一小块继续深挖。</li>
+<li>底线不变：不管发散多少轮，最终判断标准仍然是「是否回应了某群人的真实痛点，是否在他们反复尝试的问题上前进了一小步」。</li>
+</ul>
+<hr>
+<h2>五、实践提示</h2>
+<h3>提示1 · 建一张点子捕捉表，别再靠记忆</h3>
+<p>新建一个表格，列固定为五列：人群、场景、现有做法、痛感强度（一到五）、本周出现次数。每周花二十分钟做一次关键字巡逻，把新看到的案例填进去，并在月底按「痛感 × 频次」排序。跑满一个月，你会拥有一份属于自己的需求清单，而不是一堆模糊印象。</p>
+<h3>提示2 · 给每个点子写一句话，然后念给一个真人听</h3>
+<p>写完之后不要自己欣赏，找一位不了解背景的朋友念给他听，然后只问一个问题：你能不能复述出这个东西是给谁的、在什么时侯用、用了能得到什么。如果他复述不出来，说明这句话还没有过关，回到四要素表补格子。</p>
+<h3>提示3 · 拿三个常见点子做一轮「差异化三问」</h3>
+<p>从背单词、每日打卡、读书笔记助手里挑三个，逐个套用换人群、换场景、换结果呈现这三问，每个方向至少写出三条变体。你会发现「常见」和「没机会」之间根本没有等号，真正的差别在于你对那一小群人的理解深度。</p>
+<h3>提示4 · 用双钻第一钻，把问题从一堆收敛到一个</h3>
+<p>把你在发散阶段列出来的所有使用场景抄成一张清单，逐个标注出现频次和痛感强度，然后强制自己只留下得分最高的那一个，并写下一句话说明：为什么它比其余的更值得先做。这一步做不完，就不要进入方案阶段。</p>
+<h3>提示5 · 用「价值 × 可行性 × 时间」给候选功能打分</h3>
+<p>给第二钻发散出来的每个功能在三个维度上各打一到五分，算出乘积后排序，只取排在前面且时间成本不超过你的时间盒的那些。举个例子，语音播报价值高但整合成本也高，纯文本摘要价值同样明显而成本低，后者更适合进第一版。</p>
+<h3>提示6 · 给第一版画一条明确的时间边界</h3>
+<p>先定下「一个月必须交出一个可用版本」这类硬约束，再把所有明显超出时间盒的功能移进「以后再看」清单。清单要真的写下来，而不是在脑子里说「以后再说」——写下来的清单才具备约束力。</p>
+<hr>
+<h2>六、审查清单</h2>
+<p>做完一轮取材和收敛之后，逐条打勾：</p>
+<ul>
+<li>我至少记录了十条来自公开场域的真实案例，且每条都填齐了人群、场景、现有做法三个字段。</li>
+<li>我拆解过至少三个现有产品，并各自回答了「更窄人群」和「砍掉三分之二功能」这两个问题。</li>
+<li>我的核心点子能用一句话讲清，且这句话同时交代了帮谁、什么场景、多少成本、什么结果。</li>
+<li>我用人工智能做过至少一轮发散，并且从中挑出了自己最有优势的那一小块，而不是照单全收。</li>
+<li>我在第一钻阶段写下了唯一的那个核心问题，并说明了它为什么优先级最高。</li>
+<li>我在第二钻阶段给所有候选功能打过分，并划定了第一个版本的功能清单。</li>
+<li>我给第一版设定了明确的时间盒，超期功能已经进入「以后再看」清单。</li>
+<li>最终这个点子能回答：它回应了谁的真实痛点，在他们反复尝试的事情上前进了哪一小步。</li>
+</ul>
+<hr>
+<h2>七、约束与边界说明</h2>
+<p><strong>关于素材真实性。</strong> 本集提到的求职、宝妈、小微商家等例子，均来自原教程的举例，用于说明「反复出现的问题」这一信号类型。你在使用这套方法时，必须替换成你自己亲眼观察到的案例，不能直接把教程里的例子当成市场需求的结论。</p>
+<p><strong>关于常见点子。</strong> 「常见不等于无效」是一条纠偏原则，不是一条鼓励同质化的原则。它成立的前提是你确实更理解某一小群人、能在细节上做得更贴近他们。如果只是把别人的功能原样重做一遍，那么常见就是真的无效。</p>
+<p><strong>关于人工智能的角色边界。</strong> 模型在这里的价值是摊开地图，不是替你走路。它可以列出二十种人群、二十种场景，但「哪一块是你真正在意、理解够深、愿意长期投入的」这个问题，只能由你自己回答。任何时候都不要用模型的偏好替代自己的判断。</p>
+<p><strong>关于双钻模型的适用范围。</strong> 双钻是一套思考纪律，不是一个必须严格照做的流程规范。小到一个周末项目，也可以用「先列全再砍掉」这两步；大到一个长期产品，可能需要多轮迭代。不要为了走完图形而走图形。</p>
+<p><strong>关于最小可行版本。</strong> 第一版的目标是「真实存在且有人真正能用」，不是「功能完整」。刻意砍功能是这一阶段的正确动作，不是妥协。</p>
+<p><strong>关于本音频的性质。</strong> 这是基于开源教程的二次演绎配音版，为便于口播做了口语化改写与结构重组，措辞和顺序与原文不完全一致。需要引用原文时请以原始文档为准。</p>
+<hr>
+<h2>八、关键句摘抄</h2>
+<ul>
+<li>凡是有人愿意用笨办法硬撑的事情，都说明这件事对他真的够重要。</li>
+<li>与其让别人勉强记住你十几个功能，不如让他对你形成一个朴素但清楚的印象。</li>
+<li>常见的点子并不一定等于无效的点子，比拼的是谁更理解某一小群人。</li>
+<li>人工智能的价值不在于替你做决定，而在于帮你把很窄的一条路摊成一张地图。</li>
+<li>第一版的目标不是做出一个完美的应用，而是做出一个真实存在的、有人可以真正使用的版本。</li>
+<li>点子不是突然出现在脑海里的奇迹，而是你和生活、和他人、和信息世界长期互动之后自然长出来的副产品。</li>
+<li>最开始烂才是正确的，完成永远比完美重要，你得先开始，才有机会谈结局。</li>
+</ul>
+<hr>
+<h2>九、音频与稿件信息</h2>
+<table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>集次标识</td><td>stage-1-appendix-a-product-thinking-02</td></tr>
+<tr><td>章节</td><td>产品思维基础（stage-1 附录 A）</td></tr>
+<tr><td>标题</td><td>产品思维基础 · 从公开场域中挖掘需求</td></tr>
+<tr><td>口播稿</td><td>script.txt（八段式，正文约五千字）</td></tr>
+<tr><td>音频文件</td><td>stage-1-appendix-a-product-thinking-02-播客.mp3</td></tr>
+<tr><td>字幕文件</td><td>stage-1-appendix-a-product-thinking-02-播客.srt</td></tr>
+<tr><td>演绎方式</td><td>二次演绎配音版，口语化改编</td></tr>
+<tr><td>收听建议</td><td>适合在动手写第一版需求之前听，配合第六节审查清单使用</td></tr>
+</table>
+<hr>
+<h2>十、来源</h2>
+<p>本内容改编自开源项目 <strong>Easy-Vibe</strong>（datawhalechina/easy-vibe），原文位于</p>
+<p><code>docs/zh-cn/stage-1/appendix-a-product-thinking/index.md</code>，为二次演绎配音版。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
