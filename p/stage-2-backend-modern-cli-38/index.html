@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CLI AI 编程工具 · Claude Code</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 7 · EP 38</span>
+<h1>CLI AI 编程工具 · Claude Code</h1>
+<p class="sub">第 7 章 · 第 38 讲 · 16:44</p>
+<div class="meta"><span>时长 <b>16:44</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>7</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-backend-modern-cli-38-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-backend-modern-cli-38-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-2-backend-modern-cli-38/stage-2-backend-modern-cli-38-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-2-backend-modern-cli-38/stage-2-backend-modern-cli-38-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-7.html">← 第 7 章目录</a>
+<a href="/p/stage-2-backend-git-workflow-37/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:09</span></div>
+<div class="ch" data-t="69.624"><span class="t">1:09</span><span class="n">这个工具到底是什么</span><span class="d">1:38</span></div>
+<div class="ch" data-t="168.24"><span class="t">2:48</span><span class="n">官方太贵，怎么办</span><span class="d">1:53</span></div>
+<div class="ch" data-t="281.592"><span class="t">4:41</span><span class="n">用 GLM 当后端，以及环境变量是什么</span><span class="d">2:15</span></div>
+<div class="ch" data-t="417.312"><span class="t">6:57</span><span class="n">Kimi 与 Minimax</span><span class="d">2:33</span></div>
+<div class="ch" data-t="571.128"><span class="t">9:31</span><span class="n">路由工具，让模型各司其职</span><span class="d">1:46</span></div>
+<div class="ch" data-t="677.496"><span class="t">11:17</span><span class="n">路由器怎么配置</span><span class="d">1:41</span></div>
+<div class="ch" data-t="779.28"><span class="t">12:59</span><span class="n">进阶用法与那个特殊文件</span><span class="d">2:17</span></div>
+<div class="ch" data-t="917.232"><span class="t">15:17</span><span class="n">收尾</span><span class="d">1:26</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe · Claude Code 入门、低成本后端接入与路由工具 — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-2/backend/modern-cli/index.md</code>），为<strong>二次演绎配音版</strong>。原文作者与贡献者来自清华大学深圳国际研究生院及开源社区。本文在原文基础上做了口语化改写、结构重组与实践补充，观点与例子由演绎方添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>stage-2-backend-modern-cli-38</code></li>
+<li>所属章节：第 7 章</li>
+<li>原文覆盖小节：Claude Code 简介与优势、为何使用兼容 Anthropic 接口的替代后端、使用智谱 GLM 作为后端、环境变量科普、使用 Kimi K2 / Minimax / DeepSeek / 火山引擎 Coding Plan 作为后端、其他兼容 API、Claude Code Router、Claude Code 的进阶用法与 CLAUDE.md</li>
+<li>对应音频：<code>stage-2-backend-modern-cli-38-播客.mp3</code></li>
+<li>字幕：<code>stage-2-backend-modern-cli-38-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>上一集引入了「CLI AI 编程工具」这个概念，本集正式落地到具体产品，并解决三个很现实的问题：</p>
+<ol>
+<li><strong>它到底是什么、能干什么</strong> —— 与 AI IDE 中的 Agent 有什么不同；</li>
+<li><strong>官方太贵怎么办</strong> —— 如何在不动工具本身的前提下，把背后的模型换成更便宜的；</li>
+<li><strong>怎么在多个模型之间调度</strong> —— 路由工具的定位、安装与配置。</li>
+</ol>
+<p>最后原文补上了进阶用法：一组常用命令，以及一个名为 <code>CLAUDE.md</code> 的特殊项目文件。</p>
+<p>音频稿按「认识工具 → 成本与两条路线 → GLM 与环境变量 → Kimi/Minimax/DeepSeek/火山 → 路由工具定位 → 路由配置 → 进阶用法与 CLAUDE.md → 收尾」重排，并把原文以代码块形式给出的环境变量知识讲成了大白话。</p>
+<hr>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>能力项</th><th>原文怎么说的</th><th>演绎方的解读</th><th>所属环节</th></tr>
+<tr><td>工具定位</td><td>主战场在终端，也支持编辑器插件；类似 AI IDE 中的 Agent</td><td>不是聊天窗口，是能接手整件活的执行者</td><td>认识工具</td></tr>
+<tr><td>能力范围</td><td>代码编辑、修缺陷、跑并修测试、管理 Git 工作流、代码讲解、执行命令</td><td>端到端，而不只是补全</td><td>认识工具</td></tr>
+<tr><td>四大优势</td><td>极长上下文 / 主动澄清需求 / 自动规划任务 / 深度理解代码库</td><td>更适合沉浸式氛围编程</td><td>认识工具</td></tr>
+<tr><td>成本现实</td><td>官方版成本高，转用兼容协议的 API 平台</td><td>工具不动，只换背后的大脑</td><td>成本控制</td></tr>
+<tr><td>方案一</td><td>直接用兼容 Anthropic 接口的国产模型（GLM、Kimi、DeepSeek、Siliconflow 等）</td><td>门槛最低，推荐先跑通</td><td>成本控制</td></tr>
+<tr><td>方案二</td><td>Claude Code Router，可按需分发请求、支持本地模型</td><td>配置复杂，建议后置</td><td>成本控制</td></tr>
+<tr><td>环境变量</td><td>操作系统中的键值对，程序读取即可，无需改代码</td><td>密钥的标准存放方式；PATH 决定命令能否被找到</td><td>配置基础</td></tr>
+<tr><td>重启提醒</td><td>通过工具配置永久环境变量后<strong>必须重启工具</strong></td><td>否则内置终端读不到新变量</td><td>配置基础</td></tr>
+<tr><td>路由工具</td><td>支持几十个平台，按场景路由到特定模型</td><td>承认没有万能模型，用调度层组织专长</td><td>进阶调度</td></tr>
+<tr><td>转换器</td><td>用 converter 适配不同平台的 API 格式</td><td>这是它能接几十家的原因</td><td>进阶调度</td></tr>
+<tr><td>CLAUDE.md</td><td>工具启动时自动读取并加入上下文的特殊文件</td><td>沉淀「每次都要重新说一遍」的信息</td><td>进阶用法</td></tr>
+</table>
+<hr>
+<h2>三、逐节解读</h2>
+<h3>3.1 为什么它比普通 IDE Agent 更适合氛围编程</h3>
+<p>原文给出的四条优势中，<strong>「可以主动澄清模糊需求」</strong>这一条尤其关键。普通补全类工具倾向于硬着头皮猜测，而它会先反问确认——这一步把大量返工挡在了写代码之前。</p>
+<p>配合「极长上下文（可处理完整文件甚至小型项目）」与「对整个代码库的深度理解」，它就具备了接手端到端任务的前提：<strong>看得全 + 会追问 + 能规划。</strong></p>
+<h3>3.2 成本问题的解耦思路</h3>
+<p>原文的处理非常务实：<strong>工具本身不动，只替换背后的模型接口。</strong></p>
+<p>这在架构上叫「关注点分离」，落到具体操作上就是两条路线：</p>
+<table>
+<tr><th>路线</th><th>做法</th><th>复杂度</th><th>原文建议</th></tr>
+<tr><td>方案一</td><td>直接使用兼容 Anthropic 接口的国产模型 API</td><td>低</td><td><strong>先入手这条</strong></td></tr>
+<tr><td>方案二</td><td>使用 Claude Code Router 做智能分发</td><td>中高</td><td>跑通方案一后再尝试</td></tr>
+</table>
+<p>费用方面原文给出了明确的量级参考：<strong>GLM 月度套餐约 20 元/月</strong>；想试水可<strong>先充值 10 元</strong>做小规模试验。同时提醒：<strong>该工具通常会消耗大量 token</strong>，这是预算必须提前考虑的事实。</p>
+<h3>3.3 环境变量：只需要理解两件事</h3>
+<p>原文的科普很长，但可以压缩成两件事：</p>
+<ol>
+<li><strong>它是键值对的外部配置</strong> —— 程序读取即可，不必写进代码，因此密钥存这里最安全；</li>
+<li><strong>PATH 决定命令能否被找到</strong> —— 之所以输入 <code>claude</code> 就能启动工具，是因为 PATH 里记录了可执行文件所在目录。装完命令行工具却提示「找不到」，八成是它的目录没进 PATH。</li>
+</ol>
+<p>操作上的硬性提醒：<strong>若是通过 AI IDE 配置永久环境变量，配置完成后必须重启该 IDE</strong>，否则其内置终端的环境变量不更新，可能导致登录失败或网络连接错误。</p>
+<h3>3.4 五个可选后端的差异</h3>
+<p>原文逐个介绍了推荐后端，压缩后看各自的招牌：</p>
+<table>
+<tr><th>后端</th><th>招牌能力</th><th>适合谁</th></tr>
+<tr><td>智谱 GLM（4.6）</td><td>上下文扩至 200K，对标同级海外模型，性能与成本平衡</td><td>想要综合体验与成本平衡的人</td></tr>
+<tr><td>Kimi K2</td><td>200K 上下文、代码能力强、中文理解好、工具调用稳定</td><td>中文项目与整仓储和分析</td></tr>
+<tr><td>Minimax</td><td>推理强、代码结构清晰、多语言、响应快</td><td>复杂逻辑与高频调用</td></tr>
+<tr><td>DeepSeek</td><td>代码能力突出、开源可微调、性价比高、中文好</td><td>预算敏感与需要私有微调的场景</td></tr>
+<tr><td>火山引擎 Coding Plan</td><td>企业级 SLA、专为编程优化、模型选择多、国内节点快</td><td>有稳定性与合规要求的团队</td></tr>
+</table>
+<p>演绎方提炼一个通用判据：<strong>看任何模型介绍，先抓「上下文长度、中文理解、性价比」这三项</strong>，其余多为次要指标。</p>
+<h3>3.5 路由工具解决的两个具体问题</h3>
+<p>原文把它解决的问题说得很直白：</p>
+<ol>
+<li><strong>单一模型无法覆盖所有场景</strong>；</li>
+<li><strong>频繁切换平台很麻烦</strong>。</li>
+</ol>
+<p>它的机制是「按场景路由 + 转换器适配不同平台的接口格式」。原文的例子极具启发性：<strong>后台任务交给本地 Ollama 省成本，长文本交给擅长长上下文的模型，代码讲解交给性价比高的那个。</strong></p>
+<p>演绎方的理解：这本质上是<strong>团队分工模型</strong> —— 不追求万能成员，而是让专长者在合适的环节上场。</p>
+<h3>3.6 进阶用法里最值得养成的三个习惯</h3>
+<p>原文列出的命令很多，其中三个习惯性价比最高：</p>
+<ul>
+<li><strong><code>/clear</code> 与 <code>/compact</code></strong> —— 长时间会话后清理或压缩上下文，防止信息过载让工具「跑不动」；</li>
+<li><strong><code>/cost</code></strong> —— 随时查看当前消费，配合前面提到的 token 消耗量，这是最直接的预算护栏；</li>
+<li><strong>维护 <code>CLAUDE.md</code></strong> —— 把常用命令、核心文件、代码风格、测试方式、协作规范、环境配置、已知坑点沉淀进去。原文强调它没有强制格式，<strong>只要简洁、便于人类阅读即可</strong>。</li>
+</ul>
+<hr>
+<h3>3.7 进阶命令速查</h3>
+<p>音频里逐条讲了命令，这里把原文的对照表重排成速查形式，方便回看：</p>
+<table>
+<tr><th>命令</th><th>作用</th><th>使用时机</th></tr>
+<tr><td><code>claude</code></td><td>启动交互模式</td><td>日常开工</td></tr>
+<tr><td><code>claude &quot;query&quot;</code></td><td>执行一次性任务并输出结果</td><td>不想进入交互模式时</td></tr>
+<tr><td><code>claude -p &quot;query&quot;</code></td><td>执行一次性问题并在结束后自动退出</td><td>脚本化调用</td></tr>
+<tr><td><code>claude -c</code></td><td>继续最近的一次会话</td><td>中断后续上</td></tr>
+<tr><td><code>claude -r</code></td><td>恢复上一段会话</td><td>跨天继续</td></tr>
+<tr><td><code>/resume</code></td><td>在当前聊天中切换回上一段会话</td><td>会话管理中</td></tr>
+<tr><td><code>/clear</code></td><td>清空当前会话上下文，防止信息过载</td><td>聊了很久之后</td></tr>
+<tr><td><code>/compact</code></td><td>压缩会话历史，减少上下文占用</td><td>上下文告急时</td></tr>
+<tr><td><code>/cost</code></td><td>查看当前消费情况</td><td>每个长任务结束</td></tr>
+<tr><td><code>/model</code></td><td>切换模型（用兼容 API 时一般可忽略）</td><td>需要临时换底座</td></tr>
+<tr><td><code>/init</code></td><td>用 CLAUDE.md 初始化项目说明</td><td>新建项目</td></tr>
+<tr><td><code>/memory</code></td><td>管理 CLAUDE.md 记忆文件</td><td>沉淀长期约定</td></tr>
+<tr><td><code>/plugin</code></td><td>管理插件</td><td>扩展能力</td></tr>
+<tr><td><code>/help</code></td><td>显示可用命令列表</td><td>忘了命令时</td></tr>
+<tr><td><code>exit</code> 或 <code>Ctrl+C</code></td><td>退出</td><td>收工</td></tr>
+</table>
+<p>其中 <code>/clear</code>、<code>/compact</code>、<code>/cost</code> 三个命令，演绎方建议直接接入日常习惯，而不是等到出问题才想起来用。</p>
+<h3>3.8 <code>CLAUDE.md</code> 应该写什么</h3>
+<p>原文给出的建议清单很完整，可以直接当作模板使用：</p>
+<ul>
+<li><strong>常用终端命令</strong> —— 省去每次重复说明；</li>
+<li><strong>核心文件与工具函数</strong> —— 让工具第一次就能找对地方；</li>
+<li><strong>代码风格约定</strong> —— 命名、格式、注释偏好；</li>
+<li><strong>测试方式说明</strong> —— 怎么跑测试、跑哪些；</li>
+<li><strong>仓库协作规范</strong> —— 分支命名、用 merge 还是 rebase；</li>
+<li><strong>开发环境配置说明</strong> —— 是否用 pyenv、推荐哪个编译器；</li>
+<li><strong>项目中需要特别注意的坑点</strong> —— 那些踩过一次就忘不掉的地方；</li>
+<li><strong>任何你希望它记住的信息</strong>。</li>
+</ul>
+<p>原文强调的格式要求是「没有强制格式，只要简洁、便于人类阅读即可」。演绎方补一句检验标准：<strong>写完之后假装自己是个刚接手项目的新人，看能不能照着它立刻开工。</strong></p>
+<hr>
+<h2>四、审查清单</h2>
+<ul>
+<li>已理解工具定位是<strong>执行者</strong>，而非聊天窗口</li>
+<li>已选定一条<strong>低成本接入路线</strong>（推荐先走兼容 API）</li>
+<li>已获取目标后端的 <strong>API Key 并妥善保存</strong></li>
+<li>环境变量配置完成，且<strong>已重启 AI IDE</strong> 使配置生效</li>
+<li>终端能正常启动工具（若提示找不到，检查 <strong>PATH</strong>）</li>
+<li>已用 <code>/cost</code> 查看过一次消费，建立了预算感知</li>
+<li>长会话后已使用 <code>/clear</code> 或 <code>/compact</code> 清理上下文</li>
+<li>项目根目录已有 <strong><code>CLAUDE.md</code></strong> 并记录了核心约定</li>
+<li>若使用路由工具，已<strong>指定默认模型</strong>并保存重启</li>
+<li>对比过至少两个后端的实际效果，而非仅凭口碑选型</li>
+</ul>
+<hr>
+<h2>五、实践提示</h2>
+<h3>提示1 · 先跑通简单方案，再折腾复杂方案</h3>
+<p>原文明确建议「先从第一种方案入手」。原因是复杂的中间层会掩盖底层问题：一旦配置出错，你分不清是模型不行、密钥不对，还是路由层的锅。<strong>先把最简单的链路跑通，再往上加抽象层。</strong></p>
+<h3>提示2 · 用 /cost 建立预算直觉</h3>
+<p>这类工具 token 消耗量大，账单往往是事后才发现。养成习惯：每次长任务结束都看一眼消费。连续记录几次之后，你就能估算出「一件大约多大的活要花多少钱」，这是控制成本最有效的方式。</p>
+<h3>提示3 · 把 CLAUDE.md 当成团队的入职文档写</h3>
+<p>不要把它写给自己看，要写给「一个刚接手项目、什么都不认识的人」看。检验标准很简单：<strong>一个陌生人照着这份文件，能不能立刻开始干活？</strong> 能，就写对了。</p>
+<h3>提示4 · 换模型前先明确你到底要换什么</h3>
+<p>如果是因为贵 → 换性价比更高的底座；如果是因为慢 → 换响应速度快的；如果是因为长文件读不全 → 换上下文更长的。<strong>这三个问题是不同的，答案也不同。</strong> 盲目换模型，常常是花同样的钱买到同样的困扰。</p>
+<hr>
+<h2>六、约束说明</h2>
+<ol>
+<li><strong>本集内容全部来自原文 <code>stage-2/backend/modern-cli/index.md</code>，未跨文件取材。</strong> 原文提及的工具名、模型名（GLM、Kimi K2、Minimax、DeepSeek、火山引擎 Coding Plan、Siliconflow、DashScope）、以及价格量级（约 20 元/月、10 元试水）均按原文转述。</li>
+<li><strong>原文以代码块形式给出的命令未在音频中逐字朗读。</strong> 音频改为描述其含义（例如「输入工具名回车启动交互模式」），以保证零基础听众的可听性与 TTS 发音质量。命令原文以原文档为准。</li>
+<li><strong>原文中的 URL 与注册链接未朗读。</strong> 音频统一表述为「去对应平台注册并获取接口密钥」，避免朗读一长串网址。</li>
+<li><strong>原文未给出的信息不作补充。</strong> 例如各模型的具体上下文数字（除原文明确给出的 200K 外）、路由工具支持的确切平台数量清单等，本文仅按原文表述概括。</li>
+<li><strong>演绎方添加的内容限于三类</strong>：结构性提炼（执行者而非聊天窗口、解耦思路、三个选型关键词）、类比说明（PATH 决定命令能否被找到、团队分工模型）、以及实践提醒（先简后繁、用 /cost 建立预算直觉、CLAUDE.md 写给陌生人看）。这些内容属于实践补充，不等同于原文观点。</li>
+<li><strong>安全声明。</strong> 本集涉及的所有 API Key、环境变量均为流程说明，不包含任何真实可用的凭据。</li>
+</ol>
+<hr>
+<h2>七、这一集在整条链路上的位置</h2>
+<p>如果把 CLI AI 工具这条线展开，本集处在<strong>从认识到落地的中间点</strong>：</p>
+<ul>
+<li>上一集建立了「CLI AI 工具是什么、与 AI IDE 差在哪」的认知；</li>
+<li>本集解决了「怎么把它用起来、且用得起」这个成本瓶颈；</li>
+<li>后续则可以进入「怎么把它用好」——也就是本集末尾已经预告的进阶命令、项目记忆文件与按场景的任务编排。</li>
+</ul>
+<p>成本问题被解决之后，这类工具才真正从「听起来很强」变成「每天都能用」。而 <code>CLAUDE.md</code> 的出现，则意味着你和工具之间开始形成<strong>长期协作关系</strong>——它不再每次从零认识你的项目。</p>
+<p><strong>来源</strong>：Easy-Vibe（datawhalechina/easy-vibe）<code>docs/zh-cn/stage-2/backend/modern-cli/index.md</code>。本音频与本文为二次演绎配音版，非原文照读。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
