@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dify 入门与知识库集成 · 2.6.1 常见节点介绍</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 7 · EP 20</span>
+<h1>Dify 入门与知识库集成 · 2.6.1 常见节点介绍</h1>
+<p class="sub">第 7 章 · 第 20 讲 · 15:27</p>
+<div class="meta"><span>时长 <b>15:27</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>7</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-ai-capabilities-dify-knowledge-base-20-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-ai-capabilities-dify-knowledge-base-20-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-2-ai-capabilities-dify-knowledge-base-20/stage-2-ai-capabilities-dify-knowledge-base-20-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-2-ai-capabilities-dify-knowledge-base-20/stage-2-ai-capabilities-dify-knowledge-base-20-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-7.html">← 第 7 章目录</a>
+<a href="/p/stage-2-ai-capabilities-dify-knowledge-base-18/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场 · 节点就是那盒积木</span><span class="d">1:18</span></div>
+<div class="ch" data-t="78.72"><span class="t">1:18</span><span class="n">推理节点 · 负责动脑子的那几位</span><span class="d">1:44</span></div>
+<div class="ch" data-t="183.696"><span class="t">3:03</span><span class="n">逻辑节点 · 决定流程往哪走</span><span class="d">2:00</span></div>
+<div class="ch" data-t="304.104"><span class="t">5:04</span><span class="n">数据节点 · 搬砖、整形、打通外部</span><span class="d">2:07</span></div>
+<div class="ch" data-t="432.0"><span class="t">7:12</span><span class="n">工具节点 · 直接拿来用的现成能力</span><span class="d">1:46</span></div>
+<div class="ch" data-t="538.44"><span class="t">8:58</span><span class="n">为什么要分流 · 一个餐饮场景</span><span class="d">1:49</span></div>
+<div class="ch" data-t="648.144"><span class="t">10:48</span><span class="n">编排设计 · 七个节点怎么排</span><span class="d">1:24</span></div>
+<div class="ch" data-t="732.696"><span class="t">12:12</span><span class="n">动手实现 · 从起点跑到终点</span><span class="d">2:05</span></div>
+<div class="ch" data-t="858.672"><span class="t">14:18</span><span class="n">聚合输出 · 把结果收成一个</span><span class="d">1:07</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Dify 常见节点与意图分类工作流 · 解读与音频稿件</h1>
+<blockquote>本集对应开源项目 Easy-Vibe（datawhalechina/easy-vibe）</blockquote>
+<blockquote><code>docs/zh-cn/stage-2/ai-capabilities/dify-knowledge-base/index.md</code>（2.6.1 – 2.6.3）</blockquote>
+<blockquote>音频为二次演绎配音版，本文是与音频配套的文字解读，可与音频对照阅读。</blockquote>
+<h2>这一集在讲什么</h2>
+<p>上一集把「工作流」这个概念立住了，这一集把它拆成零件。</p>
+<p>源文档 2.6.1 到 2.6.3 覆盖三件事：</p>
+<ol>
+<li><strong>2.6.1 常见节点介绍</strong>：Dify 画布上那几十个节点分别是什么、配置重点在哪。</li>
+<li><strong>2.6.2 常见工具介绍</strong>：可以直接当节点用的现成能力。</li>
+<li><strong>2.6.3 创建简单的意图分类工作流</strong>：用一个餐饮场景，把节点串成一条完整流水线。</li>
+</ol>
+<p>一条主线：<strong>先认识积木，再按图纸把积木拼成一台能跑的机器。</strong></p>
+<h2>能力地图</h2>
+<p>学完这一集，你应该能在六个位置定位自己：</p>
+<table>
+<tr><th>能力项</th><th>你能做到什么</th><th>本集覆盖</th></tr>
+<tr><td>节点分类记忆</td><td>把任意节点归入推理 / 逻辑 / 数据 / 工具四类之一</td><td>2.6.1</td></tr>
+<tr><td>配置重点识别</td><td>拿到一个节点，知道该先调哪几个参数</td><td>2.6.1</td></tr>
+<tr><td>分支与循环</td><td>判断该用条件、迭代还是循环</td><td>2.6.1</td></tr>
+<tr><td>工具选型</td><td>知道网络搜索、数据处理、格式处理各自解决什么</td><td>2.6.2</td></tr>
+<tr><td>意图分流设计</td><td>把「一个模型硬扛」改造成「分类 + 分流 + 聚合」</td><td>2.6.3</td></tr>
+<tr><td>端到端搭建</td><td>从起点跑到终点，独立完成一条工作流</td><td>2.6.3</td></tr>
+</table>
+<p>其中「配置重点识别」是最实用的一项。源文档对每个节点都给出了「配置重点在于……」的提示，这些提示比节点名称本身更值钱。</p>
+<h2>逐段精讲</h2>
+<h3>1. 学习方法比节点清单更重要</h3>
+<p>源文档开篇就给了三条学习建议，值得单独拎出来：</p>
+<ul>
+<li><strong>不必一次全掌握</strong>，先留印象，用时再查。</li>
+<li><strong>在现有模板里替换节点</strong>，通过他人的使用方式反推最佳实践。</li>
+<li><strong>截图问大模型</strong>，直接询问节点用法与所需参数。</li>
+</ul>
+<p>画布操作：右键 Add Node 添加，左侧节点面板查看全部，另有工具选择面板。</p>
+<h3>2. 推理类节点：五个岗位</h3>
+<table>
+<tr><th>节点</th><th>职责</th><th>配置重点</th></tr>
+<tr><td>LLM</td><td>核心计算单元，调用大模型</td><td>提示词工程与参数调优</td></tr>
+<tr><td>Knowledge Retrieval</td><td>从知识库 / 外部数据源检索</td><td>检索源与相关性</td></tr>
+<tr><td>Answer</td><td>把结果整理成最终成果形式</td><td>输出格式定义（话术模板、排版规范）</td></tr>
+<tr><td>Agent</td><td>多步骤规划 + 自主调用工具</td><td>工具集与决策边界</td></tr>
+<tr><td>Question Classifier</td><td>按意图 / 领域归类</td><td>标签定义与描述示例</td></tr>
+</table>
+<p>理解它们的关系，可以借用一条流水线：<strong>模型节点是干活的，知识检索是查资料的，回答节点是包装成品的，智能体节点是能自己拿主意的高级工，分类器则是前台接待。</strong></p>
+<h3>3. 逻辑类节点：分支、并行、递归</h3>
+<p>三个节点，三种完全不同的时间结构：</p>
+<ul>
+<li><strong>条件节点</strong>：布尔判断实现分支。设计关键是<strong>条件表达式要严谨，覆盖所有业务场景</strong>。</li>
+<li><strong>Iteration 节点</strong>：<strong>无状态</strong>批量并行。适合子任务间无数据依赖的场景（批量翻译、并行审核、同时生成多份报告）。接收数组、自动分片、并行执行，输出自动聚合为数组。配置重点是并行度、重试策略与失败处理。</li>
+<li><strong>Loop 节点</strong>：<strong>有状态</strong>递归迭代。适合结果依赖前一轮输出的场景（多轮调优、递归式内容优化、链式计算）。核心是状态变量，需先初始化再逐轮更新。</li>
+</ul>
+<p>源文档特别强调了循环的<strong>终止条件</strong>设计，给出三类写法：</p>
+<ol>
+<li>基于计数器：最多循环 10 次</li>
+<li>基于结果判定：满意度评分 &gt; 9</li>
+<li>基于外部信号：检测到「停止」输入</li>
+</ol>
+<p>并提醒要设置循环超时、规划异常处理路径（跳出循环 / 重置状态后重试）。这一段是新手最容易忽略、也最容易写出死循环的地方。</p>
+<h3>4. 数据类节点：八个搬运工</h3>
+<p>Code（自定义代码）、Template（模板填充）、Variable Aggregator（变量聚合）、Doc Extractor（文档提取）、Variable Assigner（变量赋值）、Parameter Extractor（参数提取）、HTTP Request（外部接口）、List Operator（列表操作）。</p>
+<p>这一批看着多，其实永远只问两个问题：<strong>数据现在是什么形状，我需要它变成什么形状。</strong> 想清楚这两句，选节点就不会犹豫。</p>
+<p>HTTP Request 节点是打通外部系统的关键，配置重点在请求地址、请求方法与 headers。Parameter Extractor 则是把非结构化输入转成结构化数据的入口，配置重点在提取规则（正则 / JSON 路径）。</p>
+<h3>5. 工具节点：能省下大量时间的三条建议</h3>
+<p>源文档强调，大部分工具都可以直接作为节点放在画布上，像其他节点一样被上下游连线，只要输入符合参数规范即可执行。</p>
+<p>三类常见工具：</p>
+<ul>
+<li><strong>网络搜索</strong>（Tavily Search 为代表）：返回结构化的标题、摘要、链接，可直接作为提示词的一部分，用于最新资讯或需权威依据的问题。</li>
+<li><strong>数据处理</strong>（JSON Process 插件）：查询、筛选、转换、合并，处理复杂 API 响应或多层嵌套数据，省掉在 Code 节点里手写解析代码。</li>
+<li><strong>格式处理</strong>（Markdown Exporter）：按指定格式导出，便于展示、汇报或集成。</li>
+</ul>
+<p>三条实操建议：</p>
+<ol>
+<li>初期优先尝试「Featured / 推荐」里的工具，覆盖最常见场景。</li>
+<li>工具列表里能看到安装量和简介，可作为选择参考。</li>
+<li><strong>先搜「官方推荐工作流 DSL 案例」直接导入</strong>，比自己搭建天然节约很多时间。</li>
+</ol>
+<h3>6. 为什么要分流：一个模型硬扛的两个毛病</h3>
+<p>源文档用餐饮场景说明了「一个 LLM 处理所有输入」的代价：</p>
+<p><strong>问题一，回复风格不稳定。</strong> 同样是抱怨，有时能道歉安抚，有时却像在解释原因；同样是点餐，有时追问缺失信息，有时直接编造订单细节。</p>
+<p><strong>问题二，业务逻辑不可控。</strong> 你希望「抱怨必须先道歉」，模型未必每次都遵守；你希望「非业务问题引导回主线」，模型可能兴致勃勃聊起段子。</p>
+<p>工程化的解法是三段式流水线：<strong>先分类（用户到底想干什么）→ 再分流（不同场景用不同提示词与角色）→ 最后统一封装输出（便于前端或系统集成）。</strong></p>
+<p>四种意图与四个人格：</p>
+<table>
+<tr><th>意图</th><th>人格</th><th>核心任务</th></tr>
+<tr><td>buy_food 下单购买</td><td>下单助手</td><td>确认订单细节，主动补全缺失信息</td></tr>
+<tr><td>complain 抱怨投诉</td><td>客服专家</td><td>安抚情绪，提供清晰解决方案</td></tr>
+<tr><td>chitchat 闲聊咨询</td><td>聊天伙伴</td><td>个性化推荐，引导潜在消费</td></tr>
+<tr><td>other 其他意图</td><td>礼貌门卫</td><td>把偏离主题的对话引导回核心业务</td></tr>
+</table>
+<h3>7. 编排设计：七个节点</h3>
+<ul>
+<li><strong>Start 起点</strong>：数据入口，接收原始输入 <code>user_text</code></li>
+<li><strong>Question Classifier 意图分类器</strong>：大脑与调度中心，从四类标签中选最匹配的</li>
+<li><strong>Condition 条件分支</strong>：分流阀，按标签决定导向哪条路径</li>
+<li><strong>四个并行 LLM 节点</strong>：独立专家处理单元，各自不同的 System Prompt</li>
+<li><strong>Variable Aggregator 变量聚合器</strong>：把唯一被激活分支的回复收束为统一变量</li>
+<li><strong>Output 终点</strong>：以结构化形式（如 JSON）输出意图标签、原始问题、最终回复</li>
+</ul>
+<p>源文档在这里给了一个很坦诚的建议：<strong>新手很难凭空想到该用哪些节点，用大模型给编排建议通常是最快最好的选择。</strong></p>
+<h3>8. 实现步骤与那个最容易踩的坑</h3>
+<p>实现顺序：选 Workflow（非 Chatflow）→ 定义 User Input 变量 <code>user_text</code> → Test Run 验证 → 添加 Question Classifier 并配置四类标签（含描述与示例）→ 在 ADVANCED SETTING 写入分类提示词 → 用节点右上角播放键单测 → 接四个 LLM 节点并设置不同 System Prompt → 用 Variable Aggregator 聚合 → 用 Template 节点做结构化输出 → 添加 Output 节点。</p>
+<p><strong>最容易踩的坑</strong>：每个 LLM 节点填完 SYSTEM 提示词后，<strong>还要启用 USER 提示词参数</strong>。需点击插入变量符号选择 <code>user_text</code>，并在前面加上 <code>user input:</code> 标识。漏掉这一步，模型就收不到用户的原始输入，只会按内置提示词自说自话。</p>
+<p>Template 节点承担最终结构化输出，映射关系为：<code>intent</code> ← <code>class_name</code>，<code>original_text</code> ← <code>user_text</code>，<code>final_reply</code> ← <code>variable_aggregator</code>。</p>
+<h2>审查清单</h2>
+<p>搭完一条工作流之后，用这张清单逐项过一遍：</p>
+<ul>
+<li>条件分支是否覆盖了所有可能的输入，有没有「谁都不匹配」的漏网分支？</li>
+<li>用到循环时，终止条件是否明确？有没有计数器 / 结果判定 / 外部信号三重保险？</li>
+<li>循环是否设置了超时与异常处理路径？</li>
+<li>迭代节点的并行度是否合理？失败时是否有重试或默认值兜底？</li>
+<li>每个 LLM 节点除了 SYSTEM 提示词，<strong>USER 提示词参数是否已启用并绑定输入变量</strong>？</li>
+<li>并行分支的输出是否都汇入了变量聚合器？有没有分支结果被丢弃？</li>
+<li>最终输出是否为结构化格式（如 JSON），字段是否完整？</li>
+<li>分类器是否用至少五组不同类型的输入做过稳定性测试？</li>
+<li>外部工具的输入是否符合其参数规范？是否先用官方 DSL 案例验证过？</li>
+<li>HTTP Request 节点的请求地址、方法与 headers 是否配置正确？</li>
+<li>换个用户输入重跑一次，结果是否仍然稳定可控？</li>
+</ul>
+<h2>实践提示</h2>
+<h3>提示一 · 先用模板，再谈原创</h3>
+<p>源文档反复强调这一点：直接在现有模板里替换节点，通过他人的使用方式推测最佳实践。对新手来说，从空白画布开始的每一次犹豫，都是在重复别人已经走过的弯路。<strong>先抄懂，再改进，最后才谈原创。</strong></p>
+<h3>提示二 · 用「是否无状态」来区分迭代与循环</h3>
+<p>这是最容易混淆的一对节点。判断标准很干净：<strong>子任务之间有没有数据依赖。</strong> 各干各的（批量翻译、并行审核）用 Iteration；下一轮要用到上一轮结果（递归优化、多轮调优）用 Loop。选错了要么跑不动，要么结果不对。</p>
+<h3>提示三 · 循环一定要写终止条件，而且要写三遍</h3>
+<p>源文档给了三类终止条件，建议至少叠加两层：计数器兜底（最多十次）+ 结果判定（满意度达标）。只靠结果判定的循环，一旦模型输出不稳定就会空转。只靠计数器的循环，则可能在大功告成前一刻被硬生生掐断。</p>
+<h3>提示四 · 遇到陌生工具，先搜官方 DSL 案例</h3>
+<p>工具用起来通常比较复杂。与其自己从零搭建，不如先搜该工具的「官方推荐工作流 DSL 案例」直接导入。<strong>这一步能省下的时间，往往比后面所有优化加起来还多。</strong></p>
+<h3>提示五 · 别让一个模型硬扛所有意图</h3>
+<p>餐饮场景那两个毛病（风格不稳定、逻辑不可控）不是 Dify 特有的，而是「单一模型处理混合意图」的通用症状。一旦你的系统开始出现「有时这样有时那样」的评价，就是该上分类分流流水线的信号了。</p>
+<h2>约束说明</h2>
+<p>本节内容严格限定在源文档 <code>stage-2/ai-capabilities/dify-knowledge-base/index.md</code> 的 2.6.1 至 2.6.3 小节范围内，未引入任何源文档之外的案例、数据或引文。</p>
+<p>具体边界如下：</p>
+<ol>
+<li><strong>不补操作步骤细节</strong>：源文档在本节依赖截图说明界面位置（如 Add Node 右键菜单、ADVANCED SETTING、播放键测试），音频与本文仅转述其文字描述，不额外补充界面截图或点击路径。</li>
+<li><strong>节点名称保留英文原名</strong>：LLM、Knowledge Retrieval、Answer、Agent、Question Classifier、Iteration、Loop、Code、Template、Variable Aggregator、Doc Extractor、Variable Assigner、Parameter Extractor、HTTP Request、List Operator 等均为源文档原文名称，音频中做了口语化解释。</li>
+<li><strong>四类标签与提示词按原文呈现</strong>：buy_food / complain / chitchat / other 四类标签及其描述、四个人格的 System Prompt 要求，均来自源文档，未做改写或扩充。</li>
+<li><strong>工具举例限于原文</strong>：仅涉及 Tavily Search、JSON Process、Markdown Exporter 三个源文档明确提及的工具，未补充其他插件。</li>
+<li><strong>不承诺平台行为</strong>：源文档未给出节点数量上限、执行超时默认值、并发限制等量化参数，本集不作任何数值承诺。</li>
+<li><strong>二次演绎边界</strong>：音频为配音演绎版，节点讲解顺序做了口语化重组，但所有节点职责、配置重点、实现步骤均可在源文档中找到对应出处。</li>
+</ol>
+<h2>一句话收尾</h2>
+<p><strong>节点是积木，流水线是图纸。先认清每块积木的脾气，再按「分类、分流、聚合」这条主干把它们拼起来——一台能稳定运行的 AI 应用，就是这么来的。</strong></p>
+<hr>
+<p>来源：Easy-Vibe（datawhalechina/easy-vibe）</p>
+<p><code>docs/zh-cn/stage-2/ai-capabilities/dify-knowledge-base/index.md</code></p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
