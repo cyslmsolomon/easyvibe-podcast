@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>从数据库到 Supabase · 5.4.1 存储桶</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 7 · EP 34</span>
+<h1>从数据库到 Supabase · 5.4.1 存储桶</h1>
+<p class="sub">第 7 章 · 第 34 讲 · 15:50</p>
+<div class="meta"><span>时长 <b>15:50</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>7</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-backend-database-supabase-34-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-backend-database-supabase-34-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-2-backend-database-supabase-34/stage-2-backend-database-supabase-34-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-2-backend-database-supabase-34/stage-2-backend-database-supabase-34-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-7.html">← 第 7 章目录</a>
+<a href="/p/stage-2-backend-database-supabase-33/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:29</span></div>
+<div class="ch" data-t="89.952"><span class="t">1:29</span><span class="n">存储桶，对象存储里的文件夹</span><span class="d">1:40</span></div>
+<div class="ch" data-t="190.056"><span class="t">3:10</span><span class="n">第一种取地址方式，公开地址</span><span class="d">1:39</span></div>
+<div class="ch" data-t="289.536"><span class="t">4:49</span><span class="n">第二种取地址方式，签名地址</span><span class="d">1:44</span></div>
+<div class="ch" data-t="394.2"><span class="t">6:34</span><span class="n">边缘函数，不想买服务器怎么办</span><span class="d">1:47</span></div>
+<div class="ch" data-t="501.72"><span class="t">8:21</span><span class="n">为什么密钥不能写在前端</span><span class="d">1:42</span></div>
+<div class="ch" data-t="604.296"><span class="t">10:04</span><span class="n">怎么把函数部署上去</span><span class="d">1:55</span></div>
+<div class="ch" data-t="720.192"><span class="t">12:00</span><span class="n">另一种登录方案，Clerk</span><span class="d">2:06</span></div>
+<div class="ch" data-t="846.216"><span class="t">14:06</span><span class="n">收尾</span><span class="d">1:43</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe · 从数据库到 Supabase（存储桶、公开与签名 URL、边缘函数、Clerk） — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-2/backend/database-supabase/index.md</code> 第 5.4.1 至 5.6.2 节），为<strong>二次演绎配音版</strong>。原文作者与贡献者来自清华大学深圳国际研究生院及开源社区。本文在原文基础上做了口语化改写、结构重组与实践补充，观点与例子由演绎方添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>stage-2-backend-database-supabase-34</code></li>
+<li>所属章节：第 7 章</li>
+<li>原文覆盖小节：5.4.1 存储桶、5.4.2 获取可访问文件 URL、5.5 边缘函数、5.5.1 LLM Chat 案例解析、5.5.2 创建并部署函数、5.6 Clerk 登录、5.6.1 创建 Clerk 应用与获取密钥、5.6.2 配置 Supabase 与 Clerk 的原生集成</li>
+<li>对应音频：<code>stage-2-backend-database-supabase-34-播客.mp3</code></li>
+<li>字幕：<code>stage-2-backend-database-supabase-34-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>上一集确立了「非结构化文件交给对象存储」的方向，但只解决了「放哪」的问题，还有三个更尖锐的问题没回答：</p>
+<ol>
+<li><strong>文件放进去之后，谁能动它？</strong> —— 存储桶与行级安全策略；</li>
+<li><strong>怎么把文件变成一个浏览器能打开的地址？</strong> —— 公开 URL 与签名 URL 的取舍；</li>
+<li><strong>有一段逻辑绝不能放在浏览器里跑，怎么办？</strong> —— 边缘函数。</li>
+</ol>
+<p>原文用 5.4.1 到 5.6.2 共八个小节回答这三个问题，其中 5.6 的 Clerk 是「另一种登录方案」的补充路线。本集把它们合并为一集，主线是：<strong>从「能存文件」走到「能安全地发出文件」，再走到「能安全地跑服务端逻辑」</strong>。</p>
+<p>音频稿按「存储桶 → 公开地址 → 签名地址 → 无服务器与边缘函数 → 密钥为什么不能进前端 → 部署流程 → Clerk 集成 → 收尾」的顺序重排，并补充了原文未明说但实践中必须建立的判断规则。</p>
+<hr>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>能力项</th><th>原文怎么说的</th><th>演绎方的解读</th><th>所属环节</th></tr>
+<tr><td>Bucket 概念</td><td>Storage 的组成单元，类似操作系统文件夹，每个桶可有独立安全策略</td><td>分桶的本质是「按用途分治」，让三套规矩互不干扰</td><td>存储组织</td></tr>
+<tr><td>行级安全策略</td><td>策略写在 <code>storage.objects</code> 与 <code>storage.buckets</code> 上，分 SELECT / INSERT / UPDATE / DELETE</td><td>「能读」不等于「能传」，四个动作必须分开授权</td><td>存储权限</td></tr>
+<tr><td>策略示例</td><td>只允许上传到以自己 user_id 命名的文件夹，且只允许图片类型</td><td>一条策略同时完成「地盘隔离」和「类型卡死」</td><td>存储权限</td></tr>
+<tr><td>Public URL</td><td>固定永久链接，结构固定易拼接，可被 CDN 与浏览器缓存</td><td>适合真公共资源；生产环境有盗刷流量风险</td><td>取地址</td></tr>
+<tr><td>盗刷流量 Hotlinking</td><td>外部站点嵌入你的图片链接，产生不必要流量费用</td><td>这是成本问题不是技术问题，选型时要先算这笔账</td><td>取地址</td></tr>
+<tr><td>Signed URL</td><td>带安全标记与有效期；权限绑定；临时性杜绝盗刷</td><td>生产环境默认选项，头像、发票、付费内容均适用</td><td>取地址</td></tr>
+<tr><td>Serverless 认知</td><td>不是没有服务器，而是无需关心购买运维配置扩容</td><td>不为闲置资源付费，是它最大的吸引力</td><td>边缘函数</td></tr>
+<tr><td>边缘节点</td><td>部署在全球边缘节点，物理距离靠近用户，延迟极低</td><td>「把代码放到离用户最近的地方」是这类服务的共同思路</td><td>边缘函数</td></tr>
+<tr><td>密钥隔离</td><td><code>OPENAI_API_KEY</code> 作为环境变量存于服务端，前端完全无法接触</td><td>前端只传话，服务端才拿钥匙</td><td>边缘函数</td></tr>
+<tr><td>界面化部署</td><td>控制台新建函数 → 删占位码 → 粘贴 → 配 Secrets → Deploy updates</td><td>全程不碰命令行，零基础也能完成一次部署</td><td>边缘函数</td></tr>
+<tr><td>Clerk 定位</td><td>专注身份认证与用户管理的专业工具，覆盖注册登录 MFA 权限会话</td><td>与自建验证模块是「专业外包」与「自己搭」的两条路线</td><td>登录方案</td></tr>
+<tr><td>原生集成</td><td>Clerk 侧开启集成并复制 Domain，Supabase 侧 Add provider 粘贴 Domain</td><td>两头各配一次，鉴权跳转与权限控制即被接管</td><td>登录方案</td></tr>
+</table>
+<hr>
+<h2>三、逐节解读</h2>
+<h3>3.1 存储桶：分治是最朴素的权限设计</h3>
+<p>原文把 Bucket 类比为操作系统文件夹，重点不在比喻本身，而在后面那句「每个 Bucket 都可以有自己独立的安全策略和配置」。</p>
+<p>这个特性意味着：<strong>分桶是你做权限设计的第一个抓手</strong>。与其在一个桶里写一条复杂到没人看得懂的策略，不如按用途分成几个桶，每个桶写一条简单明确的策略。复杂度被摊薄了，出错的概率也随之下降。</p>
+<h3>3.2 一个必须纠正的直觉：能访问 ≠ 能修改</h3>
+<p>原文有一句非常容易被误读的话：「Storage 内的所有文件都可以通过一个公开的 URL 直接访问，但并不意味着任何人都可以随意上传或修改。」</p>
+<p>这里有两层不同的东西：</p>
+<ul>
+<li><strong>访问层</strong>：地址是公开的，知道地址就能拿到文件；</li>
+<li><strong>操作层</strong>：读取、上传、更新、删除四个动作，分别由行级安全策略授权。</li>
+</ul>
+<p>原文给出的示例策略同时做了两件事——限定用户只能上传到以自己用户编号命名的文件夹，并且只允许图片类型。这条示范的价值在于它展示了策略的表达力：<strong>既能做身份维度的隔离，也能做内容维度的过滤</strong>。</p>
+<h3>3.3 两种 URL：差别不在技术，在成本与安全</h3>
+<p>这是本集最需要记住的一组对比：</p>
+<table>
+<tr><th>维度</th><th>公开 URL</th><th>签名 URL</th></tr>
+<tr><td>有效期</td><td>永久</td><td>临时，带有效期</td></tr>
+<tr><td>缓存</td><td>可被 CDN 与浏览器缓存，速度快</td><td>不适合长期缓存</td></tr>
+<tr><td>权限绑定</td><td>无，知道地址就能访问</td><td>有，只有有权限的人才能生成</td></tr>
+<tr><td>主要风险</td><td>盗刷流量，产生不必要的流量费用</td><td>过期后需重新生成</td></tr>
+<tr><td>适用场景</td><td>网站 Logo、产品目录图、博客配图</td><td>头像、私人照片、付费内容、订单发票</td></tr>
+</table>
+<p>原文的选型建议非常明确：<strong>优先使用签名 URL，只有当资源明确需要永久公开时才用公开 URL。</strong> 演绎方补充一句——这条建议的本质是「默认收紧，按需放开」，和权限设计里的最小权限原则是同一件事。</p>
+<h3>3.4 边缘函数：为什么是「边缘」</h3>
+<p>原文对 Serverless 的解释值得原样记住：<strong>不是没有服务器，而是你不需要关心服务器的购买、运维、配置和扩容</strong>，按实际运行时间计费。</p>
+<p>「边缘」两个字指的是部署位置——代码被放到全球边缘节点，物理上靠近用户，因此执行延迟极低。原文顺带盘点了主流云厂商的同类服务，三者思路一致：<strong>把代码搬到离用户最近的地方跑</strong>。</p>
+<h3>3.5 密钥隔离：一个通用模式</h3>
+<p>LLM Chat 案例的价值远超「接一个聊天机器人」本身。它演示了一个可以复制到任何第三方调用上的模式：</p>
+<ol>
+<li>前端只负责传递用户输入，<strong>不持有密钥</strong>；</li>
+<li>边缘函数持有密钥（以环境变量形式加密存储），代前端发起请求；</li>
+<li>结果由函数返回前端。</li>
+</ol>
+<p>这个模式带来两个收益：<strong>安全上密钥不落地到浏览器</strong>，<strong>工程上所有外部调用被收拢到一处</strong>，换供应商、加缓存、统计用量都只改一个地方。</p>
+<h3>3.6 Clerk 与原生集成：两条登录路线</h3>
+<p>原文在此处给出了与前面「自建验证模块 + 第三方 Provider」不同的另一条路线：使用专业身份认证服务。</p>
+<p>集成动作分两头，各配一次：Clerk 侧开启集成并复制 Clerk Domain，Supabase 侧添加 Provider 并粘贴该 Domain。原文强调这是<strong>官方原生集成</strong>，无需手动配置复杂适配逻辑。演绎方提醒一点：两头的配置顺序并无强依赖，但 Clerk Domain 必须先复制出来，否则 Supabase 侧无从填写。</p>
+<hr>
+<h3>3.7 三条可以立刻用起来的决策规则</h3>
+<p>原文这一段的知识点很密，但如果把它们压缩成决策规则，实际使用时反而更好记。演绎方把本集的核心内容提炼成三条：</p>
+<p><strong>规则一：分桶是权限设计的第一个动作。</strong> 遇到「不同用途的文件要不要分开管」这个问题，答案永远是分。分桶带来的隔离是天然的，比在同一桶里写复杂策略省力得多，也更不容易出错。</p>
+<p><strong>规则二：发文件默认用签名地址。</strong> 只有当资源被确认是永久公开、无访问限制时，才改用公开地址。这条规则的价值在于它把「安全」变成了默认值，把「方便」变成了需要申请的东西——顺序反了，代价就会变成账单上的流量费。</p>
+<p><strong>规则三：有密钥的逻辑一律进服务端函数。</strong> 判断标准非常简单，只要这段代码里出现了不能给用户看到的东西，它就是服务端逻辑。不要因为「只是小小的调用一次」而图省事写在前端，密钥一旦进了前端，就等同于公开。</p>
+<p>这三条规则的共同点是：<strong>它们都不是技术难度的选择，而是风险敞口的选择。</strong> 原文在这一段反复强调安全与成本，正是这个原因。</p>
+<hr>
+<h2>四、审查清单</h2>
+<ul>
+<li>文件已按用途<strong>分桶</strong>，而不是全塞进一个桶</li>
+<li>每个桶都有明确的策略，<strong>四个动作分开授权</strong></li>
+<li>上传路径限制包含<strong>用户维度隔离</strong>（以用户编号命名的文件夹）</li>
+<li>上传策略包含<strong>文件类型过滤</strong></li>
+<li>公开桶里<strong>只有真正的公共资源</strong>，没有私人文件</li>
+<li>生产环境的头像、发票、付费内容<strong>全部走签名 URL</strong></li>
+<li>签名 URL 的<strong>有效期设置符合业务需要</strong>，不是越长越好</li>
+<li>所有带密钥的第三方调用<strong>都经过服务端函数</strong>，前端无任何密钥</li>
+<li>密钥以<strong>环境变量 / Secrets</strong> 形式存储，未写进代码仓库</li>
+<li>函数更新后<strong>执行过 Deploy updates</strong>，不是只改了编辑器里的代码</li>
+<li>Clerk 的 Secret key 只存在于<strong>本地环境文件</strong>，未进版本库</li>
+<li>Supabase 侧已<strong>添加 Clerk Provider 并保存</strong> Clerk Domain</li>
+</ul>
+<hr>
+<h2>五、实践提示</h2>
+<h3>提示1 · 默认用签名 URL，公开 URL 需要理由</h3>
+<p>不要因为公开 URL 好拼接、好缓存就默认用它。正确做法是反过来：<strong>默认给签名 URL，只有在你能明确说出「这个资源必须永久公开、且无访问限制」时，才换成公开 URL。</strong> 这个默认值的设定，能帮你省掉绝大多数被盗刷的麻烦。</p>
+<h3>提示2 · 判断一段逻辑该不该进边缘函数，只看一个问题</h3>
+<p>问自己：<strong>这段代码里有没有不能给用户看的东西，或者浏览器跑不动的东西？</strong> 有密钥、有需要强制执行的业务规则、有计算密集型任务，三者任一成立，就该放进服务端函数。如果都没有，老老实实留在前端，别为了架构好看而多一层。</p>
+<h3>提示3 · 分桶先于写策略</h3>
+<p>很多人一上来就想写一条能覆盖所有情况的复杂策略，结果越写越乱。更省力的顺序是：<strong>先按用途分桶，再给每个桶写一条简单策略。</strong> 桶是天然的隔离边界，用好了能省掉策略里一大半的条件判断。</p>
+<h3>提示4 · 部署后一定要验证一次</h3>
+<p>在控制台改完代码不等于生效。原文明确指出需要在 Edge Functions 部分执行 Deploy updates，云端才会重新构建部署。养成习惯：<strong>每次改完，部署后立刻调一次函数，确认返回的是新逻辑的结果。</strong></p>
+<hr>
+<h2>六、约束说明</h2>
+<ol>
+<li><strong>本集内容全部来自原文 5.4.1 至 5.6.2 节，未跨文件取材。</strong> 原文中出现的表名（<code>storage.objects</code>、<code>storage.buckets</code>）、策略动作（SELECT / INSERT / UPDATE / DELETE）、环境变量名（<code>OPENAI_API_KEY</code>）、密钥前缀（<code>pk_</code>、<code>sk_</code>）、示例函数名等，均按原文转述，未做改写。</li>
+<li><strong>厂商与产品名按原文表述保留。</strong> 例如 Clerk、Deno、TypeScript、AWS Lambda@Edge、Cloudflare Workers、Vercel Edge Functions 等，均为原文明确提及，未在本文中添加新的厂商或产品。</li>
+<li><strong>原文未给出的信息不作补充。</strong> 例如签名 URL 的具体有效期取值、各云厂商的计费标准、Clerk 的定价档位等，原文未涉及，因此不在本集中出现。</li>
+<li><strong>演绎方添加的内容限于三类</strong>：结构性类比（分桶即分治）、判据性建议（默认签名 URL、进不进边缘函数的判断、分桶先于策略）、以及工程提醒（部署后必须验证）。这些内容属于实践补充，不等同于原文观点。</li>
+<li><strong>安全声明。</strong> 本集涉及的所有密钥、域名、环境变量均为流程说明中的占位表述，不包含任何真实可用的凭据。</li>
+</ol>
+<hr>
+<h2>七、这一集在整条链路上的位置</h2>
+<p>把这一集和上一集串起来看，存储这条线的推进非常清晰：<strong>文件为什么要交给对象存储 → 文件在存储里怎么组织 → 谁能动这些文件 → 怎么把文件发出去 → 发出去的方式怎么选</strong>。</p>
+<p>而边缘函数这条线，则标志着应用从「前端 + 托管服务」升级为「前端 + 托管服务 + 自定义服务端逻辑」。到了这一步，你已经拥有一个完整的、可自定义、又不用自己养服务器的技术栈：</p>
+<ul>
+<li>数据有数据库，权限有行级安全策略；</li>
+<li>文件有对象存储，分发有签名 URL；</li>
+<li>账号有验证模块，登录可以接第三方，也可以接专业身份认证服务；</li>
+<li>逻辑有边缘函数，密钥安全地待在服务端。</li>
+</ul>
+<p><strong>来源</strong>：Easy-Vibe（datawhalechina/easy-vibe）<code>docs/zh-cn/stage-2/backend/database-supabase/index.md</code>，5.4.1–5.6.2 节。本音频与本文为二次演绎配音版，非原文照读。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
