@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRD：类 Dify 智能体编排平台 · 1.3 竞品页面拆解</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 7 · EP 23</span>
+<h1>PRD：类 Dify 智能体编排平台 · 1.3 竞品页面拆解</h1>
+<p class="sub">第 7 章 · 第 23 讲 · 15:22</p>
+<div class="meta"><span>时长 <b>15:22</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>7</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-assignments-custom-dify-agent-platform-prd-md-23-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-assignments-custom-dify-agent-platform-prd-md-23-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-2-assignments-custom-dify-agent-platform-prd-md-23/stage-2-assignments-custom-dify-agent-platform-prd-md-23-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-2-assignments-custom-dify-agent-platform-prd-md-23/stage-2-assignments-custom-dify-agent-platform-prd-md-23-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-7.html">← 第 7 章目录</a>
+<a href="/p/stage-2-ai-capabilities-dify-knowledge-base-22/">← 上一讲</a>
+<a href="/p/stage-2-backend-cloud-server-deployment-28/">下一讲 →</a>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">0:40</span></div>
+<div class="ch" data-t="40.296"><span class="t">0:40</span><span class="n">这份作业到底要你做什么</span><span class="d">2:01</span></div>
+<div class="ch" data-t="161.856"><span class="t">2:41</span><span class="n">为什么先拆竞品页面而不是先写代码</span><span class="d">1:48</span></div>
+<div class="ch" data-t="270.576"><span class="t">4:30</span><span class="n">Dify 的四类页面长什么样</span><span class="d">1:22</span></div>
+<div class="ch" data-t="353.352"><span class="t">5:53</span><span class="n">你自己的平台页面该怎么搭</span><span class="d">2:05</span></div>
+<div class="ch" data-t="478.656"><span class="t">7:58</span><span class="n">技术栈和模块推进顺序</span><span class="d">1:31</span></div>
+<div class="ch" data-t="570.36"><span class="t">9:30</span><span class="n">接口和后台监控说什么</span><span class="d">1:59</span></div>
+<div class="ch" data-t="689.592"><span class="t">11:29</span><span class="n">怎么知道自己做对了</span><span class="d">2:40</span></div>
+<div class="ch" data-t="849.816"><span class="t">14:09</span><span class="n">收尾</span><span class="d">1:11</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>类 Dify 智能体编排平台：竞品页面拆解与综合实战 —— 解读与音频稿件</h1>
+<blockquote>对应音频：stage-2-assignments-custom-dify-agent-platform-prd-md-23-播客.mp3</blockquote>
+<blockquote>对应字幕：stage-2-assignments-custom-dify-agent-platform-prd-md-23-播客.srt</blockquote>
+<blockquote>口播稿：script.txt</blockquote>
+<blockquote>来源：Easy-Vibe（datawhalechina/easy-vibe）docs/zh-cn/stage-2/assignments/custom-dify-agent-platform/PRD.md</blockquote>
+<hr>
+<h2>一、本集在讲什么</h2>
+<p>这一集解读的是 Stage 2 的一份综合实战作业：围绕一份真实的需求文档，从零构建一个模仿 Dify 核心体验的智能体平台。它不是单页面小练习，而是要求你交付一个「有平台感」的完整 AI 产品，包含用户控制台、管理后台和平台后端。</p>
+<p>原文档把这件事拆得很清楚。它先要求你在动手前拆解竞品的页面结构，去 Dify 的控制台首页、应用配置页、知识库页、调试预览页各看一遍，重点看它们分别怎么组织信息。然后给出建议的页面清单、技术栈、关键状态流、模块推进顺序、后端模块、后台指标、接口草案，最后是自检表、端到端测试场景、部署前检查清单、交付物和评分标准。</p>
+<p>本集口播稿覆盖原文档的以下部分：</p>
+<ol>
+<li>这份作业要你做什么，两个子系统分别承担什么职责</li>
+<li>为什么文档要求先拆竞品页面，而不是先写代码</li>
+<li>Dify 四类页面给我们的启发，以及平台感和工具感的区别</li>
+<li>推荐的页面清单，以及智能体、会话、文档、调用四类状态流</li>
+<li>技术栈建议与六个模块的推进顺序</li>
+<li>接口草案、后台指标与基础监控</li>
+<li>两个维度的验收方式：每模块自检表与最终评分标准</li>
+<li>端到端测试链条、部署前检查清单与交付物</li>
+</ol>
+<blockquote>说明：本集只做解读与科普，不手把手写代码。原文档里的接口路径、技术栈名词都是建议值，不是唯一答案，你可以用自己熟悉的组合替换。</blockquote>
+<hr>
+<h2>二、能力地图</h2>
+<p>听完这一集，你应该能建立下面这张能力地图。它分三层，从「能辨认」到「能判别」再到「能产出」。</p>
+<h3>第一层：辨认层</h3>
+<ul>
+<li>能说出这个平台由哪两个子系统组成，各自负责什么</li>
+<li>能认出七个推荐页面分别解决什么问题</li>
+<li>能认出四类关键状态流：智能体、会话、文档、调用</li>
+<li>能认出文档为什么不让你直接写代码，而是先拆竞品页面</li>
+</ul>
+<h3>第二层：判别层</h3>
+<ul>
+<li>能判断一个页面设计是平台感还是工具感</li>
+<li>能判断模块推进顺序为什么必须是鉴权、智能体、对话、日志、知识库、后台</li>
+<li>能判断哪些功能该进最小可用版本，哪些可以后面再补</li>
+<li>能看懂接口草案里每个接口对应前端哪个动作</li>
+<li>能区分每模块自检表和最终评分标准这两套验收口径</li>
+</ul>
+<h3>第三层：产出层</h3>
+<ul>
+<li>能照着页面清单搭出自己平台的骨架</li>
+<li>能为自己设定的状态流设计对应的数据字段</li>
+<li>能按模块顺序推进，并在每个模块收尾时用自检表卡一遍</li>
+<li>能走通注册、创建智能体、配置提示词、对话、查看日志这条完整链路</li>
+<li>能按交付物清单准备演示链接、源码、截图和演示视频</li>
+</ul>
+<p>这三层的关系是递进的：辨认是前提，判别是核心，产出是目的。大多数人卡在第一层——他们急着写代码，却从来没认真看过一个成熟产品是怎么排版的。</p>
+<hr>
+<h2>三、核心概念卡</h2>
+<h3>概念一：平台感和工具感</h3>
+<p>工具感是这一页能干一件事，干完就走；平台感是这一页背后连着一整套东西，你能从列表进配置、从配置进调试、从调试进日志，一条路走得通。用户愿意待在你的产品里，是因为他知道自己做的事都存下来了、都找得到。这份作业反复强调的「像平台控制台」，说的就是后者。</p>
+<h3>概念二：竞品页面拆解是一种低成本预演</h3>
+<p>文档建议你看 Dify 四个页面，各带一个观察重点：控制台首页看应用列表和导航，应用配置页看提示词、模型、参数、发布状态的组织方式，知识库页看文档上传、状态、处理结果的管理，调试预览页看左配置右结果的双栏思路。这不是让你抄，而是让你在动手前先在脑子里跑一遍信息架构，省下的返工远比想象的多。</p>
+<h3>概念三：状态流决定数据结构</h3>
+<p>智能体是草稿、已配置、可用、停用；会话是新建、进行中、归档；文档是上传中、处理中、可检索或失败；调用是成功、错误、超时。注意「处理中」和「失败」这两个状态，它们意味着上传完不等于能检索，处理失败必须有补救路径。把状态流画在纸上，数据库字段和前端按钮的显示逻辑就同时有了答案。</p>
+<h3>概念四：模块顺序是地基逻辑</h3>
+<p>鉴权是第一位的，因为后面所有模块都要回答「这是谁的数据」。智能体管理是主体，对话功能是核心链路，日志记录是可观测性，知识库接入是加分项，管理后台是收尾。这个顺序不是文档的偏好，而是依赖关系决定的：地基没打牢就往上盖，迟早要推倒重来。</p>
+<h3>概念五：接口是前端每个按钮的影子</h3>
+<p>前端每一个按钮，背后都得有一个对应的接口。注册登录、智能体的增删改查、会话的创建与发消息、知识库文档上传、调用日志、平台总览，缺一个，那块功能就是死的。反过来也成立：如果某个接口没有任何前端动作会触发它，那它大概率是多余的。</p>
+<h3>概念六：验收有两套口径</h3>
+<p>一套是每模块的自检表，查页面一致性、接口闭环、权限隔离、数据一致性、可演示性；另一套是最终评分标准，从平台完整度、业务闭环、数据与追踪、权限安全、工程交付五个维度打分，每个维度分基本要求和进阶要求。先用前者卡过程，再用后者卡结果。</p>
+<hr>
+<h2>四、实践提示</h2>
+<h3>提示1 · 先拆竞品页面，再动键盘</h3>
+<p>把 Dify 那四个页面打开，按文档给的观察重点各看五分钟，写下你看到的布局规律。这一步做完再写代码，你会少走很多弯路。需求理解不清楚是返工的头号原因，而拆页面正是理解需求最快的方式。</p>
+<h3>提示2 · 先立骨架，再填肉</h3>
+<p>写接口时别想着一次写全。把智能体的新增、列表、查看、更新、删除这五个先跑通，平台就立起来了。很多同学卡住不是因为接口难，而是想一口气把所有接口都写完，结果一个都没调通。</p>
+<h3>提示3 · 把状态流画在纸上再建表</h3>
+<p>在写数据库之前，先把智能体、会话、文档、调用四类状态画出来，标清楚每个状态之间怎么流转、失败往哪走。状态图画完，字段设计和按钮禁用逻辑基本就自己浮现出来了，比边写边改省事得多。</p>
+<h3>提示4 · 每个接口都问一句权限问题</h3>
+<p>从第一天起养成习惯，每写一个接口就问：这个接口谁能调，调了能看到谁的数据。评分里权限安全这一档最容易被忽略，很多功能齐全的作业恰恰卡在归属校验上。</p>
+<h3>提示5 · 用自检表卡过程，用评分标准卡结果</h3>
+<p>每完成一个模块，就对着自检表的五项打勾；全部做完后，再对着评分标准的五个维度自评。两套口径一起用，你永远知道自己做到哪了，不会出现「做了一半不知道还剩什么」的失控感。</p>
+<hr>
+<h2>五、审查清单</h2>
+<p>在动手搭完一遍之后，逐条打勾。任何一条不过，先回到上一步。</p>
+<p><strong>关于需求理解</strong></p>
+<ul>
+<li>我能说出两个子系统各自负责什么</li>
+<li>我能回答文档那四个前置问题：哪些进最小可用版本、页面路由是否拍板、模型调用与日志的边界、多租户是否先不做</li>
+</ul>
+<p><strong>关于页面与状态</strong></p>
+<ul>
+<li>我能列出七个推荐页面，并说出每个页面解决什么问题</li>
+<li>我能背出四类状态流，并知道失败状态意味着什么</li>
+<li>我的页面设计体现出平台感，而不是孤立的功能页</li>
+</ul>
+<p><strong>关于模块推进</strong></p>
+<ul>
+<li>我按鉴权、智能体、对话、日志、知识库、后台的顺序推进</li>
+<li>每个模块收尾时我都用自检表卡过一遍</li>
+<li>我至少跑通了智能体增删改查这五个接口</li>
+</ul>
+<p><strong>关于可观测性</strong></p>
+<ul>
+<li>我的日志页能看到耗时、令牌用量和错误信息</li>
+<li>我的后台至少能看到智能体总数、活跃用户数、日调用次数这几项</li>
+<li>我知道对话接口的平均耗时和错误率该从哪看</li>
+</ul>
+<p><strong>关于交付</strong></p>
+<ul>
+<li>我能演示注册到创建智能体到对话到查看日志的完整链路</li>
+<li>我能演示管理员登录查看用户数据和调用统计</li>
+<li>我的模型密钥走环境变量，没有硬编码</li>
+<li>我的错误提示前端看得到，不只打在控制台</li>
+</ul>
+<hr>
+<h2>六、约束与边界说明</h2>
+<p>为了避免误用，这里明确列出本集结论的适用范围与已知限制。</p>
+<p><strong>约束一：主题边界</strong></p>
+<p>本集只覆盖「类 Dify 智能体编排平台」这份作业的需求解读与推进方法，不涉及具体代码实现。接口路径、技术栈均为建议值，可替换。</p>
+<p><strong>约束二：改编边界</strong></p>
+<p>本音频为二次演绎配音版，口语化表达、例子取舍与结构顺序均有改编，不等于原文档逐字朗读。涉及产品名（Dify、Next.js、Supabase、PostgreSQL 等）以原厂为准。</p>
+<p><strong>约束三：切片范围边界</strong></p>
+<p>本集对应的内容切片里，除了类 Dify 智能体平台的正文，还混入了另一份「在线考试与管理系统」作业的内容。本集严格只覆盖前者，后者不属于本篇范围，不在此展开。</p>
+<p><strong>约束四：技术栈的边界</strong></p>
+<p>文档推荐的技术栈是「够用且主流」的建议，不是评分项本身。评分看的是平台完整度、业务闭环、数据与追踪、权限安全、工程交付，不是你用了哪个框架。别为了显得高级去堆不熟的技术。</p>
+<p><strong>约束五：最小可用版本的边界</strong></p>
+<p>文档明确建议多租户和复杂工作流先不做，知识库接入是加分项。这意味着最小可用版本的边界是清晰的：先把智能体、对话、日志三页做通，再谈扩展。贪多嚼不烂是这份作业最常见的失败方式。</p>
+<p><strong>约束六：演示与生产的边界</strong></p>
+<p>这份作业交付的是一个可演示的原型，不是可直接上线的生产系统。真实产品还要考虑限流、配额、成本控制、审计合规，那些超出本作业范围。</p>
+<hr>
+<h2>七、关键句摘抄</h2>
+<ul>
+<li>拆竞品页面不是为了抄，而是为了理解轮子为什么是这个形状。</li>
+<li>需求理解不清楚，是导致返工的头号原因。</li>
+<li>平台感是这一页背后连着一整套东西，工具感是这一页干完就走。</li>
+<li>状态流决定了数据库字段，也决定了每个按钮该不该显示。</li>
+<li>前端每一个按钮，背后都得有一个对应的接口，缺一个就是死的。</li>
+<li>先立骨架，再填肉，先跑通再漂亮。</li>
+</ul>
+<hr>
+<h2>八、音频与稿件信息</h2>
+<table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>集次标识</td><td>stage-2-assignments-custom-dify-agent-platform-prd-md-23</td></tr>
+<tr><td>章节</td><td>综合实战（stage-2 第 7 章）</td></tr>
+<tr><td>标题</td><td>类 Dify 智能体编排平台：竞品页面拆解与综合实战</td></tr>
+<tr><td>口播稿</td><td>script.txt（九段式，正文约四千七百余字）</td></tr>
+<tr><td>音频文件</td><td>stage-2-assignments-custom-dify-agent-platform-prd-md-23-播客.mp3</td></tr>
+<tr><td>字幕文件</td><td>stage-2-assignments-custom-dify-agent-platform-prd-md-23-播客.srt</td></tr>
+<tr><td>演绎方式</td><td>二次演绎配音版，口语化改编</td></tr>
+<tr><td>收听建议</td><td>适合在开始这份综合实战之前听，配合第五节审查清单使用</td></tr>
+</table>
+<hr>
+<h2>九、来源</h2>
+<p>本内容改编自开源项目 <strong>Easy-Vibe</strong>（datawhalechina/easy-vibe），原文位于</p>
+<p><code>docs/zh-cn/stage-2/assignments/custom-dify-agent-platform/PRD.md</code>，为二次演绎配音版。</p>
+<h2>十、常见误区与澄清</h2>
+<p>做综合实战，新手踩的坑高度相似，集中澄清一下。</p>
+<p><strong>误区一：直接写代码最省时间。</strong> 错。文档反复强调先拆竞品页面、先答清楚前置问题。跳过这两步，返工时间远超过省下的时间。</p>
+<p><strong>误区二：技术栈越新越得分。</strong> 错。评分看的是五个维度，不看框架。用你熟悉的组合，把链路跑通，比堆一堆不熟的技术然后调不通强得多。</p>
+<p><strong>误区三：上传完文档就能检索。</strong> 错。文档要经历上传中、处理中、可检索或失败。处理中不能检索，失败要能重来，这两个状态必须在前端体现出来。</p>
+<p><strong>误区四：功能做完就等于验收通过。</strong> 错。验收看权限隔离和数据一致性。核心接口不校验登录、用户甲能翻用户乙的智能体，这类问题一票否决。</p>
+<p><strong>误区五：日志只是给自己看的。</strong> 错。日志是评分里「数据与追踪」这一档的核心，耗时、令牌用量、错误记录都要能查，进阶还要有统计看板。</p>
+<p><strong>误区六：知识库必须做。</strong> 错。文档明确标它是加分项。最小可用版本先把智能体、对话、日志三页做通，有余力再接知识库。</p>
+<p><strong>误区七：部署前检查可以上线再说。</strong> 错。密钥硬编码、错误只打控制台这类问题，一旦养成习惯，上线前根本来不及改，而且会直接影响可演示性。</p>
+<h2>十一、一次上手的最小步骤</h2>
+<p>如果你只想用最短路径把这份作业立起来，照下面五步走。</p>
+<p>第一步，打开 Dify，把控制台首页、应用配置页、知识库页、调试预览页各看一遍，按文档给的观察重点记下布局规律。第二步，照着七个推荐页面列一张清单，给你的每个页面写一句话说明它解决什么问题。第三步，把四类状态流画在纸上，标出失败状态往哪走，据此设计数据库字段。第四步，先做鉴权，再做智能体增删改查这五个接口，跑通之后再接对话和日志。第五步，每完成一个模块就对自检表打勾，全部做完后走一遍注册到创建智能体到对话到查看日志的链路，录一段演示视频。五步走完，这份作业的骨架就立住了，剩下的都是填肉。很多人卡在第一步，不是因为工具难，而是急着写代码。放慢一点，先看清路，反而最快。</p>
+<h2>十二、自我检验三问</h2>
+<p>读完听完，用三问检验自己是不是真懂了。一，能不能说清为什么文档要求先拆竞品页面，说不清的回概念二和提示一。二，能不能讲出四类状态流，以及它们怎么决定数据库字段和前端按钮，讲不清的回概念三和提示三。三，能不能不靠文档、说出模块推进顺序及其依赖理由，说不清的回概念四。三问都答上来，这一集才算真正过了。如果有一问答不上，别焦虑，回到对应的概念卡重读，它本来就是给你随时回查的地图，你其实不用一次全记住。</p>
+<hr>
+<h2>十三、两条端到端链路的落地拆解</h2>
+<p>为了让第五节那张审查清单不只是抽象条目，这里把文档要求的两条端到端测试链路，按前后端配合的方式一层层拆开。</p>
+<p>第一条是用户链路：注册拿到身份，创建一个智能体，进入配置页填好提示词、选好模型和温度参数，发起会话并发送消息，后端收到消息后调用模型、把回复存下来、同时写一条调用日志，最后用户在日志页看到这次调用的耗时、令牌用量和状态。这条链路把鉴权、智能体管理、对话功能、日志记录四个模块串在了一起，缺任何一个，链路就断。</p>
+<p>第二条是管理员链路：管理员登录，进入后台，查看用户数据和调用统计。它看着简单，但依赖前提最重——只有当第一条链路真的把会话和日志落库了，第二条链路才有东西可看。这也解释了为什么文档把管理后台排在最后。</p>
+<p>拆完这两条链路你会发现，这份作业看似庞大，其实只有一个主轴：数据从用户手里进来，经过智能体和模型，变成消息和日志存下来，最后被后台看板消费。你把这个主轴想清楚，剩下的页面、接口、状态流都只是它的外化表现。这也是提示五说的，先用自检表卡过程、再用评分标准卡结果，你就能一直知道自己站在主轴的哪个位置。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>

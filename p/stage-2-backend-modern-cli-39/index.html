@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CLI AI 编程工具 · Claude Code 的内部原理</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 7 · EP 39</span>
+<h1>CLI AI 编程工具 · Claude Code 的内部原理</h1>
+<p class="sub">第 7 章 · 第 39 讲 · 14:41</p>
+<div class="meta"><span>时长 <b>14:41</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>7</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-backend-modern-cli-39-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-backend-modern-cli-39-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-2-backend-modern-cli-39/stage-2-backend-modern-cli-39-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-2-backend-modern-cli-39/stage-2-backend-modern-cli-39-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-7.html">← 第 7 章目录</a>
+<a href="/p/stage-2-backend-modern-cli-38/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">0:38</span></div>
+<div class="ch" data-t="38.304"><span class="t">0:38</span><span class="n">为什么它更好用，先看内部机制</span><span class="d">1:18</span></div>
+<div class="ch" data-t="116.616"><span class="t">1:56</span><span class="n">一个循环，感知、思考、行动、验证</span><span class="d">3:13</span></div>
+<div class="ch" data-t="310.056"><span class="t">5:10</span><span class="n">主任务循环与工具调用</span><span class="d">1:50</span></div>
+<div class="ch" data-t="420.432"><span class="t">7:00</span><span class="n">特性一和二，流式处理与智能压缩</span><span class="d">2:06</span></div>
+<div class="ch" data-t="547.176"><span class="t">9:07</span><span class="n">特性三和四，并发控制与子代理管理</span><span class="d">1:40</span></div>
+<div class="ch" data-t="648.0"><span class="t">10:48</span><span class="n">Codex，OpenAI 版的同类工具</span><span class="d">1:30</span></div>
+<div class="ch" data-t="738.6"><span class="t">12:18</span><span class="n">用转发接口绕开官方限制</span><span class="d">1:23</span></div>
+<div class="ch" data-t="821.928"><span class="t">13:41</span><span class="n">收尾</span><span class="d">0:58</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Claude Code 的内部原理：感知思考行动验证循环 —— 解读与音频稿件</h1>
+<blockquote>对应音频：stage-2-backend-modern-cli-39-播客.mp3</blockquote>
+<blockquote>对应字幕：stage-2-backend-modern-cli-39-播客.srt</blockquote>
+<blockquote>口播稿：script.txt</blockquote>
+<blockquote>来源：Easy-Vibe（datawhalechina/easy-vibe）docs/zh-cn/stage-2/backend/modern-cli/index.md</blockquote>
+<hr>
+<h2>一、本集在讲什么</h2>
+<p>这一集解读的是命令行 AI 编程工具的内部工作机制，主角是 Claude Code。原文档开门见山提出一个很多人的疑问：为什么 Claude Code 在很多场景下比 Trae 或 Cursor 等图形界面的智能体编程工具更好用？答案不在界面，而在它的内部工作方式。</p>
+<p>文档给出的核心解释是，Claude Code 会把编程任务拆解成一个持续的「感知—思考—行动—验证」循环，并在循环里调用不同工具完成任务。它模仿的是人类开发者的工作流，也就是不断「写代码、运行、看结果、再改进」。系统内部有一个主任务循环不断执行步骤，每一轮都可以调用读写文件、执行命令、搜索代码等工具，再根据工具返回的真实结果决定下一步。</p>
+<p>在此之上，文档点出了四个关键特性：流式处理、智能压缩、并发控制、子代理管理。随后介绍了同类工具 Codex，以及通过第三方网关转发调用的实用方案。</p>
+<p>本集口播稿覆盖原文档的以下部分：</p>
+<ol>
+<li>为什么判断一个编程工具要看它的任务推进方式，而不是界面</li>
+<li>感知、思考、行动、验证这个循环，以及它如何模仿人类开发者</li>
+<li>主任务循环与三类常见工具，为什么真实结果很关键</li>
+<li>四个关键特性：流式处理、智能压缩、并发控制、子代理管理</li>
+<li>Codex 与 GPT 五的适配特点、优点与缺点</li>
+<li>用转发接口绕开官方限制的完整思路</li>
+</ol>
+<blockquote>说明：本集只做原理科普，不教具体安装配置命令。文档里的配置文件和环境变量属于操作细节，请以原文档和原厂说明为准。</blockquote>
+<hr>
+<h2>二、能力地图</h2>
+<p>听完这一集，你应该能建立下面这张能力地图。它分三层，从「能辨认」到「能判别」再到「能产出」。</p>
+<h3>第一层：辨认层</h3>
+<ul>
+<li>能说出感知、思考、行动、验证这四个阶段各自在干什么</li>
+<li>能认出工具大致分读写文件、执行命令、搜索代码三类</li>
+<li>能说出四个关键特性的名字和各自解决什么问题</li>
+<li>能认出 Codex 和 Claude Code 是同一类工具</li>
+</ul>
+<h3>第二层：判别层</h3>
+<ul>
+<li>能判断一次性生成和循环推进这两种方式的根本差别在哪</li>
+<li>能判断为什么「根据工具返回的真实结果决策」比凭感觉生成更稳</li>
+<li>能判断什么任务适合拆给多个子代理并行处理</li>
+<li>能判断长任务为什么会失忆，以及压缩和记忆机制怎么缓解它</li>
+<li>能判断自己更适合哪一款工具的表达风格</li>
+</ul>
+<h3>第三层：产出层</h3>
+<ul>
+<li>能把一个模糊需求改写成允许工具循环推进的任务描述</li>
+<li>能主动要求工具跑测试、把验证结果告诉你</li>
+<li>能为自己的项目设计简单的代理分工，比如写码、测试、文档各一个</li>
+<li>能在长任务里主动做阶段小结，帮工具减轻记忆负担</li>
+</ul>
+<p>这三层的关系是递进的：辨认是前提，判别是核心，产出是目的。大多数人卡在第一层——他们把这类工具当成高级补全，却没意识到它本质上是一个会自己推进的循环。</p>
+<hr>
+<h2>三、核心概念卡</h2>
+<h3>概念一：循环大于生成</h3>
+<p>一次性工具给你一段代码就结束，对不对要你自己测；循环式工具会自己跑、自己看结果、自己决定下一步。差别不在生成能力，而在谁负责验证。让工具自己验证，和你替它验证，可靠性完全不是一个量级。</p>
+<h3>概念二：四个阶段各司其职</h3>
+<p>感知是看清楚现状，读项目、看代码、看报错；思考是排优先级，判断先做什么；行动是真动手，改文件、跑命令；验证是看结果对不对，测试过没过、报错还在不在。四个阶段一圈一圈转，直到事情做完。</p>
+<h3>概念三：工具返回的是真实结果</h3>
+<p>这是整个机制的信任基础。它每一步决策的依据是工具返回的真实结果，而不是自己的猜测。所以它随时能发现自己走错了，并且有能力回头。这也是它在多轮复杂任务里稳定性更高的根本原因。</p>
+<h3>概念四：流式处理让中途纠偏成为可能</h3>
+<p>一边思考一边输出，意味着它中途发现不对可以马上调整，不用把错路走到黑。对你来说，则是可以实时看到进展，并在早期打断。会打断，是使用这类工具最重要的技能之一。</p>
+<h3>概念五：智能压缩解决的是失忆问题</h3>
+<p>长对话上下文越来越长，模型会忘记开头的约定。把历史压缩成关键信息、并区分长期与短期记忆，就是为了减少遗忘、保证效率。你也可以主动帮它压缩，让它在阶段结束时总结结论、约定和踩过的坑。</p>
+<h3>概念六：子代理管理是把团队分工搬进来</h3>
+<p>真实开发从来不是一个角色干所有事。可以让一个代理写代码，一个写测试，一个补文档，一个做审查。分开之后，测试那个代理眼里只有有没有问题，不会心疼刚写出来的代码，质量反而更高。</p>
+<h3>概念七：Codex 是同思路的另一款实现</h3>
+<p>Codex 由 OpenAI 开发，可以理解为 OpenAI 版的 Claude Code，优势是对 GPT 五的高效适配：响应更快、犯错率更低、多轮复杂任务正确完成的概率更高。缺点是解释偏学术和技术，信息量大，初学者可能觉得难懂。因为底层循环思路相通，在一款上积累的经验可以迁移到另一款。</p>
+<hr>
+<h2>四、实践提示</h2>
+<h3>提示1 · 派活时留出循环的空间</h3>
+<p>别说一句「帮我写个应用」就完事。把目标说清楚，并且明确允许它去跑、去看报错、去改。你越把它当成会自己推进的同事，它表现得越好。任务描述里加上「跑一遍测试并把结果告诉我」这句话，效果往往立竿见影。</p>
+<h3>提示2 · 把验证交还给它</h3>
+<p>很多人的习惯是自己复制代码、自己跑、自己把报错贴回去。既然它本来就有验证环节，就别替它做这件事。让它自己跑测试、自己看输出，你只需要看它的结论和改动。</p>
+<h3>提示3 · 学会在中途打断</h3>
+<p>流式处理给了你中途插话的机会。看到它往你不想要的方向走，马上喊停，省下的不只是时间，还有后续一大串基于错误方向的输出。别等它写完几千行才发现跑偏。</p>
+<h3>提示4 · 主动帮它压缩记忆</h3>
+<p>长任务跑到一定阶段，让它把结论、约定和踩过的坑总结成一段话，作为下一段工作的开头。这等于替它做笔记，效果比让它自己回忆好得多。</p>
+<h3>提示5 · 按工作性质拆分代理</h3>
+<p>别指望一个助手包打天下。可以拆成写代码、写测试、补文档、做审查几个角色，各自只看自己的上下文，互不污染。也可以让一个先读代码库输出结论，另一个基于结论动手，这样上下文更干净。</p>
+<hr>
+<h2>五、审查清单</h2>
+<p>在动手用一遍之后，逐条打勾。任何一条不过，先回到上一步。</p>
+<p><strong>关于循环理解</strong></p>
+<ul>
+<li>我能说出感知、思考、行动、验证四个阶段各自做什么</li>
+<li>我能解释为什么「工具返回真实结果」是整个机制的关键</li>
+<li>我能说清一次性生成和循环推进的根本差别</li>
+</ul>
+<p><strong>关于四个特性</strong></p>
+<ul>
+<li>我能说出流式处理除了快慢之外的真正价值</li>
+<li>我能说清长任务为什么会失忆，压缩机制怎么缓解</li>
+<li>我知道并发控制和子代理管理分别解决什么问题</li>
+<li>我能为自己的项目想出至少两个代理的分工方式</li>
+</ul>
+<p><strong>关于工具选择</strong></p>
+<ul>
+<li>我能说出 Codex 相对 Claude Code 的优势和缺点</li>
+<li>我选工具的标准是「我能不能读懂它的解释」</li>
+<li>我知道两款工具底层思路相通，经验可迁移</li>
+</ul>
+<p><strong>关于实际使用</strong></p>
+<ul>
+<li>我会在任务里主动要求它跑测试并汇报结果</li>
+<li>我会在长任务中做阶段小结帮它压缩</li>
+<li>我会在中途发现方向不对时及时打断</li>
+<li>我知道走第三方转发时要权衡方便与安全</li>
+</ul>
+<hr>
+<h2>六、约束与边界说明</h2>
+<p>为了避免误用，这里明确列出本集结论的适用范围与已知限制。</p>
+<p><strong>约束一：主题边界</strong></p>
+<p>本集只覆盖命令行 AI 编程工具的内部原理与四个关键特性，不教具体安装配置操作。文档中的配置文件、环境变量等属于操作细节，以原文档为准。</p>
+<p><strong>约束二：改编边界</strong></p>
+<p>本音频为二次演绎配音版，口语化表达、类比取舍与结构顺序均有改编，不等于原文档逐字朗读。涉及产品名（Claude Code、Codex、Trae、Cursor、OpenAI、GPT 五等）以原厂为准。</p>
+<p><strong>约束三：切片范围边界</strong></p>
+<p>本集对应的内容切片里，除了命令行工具的正文外，还混入了另一份与主题无关的英文产品需求文档以及一段需求撰写技巧的内容。本集严格只覆盖命令行工具部分，其余内容不属于本篇范围，不在此展开。</p>
+<p><strong>约束四：体验结论的边界</strong></p>
+<p>文档中关于响应更快、犯错率更低等体验描述，是特定时间点的观察，会随模型与工具版本变化。别把它当成永久结论，实际以你自己的使用为准。</p>
+<p><strong>约束五：循环能力的边界</strong></p>
+<p>循环和验证很强，但不等于它不会错。它能发现自己走错并回头，前提是它有能力观察到错误。如果验证手段本身缺失，比如项目没有测试，循环就失去了纠偏依据。给它可验证的环境，比给它更强的模型更重要。</p>
+<p><strong>约束六：第三方转发的边界</strong></p>
+<p>走第三方网关转发可以降低成本和网络门槛，但也把调用链路交给了中间方。选择平台要看稳定性与口碑，密钥要妥善保管。方便与安全之间的权衡需要你自己做。</p>
+<hr>
+<h2>七、关键句摘抄</h2>
+<ul>
+<li>判断一个编程工具好不好用，要看它拿到任务后怎么一步步推进。</li>
+<li>一次性工具没有第二次机会，循环式工具会自己盯到底。</li>
+<li>它的每一步决策都有事实依据，因为工具返回的是真实结果。</li>
+<li>流式处理真正的价值不是快，而是能中途纠偏。</li>
+<li>长任务跑不完，往往不是能力不够，而是记不住。</li>
+<li>会打断，是使用这类工具最重要的技能之一。</li>
+<li>真正值得学的不是某个工具的按钮，而是这套工作方式。</li>
+</ul>
+<hr>
+<h2>八、音频与稿件信息</h2>
+<table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>集次标识</td><td>stage-2-backend-modern-cli-39</td></tr>
+<tr><td>章节</td><td>后端与现代工具（stage-2 第 7 章）</td></tr>
+<tr><td>标题</td><td>Claude Code 的内部原理：感知思考行动验证循环</td></tr>
+<tr><td>口播稿</td><td>script.txt（九段式，正文约四千六百余字）</td></tr>
+<tr><td>音频文件</td><td>stage-2-backend-modern-cli-39-播客.mp3</td></tr>
+<tr><td>字幕文件</td><td>stage-2-backend-modern-cli-39-播客.srt</td></tr>
+<tr><td>演绎方式</td><td>二次演绎配音版，口语化改编</td></tr>
+<tr><td>收听建议</td><td>适合在第一次使用命令行 AI 编程工具之前听，配合第五节审查清单使用</td></tr>
+</table>
+<hr>
+<h2>九、来源</h2>
+<p>本内容改编自开源项目 <strong>Easy-Vibe</strong>（datawhalechina/easy-vibe），原文位于</p>
+<p><code>docs/zh-cn/stage-2/backend/modern-cli/index.md</code>，为二次演绎配音版。</p>
+<h2>十、常见误区与澄清</h2>
+<p>用命令行 AI 编程工具，新手的误解非常集中，这里一次说清。</p>
+<p><strong>误区一：它就是个高级代码补全。</strong> 错。它内部是一个持续的循环，会自己跑、自己看结果、自己改。把它当补全用，等于只用了它十分之一的能力。</p>
+<p><strong>误区二：说得越简短越省事。</strong> 错。既然它按循环工作，你就该给它留出循环空间。目标说清楚，并允许它去验证，效果远好过一句话换答案。</p>
+<p><strong>误区三：它写完了就完事了。</strong> 错。真正的关键在验证阶段。项目里没有测试，它的循环就没有纠偏依据，错误会被一路带到最后。</p>
+<p><strong>误区四：长任务它自己能记住。</strong> 错。上下文变长就会失忆，这是机制问题。压缩能缓解但不能根除，所以你要主动帮它做阶段小结。</p>
+<p><strong>误区五：并发就是让它同时写更多代码。</strong> 错。并发控制的价值在于互不干扰，配合子代理分工才发挥出来。所有事塞给一个代理，并发再强也没用。</p>
+<p><strong>误区六：选工具要选最强的。</strong> 错。要选你读得懂它解释的那个。看不懂它的推理过程，你就学不到东西，只能复制结果。</p>
+<p><strong>误区七：走第三方转发没有代价。</strong> 错。代价是把调用链路交给中间方，稳定性和密钥安全都要自己权衡。</p>
+<h2>十一、一次上手的最小步骤</h2>
+<p>如果你只想用最短路径把这套工作方式用起来，照下面五步走。</p>
+<p>第一步，挑一个你真正想做的小项目，别太大，一个能跑起来的小工具就够。第二步，把需求写成一句话目标，再加一句「跑一遍测试并把结果告诉我」。第三步，让它自己去看项目、改文件、跑命令，你不要替它复制粘贴报错，让它自己看真实结果。第四步，跑起来之后，让它把这一轮的结论、约定和踩过的坑总结成一段话，作为下一轮的开头。第五步，如果任务变复杂，试着拆成两个角色，一个写、一个测，看看质量有没有变化。五步走完，你就从把工具当补全，进化成了把工具当同事。很多人用了很久却觉得它不好用，问题往往出在第一步和第二步，需求太粗，又不让它验证。</p>
+<h2>十二、自我检验三问</h2>
+<p>读完听完，用三问检验自己是不是真懂了。一，能不能说清感知、思考、行动、验证四个阶段，以及为什么验证最关键，说不清的回概念二。二，能不能讲出「工具返回真实结果」为什么是整个机制的地基，讲不清的回概念三。三，能不能为自己一个真实任务设计出代理分工，做不到的回提示五。三问都答上来，这一集才算真正过了。如果有一问答不上，别焦虑，回到对应的概念卡重读，它本来就是给你随时回查的地图，你其实不用一次全记住。</p>
+<hr>
+<h2>十三、一次完整任务的循环拆解</h2>
+<p>为了让第三节那张能力地图不只是一串概念，这里把一个真实任务按循环拆开，你可以照着对照自己的使用过程。</p>
+<p>任务是给一个小项目加登录功能。感知阶段，它读项目结构，确认有没有现成的用户代码、用的是什么框架、登录该放在哪一层。这一步的输出是一份现状判断。思考阶段，它决定动哪几个文件，是先写后端接口还是先做页面，输出的是一份改动清单。行动阶段，它真去改文件、装依赖、执行迁移，输出的是磁盘上的实际变化。验证阶段，它启动服务、调用登录接口、跑测试，输出的是通过与失败的真实结果。</p>
+<p>如果验证通过，循环结束，它汇报结论。如果验证失败，它带着失败结果回到下一圈，重新思考、重新行动、重新验证。这里最关键的一点在于，失败不是终点，而是下一圈的输入。一次性工具在第一次失败处就停了，而循环式工具把失败当成了继续推进的燃料。</p>
+<p>你对照这个过程会发现，自己过去用不好这类工具，往往是因为你把感知和验证这两头都替它做了：你替它看报错，你替它跑测试，只留了中间思考行动给它。把两头还回去，整个循环才转得起来，这也是提示二想说的那件事。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
