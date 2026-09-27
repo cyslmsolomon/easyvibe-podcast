@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>从数据库到 Supabase · 5.2.3 配置 GitHub 获取 Clien…</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 7 · EP 33</span>
+<h1>从数据库到 Supabase · 5.2.3 配置 GitHub 获取 Clien…</h1>
+<p class="sub">第 7 章 · 第 33 讲 · 16:51</p>
+<div class="meta"><span>时长 <b>16:51</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>7</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-backend-database-supabase-33-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-backend-database-supabase-33-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-2-backend-database-supabase-33/stage-2-backend-database-supabase-33-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-2-backend-database-supabase-33/stage-2-backend-database-supabase-33-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-7.html">← 第 7 章目录</a>
+<a href="/p/stage-2-backend-database-supabase-32/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:34</span></div>
+<div class="ch" data-t="94.032"><span class="t">1:34</span><span class="n">第三方登录的第一半，去 GitHub 领凭证</span><span class="d">1:44</span></div>
+<div class="ch" data-t="198.96"><span class="t">3:18</span><span class="n">第三方登录的第二半，把凭证填回后端</span><span class="d">1:24</span></div>
+<div class="ch" data-t="283.344"><span class="t">4:43</span><span class="n">用户把密码忘了怎么办</span><span class="d">2:09</span></div>
+<div class="ch" data-t="412.752"><span class="t">6:52</span><span class="n">实时功能，让页面自己动起来</span><span class="d">1:54</span></div>
+<div class="ch" data-t="527.592"><span class="t">8:47</span><span class="n">第一种实时能力，监听数据库的变化</span><span class="d">1:56</span></div>
+<div class="ch" data-t="643.968"><span class="t">10:43</span><span class="n">第二种和第三种，广播与在线状态</span><span class="d">2:32</span></div>
+<div class="ch" data-t="796.824"><span class="t">13:16</span><span class="n">文件应该放在哪里，存储服务</span><span class="d">2:02</span></div>
+<div class="ch" data-t="919.296"><span class="t">15:19</span><span class="n">收尾</span><span class="d">1:31</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe · 从数据库到 Supabase（第三方登录、密码重置、实时功能与存储） — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-2/backend/database-supabase/index.md</code> 第 5.2.3 至 5.4 节），为<strong>二次演绎配音版</strong>。原文作者与贡献者来自清华大学深圳国际研究生院及开源社区。本文在原文基础上做了口语化改写、结构重组与实践补充，观点与例子由演绎方添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>stage-2-backend-database-supabase-33</code></li>
+<li>所属章节：第 7 章</li>
+<li>原文覆盖小节：5.2.3 配置 GitHub 获取 Client ID 和 Secret、5.2.4 在 Supabase 中配置 Provider、5.2.5 密码重置实现、5.3 实时功能、5.3.1 数据库实时变动 Postgres Changes、5.3.2 信息广播同步 Broadcast &amp; Presence、5.4 存储</li>
+<li>对应音频：<code>stage-2-backend-database-supabase-33-播客.mp3</code></li>
+<li>字幕：<code>stage-2-backend-database-supabase-33-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>到这一集为止，账号体系已经能完成「邮箱注册 → 邮箱登录 → 退出登录」的闭环。但一个真实产品会立刻被用户追问三个问题：</p>
+<ol>
+<li><strong>为什么要我再记一个密码？</strong> —— 第三方登录诉求；</li>
+<li><strong>密码忘了怎么办？</strong> —— 密码重置诉求；</li>
+<li><strong>我传的头像、商品图放哪？别人发的东西我为什么看不到？</strong> —— 文件存储与实时性诉求。</li>
+</ol>
+<p>原文用一个连续的编号序列回答了这三个问题：<strong>5.2.3 到 5.2.5 解决前两个，5.3 解决实时，5.4 解决文件</strong>。这四个小节在原文中属于同一页的连续内容，因此本集把它们合并为一集，主题统一为「<strong>让应用从单机展示页，变成一个多用户、能联动、能承载个人文件的产品雏形</strong>」。</p>
+<p>音频稿按「GitHub 领凭证 → 平台填 Provider → 密码重置 → 实时总览 → 数据库变更监听 → Presence 与 Broadcast → Storage → 收尾」的顺序重排，并补充了大量原文没有明说但实践上必须知道的判断依据。</p>
+<hr>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>能力项</th><th>原文怎么说的</th><th>演绎方的解读</th><th>所属环节</th></tr>
+<tr><td>OAuth 应用登记</td><td>在 GitHub Developer Settings 注册 OAuth App，填 Homepage URL 与 Callback URL</td><td>双向认识的机制：你的站要认识 GitHub，GitHub 也要认识你的站</td><td>第三方登录</td></tr>
+<tr><td>Client ID / Client Secret</td><td>注册后显示 ID；Secret 需点「Generate a new client secret」生成</td><td>Secret 只显示一次，必须当场复制保存，这是操作层面的硬约束</td><td>第三方登录</td></tr>
+<tr><td>Provider 配置</td><td>Supabase Dashboard → Authentication → Providers，启用 Google / GitHub 并粘贴凭证</td><td>两次复制粘贴换两种登录方式，是「专业能力外包」最直观的收益</td><td>第三方登录</td></tr>
+<tr><td>最小成本复用</td><td>让 AI 参考 <code>project-burger-shop-auth-advanced-supabase-6</code> 复刻登录界面</td><td>先验证产品想法，别被通用功能绊住；原理可以后补</td><td>第三方登录</td></tr>
+<tr><td>密码重置四步</td><td>发起请求 → 发送邮件 → 访问链接 → 更新密码</td><td>判断权全在后端那条一次性链接上，前端不做身份判断</td><td>账号安全</td></tr>
+<tr><td>邮件模板定制</td><td>Authentication → Email Templates，自定义 Reset Password 模板</td><td>安全是底线，体验是加分项，二者分层处理</td><td>账号安全</td></tr>
+<tr><td>拉模式 vs 推模式</td><td>实时功能让数据变更主动推送到前端，无需轮询</td><td>从「拉」到「推」是本节最重要的思维转变</td><td>实时能力</td></tr>
+<tr><td>Postgres Changes</td><td>表加入 <code>supabase_realtime</code> publication 后，变更经 WebSocket 推送</td><td>publication 就是一份订阅名单，进名单才被监听</td><td>实时能力</td></tr>
+<tr><td>订阅四要素</td><td>建频道 → 挂监听 → 取 payload → subscribe</td><td>订阅范围写得越窄，无用推送越少</td><td>实时能力</td></tr>
+<tr><td>Presence</td><td>客户端 <code>track()</code> 宣告在线，服务器同步；用 sync / join / leave 维护名单</td><td>名单由服务器维护，断网自动触发 leave，不需自己清理</td><td>实时能力</td></tr>
+<tr><td>Broadcast</td><td><code>channel.send()</code> 发、<code>channel.on()</code> 收，消息绕过数据库</td><td>用于光标这类高频临时数据，写库是灾难级设计</td><td>实时能力</td></tr>
+<tr><td>对象存储</td><td>非结构化文件交给对象存储，通过唯一 URL 访问</td><td>别把文件塞进业务服务器，否则存储压力和读写延迟一起上来</td><td>存储</td></tr>
+</table>
+<hr>
+<h2>三、逐节解读</h2>
+<h3>3.1 第三方登录：为什么一定分成两半</h3>
+<p>原文把配置拆成 5.2.3（去 GitHub 登记）和 5.2.4（回 Supabase 填 Provider），这个拆分不是随意的，它对应 OAuth 授权码模式的本质——<strong>信任是双向的</strong>。</p>
+<ul>
+<li>你向 GitHub 声明：我的站叫这个名字，主页在这个地址，授权成功后请把用户送回这个回调地址；</li>
+<li>GitHub 给你一对凭证（Client ID + Client Secret）作为你在 GitHub 侧的身份证；</li>
+<li>你把这对凭证交给 Supabase，Supabase 才被允许代表你去和 GitHub 对话。</li>
+</ul>
+<p>所以顺序不能反：没有 Client ID 和 Secret，5.2.4 的输入框无从填起。</p>
+<p>回调地址这一栏最容易填错。原文明确指出它的格式是 <code>https://&lt;项目&gt;.supabase.co/auth/v1/callback</code>，并且可以在 Supabase Dashboard 的 Authentication → Providers → GitHub 页面直接复制。<strong>不要凭记忆手敲</strong>，项目域名部分每个项目都不一样。</p>
+<h3>3.2 密码重置：四步流程里的安全边界</h3>
+<p>原文给出的四步是：前端调用 <code>resetPasswordForEmail()</code> 并指定 <code>redirectTo</code> → Supabase 发送含唯一重置链接的邮件 → 用户点击链接被重定向到应用内重置页 → 前端调用 <code>updateUser()</code> 提交新密码。</p>
+<p>这里有一个值得单独拎出来的架构判断：<strong>整个流程中前端不做身份判定</strong>。前端只负责「代用户提交一个请求」和「代用户提交一个新密码」，真正的合法性校验由后端那条一次性链接承担。因此 <code>redirectTo</code> 必须指向你自己应用内的页面——一旦指向别处，链接的效力就被转移了。</p>
+<h3>3.3 实时功能：三条能力，三种关心</h3>
+<p>原文用三个小节讲了三种实时能力，初学时最容易把它们混为一谈。一个有效的区分方式是看「它关心什么」：</p>
+<ul>
+<li><strong>Postgres Changes</strong> 关心「<strong>发生了什么事</strong>」——数据真的落库了，并且被推送出去，是持久化的；</li>
+<li><strong>Presence</strong> 关心「<strong>谁在这儿</strong>」——维护的是一份在线名单，是共享状态；</li>
+<li><strong>Broadcast</strong> 关心「<strong>此刻在传什么话</strong>」——高频、临时、不落库，直接走 WebSocket 绕过数据库。</li>
+</ul>
+<p>一句话使用规则：<strong>要留痕的用数据库变更，要名单的用 Presence，要高频临时的用 Broadcast。</strong></p>
+<h3>3.4 存储：为什么文件不能放进业务服务器</h3>
+<p>原文给出两条理由：体积差异大、数量可能极多。演绎方补充一层理解——这两条理由共同指向一个结论：<strong>文件的增长曲线和结构化数据的增长曲线完全不同</strong>。用户表可能几千行，但商品图可能几万到几十万张，把它们放在同一个存储引擎里，读写性能会互相拖累。</p>
+<p>访问方式上的观念转变同样重要：你不是去对象存储的「底层仓库」里翻文件，而是拿一个唯一 URL。这个 URL 对前端来说就是一个可以直接加载的资源地址，业务服务器不需要中转，既快又减压。</p>
+<hr>
+<h3>3.5 三种能力怎么组合使用</h3>
+<p>单独理解三种能力之后，还需要知道它们怎么配合。原文给出的实时聊天室示例本身就是一个组合范例：<strong>聊天消息走 Postgres Changes，在线名单走 Presence，「正在输入」或光标位置走 Broadcast</strong>。</p>
+<ul>
+<li>聊天消息必须留痕：刷新页面后历史消息还在，所以它必须落库，变更再通过监听推送给所有人。</li>
+<li>在线名单不需要留痕：它描述的是「此刻」，人走了就该消失，所以交给 Presence，断线由服务器自动清理。</li>
+<li>正在输入、光标位置这类信号，既不需要留痕，频率又极高：走 Broadcast 直接绕过数据库，延迟最低。</li>
+</ul>
+<p>把这三句话连起来，就得到了一条可复用的设计规则：<strong>先问这条数据要不要留痕，再问它出现的频率高不高，答案确定之后，用哪种能力就自然确定了。</strong> 不需要凭感觉挑。</p>
+<h3>3.6 关于「让 AI 参考示例项目」</h3>
+<p>原文在 5.2.4 和 5.2.5 两处都给出了同一个建议：直接让 AI 参考配套示例项目，在自己项目基础上复刻对应功能。这个建议值得认真对待，因为它体现了这一整套教程的核心方法论——<strong>通用能力不自己从零写，而是借助 AI 去复用一份已经跑通的参考实现</strong>。</p>
+<p>但复用有前提。你至少要知道三件事：这个功能分几步（比如密码重置的四步）、每一步谁负责（前端还是后端）、以及哪个环节是安全边界（那条一次性链接）。知道这三件事，你才判断得出 AI 生成的代码对不对。这也是本集把流程拆开讲一遍的原因：<strong>先听懂，再复刻。</strong></p>
+<hr>
+<h2>四、审查清单</h2>
+<p>这一集的成果是否真的可用，按下面逐条打勾：</p>
+<ul>
+<li>OAuth 应用的 Callback URL 是<strong>从 Supabase 控制台复制</strong>的，不是手敲的</li>
+<li>Client Secret 在生成后<strong>当场复制并保存</strong>，且没有提交进代码仓库</li>
+<li>Google 与 GitHub 两个 Provider <strong>都已启用并保存</strong>，不是只填了一半</li>
+<li>密码重置的 <code>redirectTo</code> 指向<strong>应用内页面</strong></li>
+<li>已实际收到并点开过一封重置邮件，确认链接可用</li>
+<li>若改动过邮件模板，确认<strong>链接变量没有被误删</strong></li>
+<li>需要监听的表已加入 <code>supabase_realtime</code> publication（或在 Table Editor 启用 Realtime）</li>
+<li>订阅代码里<strong>事件范围收窄</strong>到指定表与指定事件类型，而不是监听整库</li>
+<li>频道命名有业务含义，不同功能用不同频道隔离</li>
+<li>Presence 的 channel 配置里指定了<strong>唯一标识当前用户的 key</strong></li>
+<li>Broadcast 的事件名在发送端与接收端<strong>完全一致</strong></li>
+<li>上传端点指向的是<strong>可续传接口</strong>，而不是普通上传接口</li>
+<li>前端渲染图片用的是对象存储返回的 URL，不经业务服务器中转</li>
+</ul>
+<hr>
+<h2>五、实践提示</h2>
+<h3>提示1 · 凭证只出现一次，把它当成一次性用品</h3>
+<p>Client Secret 生成后只显示一次，刷新页面就再也看不到，只能重新生成。实践上的做法是：生成 → 立刻复制 → 粘贴进 Supabase 的配置框 → 随后才关页面。不要先关页面再想起来没保存。同样重要的是，这对凭证不要写进前端代码、不要提交到公开仓库。</p>
+<h3>提示2 · 订阅范围宁窄勿宽</h3>
+<p>Postgres Changes 允许你监听整张表的所有事件，也允许你只监听 INSERT。默认请选后者。监听范围越宽，前端收到的无用推送越多，处理逻辑越容易失控，而大多数业务场景只需要其中一种事件。</p>
+<h3>提示3 · 判断什么该落库，什么该走广播</h3>
+<p>一个简单的判据：<strong>这条数据在页面刷新后还需要存在吗？</strong> 需要 → 走数据库变更监听；不需要（光标位置、正在输入的提示、临时表情）→ 走 Broadcast。把光标位置写进数据库是最典型的误用，会产生大量无意义的写操作。</p>
+<h3>提示4 · Presence 的 key 必须是稳定且唯一的</h3>
+<p>Presence 用一个 key 标识当前用户，通常用用户 ID。不要用随机值或会话 ID——否则同一个人开两个标签页会被算成两个人，在线名单立刻失真。</p>
+<hr>
+<h2>六、约束说明</h2>
+<ol>
+<li><strong>本集内容全部来自原文 5.2.3 至 5.4 节，未跨文件取材。</strong> 原文中出现的示例项目路径、<code>supabase_realtime</code> publication 名称、<code>resetPasswordForEmail()</code> 与 <code>updateUser()</code> 方法名、可续传上传端点等，均按原文表述转述，未做改写或补充新的技术参数。</li>
+<li><strong>代码示例仅作概念说明。</strong> 音频稿为面向零基础听众的口语化演绎，刻意避开了逐行代码的讲解。实际实现请以原文配套示例项目为准。</li>
+<li><strong>原文未给出的信息，本文不作补充。</strong> 例如各 Provider 的具体申请门槛、对象存储的计费标准、可续传上传的分片大小等，原文未涉及，因此不在本集中出现。</li>
+<li><strong>演绎方添加的内容限于三类</strong>：结构性类比（拉模式与推模式、订阅名单）、判据性建议（订阅范围宁窄勿宽、该不该落库的判断）、以及风险提示（Secret 一次性、redirectTo 归属）。这些内容属于实践补充，不等同于原文观点。</li>
+<li><strong>安全声明。</strong> 本集涉及的任何凭证、密钥、回调地址均为通用流程说明，不包含任何真实项目的可用凭据。</li>
+</ol>
+<hr>
+<h2>七、这一集在整条链路上的位置</h2>
+<p>回看整个后端篇章的推进顺序：<strong>建库建表 → 读写数据 → 用户体系 → 第三方登录与密码重置 → 实时 → 存储</strong>。这是一个非常清晰的能力叠加过程。</p>
+<ul>
+<li>到「用户体系」为止，应用知道「你是谁」；</li>
+<li>加上「第三方登录」，应用知道「你可以少一步」；</li>
+<li>加上「实时」，应用知道「你们可以互相看见」；</li>
+<li>加上「存储」，应用知道「你可以有自己的东西」。</li>
+</ul>
+<p>这四层叠加完成，一个产品的雏形才真正站得住——它不再是一个静态的展示页，而是一个多用户在线、彼此可见、各自有资产的活系统。</p>
+<hr>
+<p><strong>来源</strong>：Easy-Vibe（datawhalechina/easy-vibe）<code>docs/zh-cn/stage-2/backend/database-supabase/index.md</code>，5.2.3–5.4 节。本音频与本文为二次演绎配音版，非原文照读。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
