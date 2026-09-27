@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>创意灵感从哪里来 · 1. 从自己的生活开始</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 6 · EP 12</span>
+<h1>创意灵感从哪里来 · 1. 从自己的生活开始</h1>
+<p class="sub">第 6 章 · 第 12 讲 · 15:51</p>
+<div class="meta"><span>时长 <b>15:51</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>6</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-1-appendix-idea-sources-12-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-1-appendix-idea-sources-12-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-1-appendix-idea-sources-12/stage-1-appendix-idea-sources-12-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-1-appendix-idea-sources-12/stage-1-appendix-idea-sources-12-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-6.html">← 第 6 章目录</a>
+<a href="/p/stage-1-appendix-articles-example0-1-vibe-coding-tools-snake-game-tutorial-md-09/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:10</span></div>
+<div class="ch" data-t="70.128"><span class="t">1:10</span><span class="n">从自己的生活开始</span><span class="d">1:29</span></div>
+<div class="ch" data-t="159.624"><span class="t">2:39</span><span class="n">留意身边反复出现的求助</span><span class="d">1:30</span></div>
+<div class="ch" data-t="250.224"><span class="t">4:10</span><span class="n">去这些地方逛一圈</span><span class="d">3:15</span></div>
+<div class="ch" data-t="445.992"><span class="t">7:25</span><span class="n">也可以把产品做给海外用户</span><span class="d">1:38</span></div>
+<div class="ch" data-t="544.656"><span class="t">9:04</span><span class="n">B 端与 C 端</span><span class="d">1:51</span></div>
+<div class="ch" data-t="656.544"><span class="t">10:56</span><span class="n">六个可以直接入手的场景</span><span class="d">4:54</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>创意灵感从哪里来 · 1. 从自己的生活开始 —— 解读与音频稿件</h1>
+<blockquote>本内容改编自开源项目 Easy-Vibe，为二次演绎配音版。本文档是配套的图文解读稿，与同名音频节目一一对应，可单独阅读，也可边听边对照。</blockquote>
+<h2>这一集要解决什么问题</h2>
+<p>绝大多数想做产品的人，卡住的地方不在&quot;做不出来&quot;，而在&quot;不知道做什么&quot;。</p>
+<p>这个卡点有个很迷惑人的地方：它看起来像是&quot;灵感不够&quot;，于是很多人去刷资讯、追热点、看别人的产品，希望某一条能击中自己。但刷得越多，越容易陷入一种错觉——世界上的好点子都被人做完了。</p>
+<p>其实问题不在点子总量，而在你的采集方式。本集的核心主张是：灵感不是等来的，是捡起来的。它一直在你身边，只是你没有弯腰。</p>
+<p>本集把采集动作拆成三层，由近及远：</p>
+<ol>
+<li><strong>最近的一层：你自己的生活</strong>。你就是真实用户，不需要猜。</li>
+<li><strong>中间的一层：别人嘴里的抱怨</strong>。重复出现的求助，是最硬的付费信号。</li>
+<li><strong>最远的一层：公开的社区与数据</strong>。别人已经把需求写在评论区和差评里了。</li>
+</ol>
+<p>采集完之后，还要做一次分类判断：这个场景偏 B 端还是偏 C 端？两种方向的付费逻辑完全不同，判断错了，后面整套设计都会歪。</p>
+<h2>能力地图：学完这一集你应该能做到什么</h2>
+<table>
+<tr><th>能力项</th><th>具体要求</th><th>检验方式</th></tr>
+<tr><td>生活线索采集</td><td>能从最近一周的经历里，识别出&quot;复制粘贴&quot;&quot;来回切换&quot;&quot;下次一定找个办法&quot;三类信号</td><td>写出至少 3 条带原始场景的记录</td></tr>
+<tr><td>抱怨信号识别</td><td>能判断一条群聊求助是偶发还是重复，并完整保存原话与场合</td><td>说出&quot;值得保存&quot;的判据</td></tr>
+<tr><td>社区信息采集</td><td>知道 Product Hunt / Indie Hackers / Capterra / Google Trends 各自适合查什么</td><td>对任一品类说出该去哪个站点、看什么字段</td></tr>
+<tr><td>海外需求观察</td><td>能用英文现场用语去检索，而不是翻译行业术语</td><td>列出 3 个英文检索式</td></tr>
+<tr><td>场景性质判断</td><td>能用&quot;谁在做、材料从哪来、结果写回哪、出错谁负责&quot;四问检验 B 端场景</td><td>对任一场景补齐四问答案</td></tr>
+<tr><td>切口选择</td><td>能在六个成熟场景（客服、销售、知识库、财务法务、研发、制造）中选定一个可验证的小切口</td><td>写出第一版范围与衡量指标</td></tr>
+</table>
+<h2>一、从自己的生活开始：三个信号</h2>
+<p>回想最近一周，问自己三个问题：</p>
+<ul>
+<li>哪件事让你<strong>反复复制粘贴</strong>？</li>
+<li>哪件事让你在<strong>几个应用之间来回切换</strong>？</li>
+<li>哪一次你忍不住说了句<strong>&quot;下次一定要找个办法&quot;</strong>？</li>
+</ul>
+<p>这三个问题的答案不是随口一问，它们各自对应一类结构性问题：</p>
+<table>
+<tr><th>信号</th><th>背后的结构问题</th></tr>
+<tr><td>反复复制粘贴</td><td>信息在两个系统之间没有打通，存在手工搬运</td></tr>
+<tr><td>来回切换应用</td><td>一个完整流程被切成了几段，缺少统一的承载面</td></tr>
+<tr><td>&quot;下次一定要找个办法&quot;</td><td>这个痛点已经重复出现，不是一次性事件</td></tr>
+</table>
+<p><strong>案例：找房。</strong> 同时开着三个平台，手抄一份表格比对租金和通勤；看房回来，手机里的照片经常和房源对不上。</p>
+<p>拆开看，这是三个独立的小麻烦：信息分散（三个平台）、手工搬运（手抄表格）、对应关系丢失（照片对不上房源）。注意它没有一个宏大的叙事，全是琐碎细节——但这恰恰是好素材的特征，因为它足够具体，具体到可以直接翻译成功能。</p>
+<h3>提示1 · 记录时不要马上想产品</h3>
+<p>保存一两句&quot;当时到底发生了什么&quot;，再附上截图或文件，这条线索就已经可用了。</p>
+<p>为什么强调这一步：一旦开始构思产品，你会不自觉地把事实修剪成你想要的样子。原始场景里那些&quot;不顺手&quot;的细节，往往才是最值钱的部分，却也最容易被你的产品想象给抹掉。</p>
+<h2>二、留意身边反复出现的求助</h2>
+<p>同事群、同学群、兴趣社群里，灵感藏在很普通的对话中：</p>
+<blockquote>&quot;谁有上次的模板？&quot;&quot;这个尺寸怎么导？&quot;&quot;为什么发出去又被裁了？&quot;</blockquote>
+<p><strong>判据：同一种求助隔几天又出现，就值得保存。</strong></p>
+<p><strong>案例：活动海报改尺寸。</strong> 一张海报要改成公众号头图、社区平台竖图、视频封面三种规格。尺寸一变，设计师就要重新安排标题位置、主体大小，还要重算安全区域。</p>
+<p>这里真正的麻烦不是&quot;改尺寸&quot;这个动作，而是每次改都要<strong>重新做一遍构图判断</strong>。而这恰好是机器能帮上忙、人又不愿意反复做的那类事——这是判断一个痛点是否值得自动化的关键特征。</p>
+<h3>提示2 · 保存原话，不要保存你的转述</h3>
+<p>先记下对方用的原话，再记下它出现在什么场合。</p>
+<p>原因：用户的表达方式暴露了他的心智模型。&quot;这个尺寸怎么导&quot;和&quot;我需要一个多尺寸导出方案&quot;，是两种完全不同的认知阶段，前者才是真实场景。</p>
+<p>至于这是偶然的小麻烦还是值得投入的方向，留到判断阶段再处理，采集阶段先别下结论。</p>
+<h2>三、去这些地方逛一圈</h2>
+<p>按目的挑，不要按知名度挑：</p>
+<table>
+<tr><th>你想知道什么</th><th>去哪里</th></tr>
+<tr><td>别人缺什么</td><td>点子社区</td></tr>
+<tr><td>小产品怎么起步</td><td>独立开发者案例</td></tr>
+<tr><td>离真实生意近一点</td><td>软件差评、采购信息、代做服务</td></tr>
+<tr><td>大方向的热度变化</td><td>趋势报告、投资机构文章</td></tr>
+</table>
+<p><strong>强烈建议：不用一次全部看完。</strong> 选一组，认真读几条具体内容，比同时打开二十个网站有收获得多。浏览量和判断力是两回事，甚至经常是反着来的。</p>
+<h3>Product Hunt —— 看新品类</h3>
+<p>科技产品集中首发、争取曝光的平台。团队会提前准备介绍、截图和演示，上线当天邀请用户投票冲榜。</p>
+<p>进去以后重点看三处：</p>
+<ol>
+<li>产品用<strong>一句话</strong>怎么介绍自己（这是它自己做的定位）</li>
+<li>首屏截图在强调什么（这是它认为最有说服力的证据）</li>
+<li>评论区的人在问什么（这是潜在用户真实的困惑）</li>
+</ol>
+<p><strong>不要只看第一名。</strong> 连续看几天，你更容易发现最近大家都在做哪些品类。品类比单品有信息量得多。</p>
+<h3>Indie Hackers —— 看长线经营</h3>
+<p>Product Hunt 是上线当天的舞台，Indie Hackers 是长期交流生意的社区。有人公开进展、收入、获客过程，也会诚实地说&quot;做了几个月还是没有客户&quot;。</p>
+<p><strong>不必只找收入最高的项目。</strong> 一个人维护、每月稳定赚几千美元的产品，通常更容易看清它最初解决了什么小问题、第一批客户从哪来。大项目故事好看，小项目路径可复制。</p>
+<h3>Capterra —— 从差评里挖需求</h3>
+<p>商业软件目录与评价网站，公司挑选客户管理、项目管理、客服、排班软件时常来这里。</p>
+<p><strong>最有效的动作：先找到几款常见工具，然后直接打开低分评价。</strong></p>
+<p>反复出现的抱怨——移动端难用、导出格式不对、配置过于复杂——往往比官网的功能列表更值得记录。一句话概括：官网说的是它想做的，差评说的是它没做好的。</p>
+<h3>Google Trends —— 只用来验证表达</h3>
+<p>展示关键词搜索热度的<strong>相对</strong>变化，可比较不同时间、地区的热度，也可查看相关查询和突然升温的词。</p>
+<p>它适合在你<strong>已经有几个关键词之后</strong>使用，用来比较人们更常搜哪种表达。</p>
+<p><strong>关键约束：曲线上升不等于一定有市场。</strong> 它只能告诉你关注度正在怎样变化。热度是注意力，不是钱包。</p>
+<h3>提示3 · 也可以把产品做给海外用户</h3>
+<p>一个人可以做英文网站、浏览器插件、电商平台第三方应用、设计工具插件或小型订阅式软件服务，再通过 Product Hunt、Reddit 和海外社区找到第一批用户。</p>
+<p>对个人开发者来说，面向全球的小工具有时比只服务本地的大平台更容易起步——你不需要赢下一个大市场，只需要在一群人里被需要。</p>
+<p>可观察的具体方向：跨境卖家怎样批量整理商品信息，房产经纪人怎样把看房记录写成房源介绍，独立开发者怎样处理客服邮件和订阅收入。搜完中文关键词，换英文说法再搜一遍。</p>
+<p><strong>提醒：做海外产品不只是把页面翻译成英文。</strong> 用户习惯、常用平台、支付方式和地区法规都可能不同。先选一个自己能理解的小场景，找几位真实用户聊清楚，再决定从哪一步开始。</p>
+<p>检索技巧：搜索论坛和评论时，用<strong>人们在现场会说的话</strong>去搜，而不是行业术语。看到有意思的内容，保存原句、页面链接和日期；不要只收藏网站首页，也不要急着把别人的话改写成产品功能。</p>
+<h2>四、B 端与 C 端：两种付费逻辑</h2>
+<h3>B 端：企业为结果付钱</h3>
+<p>企业很少为&quot;能聊天&quot;本身买单。它购买的是：更短的处理时间、更少的返工、更稳定的合规质量、更多成交。</p>
+<p><strong>一个可研究的 B 端场景，至少要能回答四件事：</strong></p>
+<ol>
+<li><strong>谁每天在做</strong> —— 岗位是谁</li>
+<li><strong>材料从哪里来</strong> —— 输入是什么</li>
+<li><strong>结果写回哪个系统</strong> —— 落点在哪</li>
+<li><strong>出错后谁负责</strong> —— 兜底机制</li>
+</ol>
+<p>这四个问题答不上来，场景基本就悬了。</p>
+<p><strong>为什么企业试验常常扩大不了规模？</strong> Deloitte 对两千七百多名企业管理者的调查显示，很多组织仍只有少量生成式智能试验能进入规模化阶段；Accenture 对两千多个项目的复盘也发现，真正产生企业级价值的组织仍是少数。</p>
+<p>难点往往不是模型能不能回答，而是<strong>它有没有进入完整流程</strong>。模型只是零件，流程才是机器。</p>
+<h3>C 端：用户为一个更轻松的时刻付钱</h3>
+<p>C 端不需要接入十套企业系统，但要面对更直接的考验：用户随时可以关掉应用。</p>
+<p>好的消费场景通常贴着一个<strong>明确时刻</strong>出现——准备旅行、比较商品、练口语、做一张海报、整理账单。先帮用户完成这一件事，再慢慢记住他的偏好。</p>
+<p>Capgemini 对一万两千名消费者的调查显示，生成式智能已进入商品发现和比较环节；QuestMobile 的国内数据显示，智能应用正从独立聊天工具进入搜索、办公、影像、音乐等已有产品。</p>
+<p>结论：C 端的机会不在&quot;再做一个聊天框&quot;，而在<strong>把对话接到下一步动作上</strong>。</p>
+<h2>五、六个可以直接入手的场景</h2>
+<table>
+<tr><th>场景</th><th>谁在做</th><th>常见建议切口</th><th>衡量指标</th></tr>
+<tr><td>客服</td><td>一线客服、坐席主管、售后运营</td><td>只接&quot;人工接待之后&quot;：会话小结、诉求识别、带出规则，人工确认后写工单</td><td>单次处理耗时下降</td></tr>
+<tr><td>销售</td><td>商务拓展、客户经理、售前、销售主管</td><td>只解决&quot;会后十五分钟&quot;：提取目标/异议/承诺/下一步，生成可改邮件并补字段</td><td>客户记录完整度、跟进及时率</td></tr>
+<tr><td>公司知识库</td><td>顾问、运营、人力、财务、IT 支持、新员工</td><td>选一个提问密集、边界清楚的部门；回答带原文位置，找不到就说找不到</td><td>命中率、引用准确率</td></tr>
+<tr><td>财务法务合规</td><td>财务分析、税务、法务、采购、合规</td><td>一种固定材料 + 一套明确规则，逐条核对并给出原文引用与风险说明</td><td>漏检率、复核时间</td></tr>
+<tr><td>软件开发</td><td>开发、测试、运维、安全工程师</td><td>从&quot;失败的持续集成&quot;开始：读报错和相关改动，定位原因，生成待审补丁</td><td>修复周期、补丁采纳率</td></tr>
+<tr><td>制造与现场服务</td><td>操作员、维修工程师、现场服务、工艺工程师</td><td>围绕一种设备：识别错误码，检索手册和历史工单，给出排查顺序并整理报告</td><td>停机时长、报告一次性通过率</td></tr>
+</table>
+<p>几个共同规律，值得单独记住：</p>
+<ul>
+<li><strong>客服不是回答问题，而是把一件事处理完。</strong> Klarna 的智能助手能处理退款、退货和多语言客服；ResultsCX 把语音分流、账户查询和后台接口连在一起。有价值的不是常见问题列表，而是&quot;查到状态—按规则处理—留下记录—必要时转人工&quot;这一整段。</li>
+<li><strong>销售最缺的不是文案，是下一步该跟谁谈什么。</strong> 第一版别做全周期，先解决会后十五分钟。</li>
+<li><strong>知识库真正要解决的是&quot;这一次该按哪条办&quot;。</strong> Sun Life 的内部助手每周处理一万多次员工查询；Morgan Stanley 把可检索内部语料扩展到约十万份文档。核心不是&quot;上传文档就能问&quot;，而是权限、版本、来源和反馈闭环。</li>
+<li><strong>法务场景先证明三件事：漏检率、复核时间、引用准确率。</strong> 不要一上来就承诺&quot;AI 法务&quot;。</li>
+<li><strong>软件开发的价值出现在仓库里，不在单独的聊天窗口里。</strong> 工具必须运行测试、展示差异、接受评审，而不是直接推生产环境。</li>
+<li><strong>制造场景按停机分钟计损。</strong> Siemens 的试验面向每年超过一百四十万份工单报告，把工程师的简短记录整理成一致的客户报告。所有建议都要显示依据，并允许工程师标记&quot;无效&quot;。</li>
+</ul>
+<h2>审查清单：发布前逐项自查</h2>
+<p><strong>采集阶段</strong></p>
+<ul>
+<li>至少记录了 3 条来自自己生活的原始场景，且没有被&quot;产品化&quot;修饰</li>
+<li>每条记录都带上了当时发生了什么，而不是结论</li>
+<li>群聊求助已记下原话与场合，未改写</li>
+</ul>
+<p><strong>调研阶段</strong></p>
+<ul>
+<li>逛社区时是&quot;认真读几条&quot;，而不是&quot;打开二十个网站&quot;</li>
+<li>看过 Product Hunt 的评论区，而不只是第一名</li>
+<li>去过 Capterra 的低分评价区，而不只是功能列表</li>
+<li>使用 Google Trends 前已经先有了候选关键词</li>
+</ul>
+<p><strong>判断阶段</strong></p>
+<ul>
+<li>B 端场景的四个问题（谁做、材料、落点、谁负责）全部有答案</li>
+<li>C 端场景能说清它贴在哪个&quot;明确时刻&quot;上</li>
+<li>已选定一个可验证的小切口，而不是&quot;全流程智能化&quot;</li>
+<li>已定义衡量指标，且指标不是&quot;生成了多少字&quot;</li>
+</ul>
+<p><strong>海外方向附加项</strong></p>
+<ul>
+<li>已确认目标市场的支付方式与合规要求</li>
+<li>至少和几位真实用户聊过，而不是只看检索结果</li>
+</ul>
+<h2>约束说明</h2>
+<p>使用本集方法时，请注意以下边界：</p>
+<ol>
+<li><strong>不虚构原则。</strong> 本集所有案例、数据与机构名称均来自 Easy-Vibe 开源教程原文，未作外推。引用数据时请保留原始出处，不要自行扩大适用范围（例如把&quot;某机构的调查样本&quot;说成&quot;行业普遍结论&quot;）。</li>
+<li><strong>热度不等于市场。</strong> Google Trends 只能反映关注度变化，不能作为需求存在的证据。</li>
+<li><strong>差评是线索不是需求。</strong> Capterra 上的抱怨说明现有方案没做好，但不代表用户愿意为你的方案付费，仍需独立验证付费意愿。</li>
+<li><strong>海外不是翻译问题。</strong> 法规、支付、平台习惯的差异需要在选场景阶段就考虑，不能留到上线前。</li>
+<li><strong>B 端四问是硬门槛。</strong> 答不全的场景不建议立项，无论它看起来多热闹。</li>
+<li><strong>第一版不做全流程。</strong> 六个场景的共同建议都是&quot;先切一小段&quot;，尤其不要把资金操作（如退款权限）在第一版就交给模型。</li>
+<li><strong>采集与判断分阶段。</strong> 采集阶段的任务是收集线索，不是做决策。过早下结论会污染素材。</li>
+</ol>
+<h2>本集小结</h2>
+<p>找灵感这件事，本质上是一场有纪律的采集工作，而不是一次灵感迸发。</p>
+<p>从你自己最近一周的三次复制粘贴开始，到群里那些隔几天就重现的原话，再到 Product Hunt 的评论区、Capterra 的差评区和 Google Trends 的曲线，最后用 B 端四问和 C 端时刻把场景分类落位——这条路径每一步都可以立刻执行。</p>
+<p>下一集我们做一件更狠的事：把这些线索里不值得做的，一个一个删掉。</p>
+<hr>
+<p><strong>相关资源</strong></p>
+<ul>
+<li>本集音频：同目录下 <code>stage-1-appendix-idea-sources-12-播客.mp3</code></li>
+<li>本集字幕：同目录下 <code>stage-1-appendix-idea-sources-12-播客.srt</code></li>
+<li>原始出处：Easy-Vibe <code>stage-1/appendix-idea-sources/index.md</code></li>
+<li>文中引用的机构报告：Deloitte《State of Generative AI in the Enterprise》、Accenture《Making Reinvention Real with Gen AI》、Capgemini《What Matters to Today&#x27;s Consumer 2025》、QuestMobile《2025 中国移动互联网春季报告》、Thomson Reuters《2025 Generative AI in Professional Services》</li>
+</ul></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
