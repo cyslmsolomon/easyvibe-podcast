@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Git 和 GitHub 工作流 · 在 GitHub 上创建你的第一个仓库</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 7 · EP 37</span>
+<h1>Git 和 GitHub 工作流 · 在 GitHub 上创建你的第一个仓库</h1>
+<p class="sub">第 7 章 · 第 37 讲 · 16:12</p>
+<div class="meta"><span>时长 <b>16:12</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>7</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-backend-git-workflow-37-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-backend-git-workflow-37-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-2-backend-git-workflow-37/stage-2-backend-git-workflow-37-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-2-backend-git-workflow-37/stage-2-backend-git-workflow-37-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-7.html">← 第 7 章目录</a>
+<a href="/p/stage-2-backend-database-supabase-36/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:14</span></div>
+<div class="ch" data-t="74.4"><span class="t">1:14</span><span class="n">创建你的第一个仓库</span><span class="d">2:09</span></div>
+<div class="ch" data-t="204.336"><span class="t">3:24</span><span class="n">为什么需要 SSH，密钥对又是怎么回事</span><span class="d">2:31</span></div>
+<div class="ch" data-t="355.92"><span class="t">5:55</span><span class="n">绑定的具体怎么做</span><span class="d">2:11</span></div>
+<div class="ch" data-t="487.632"><span class="t">8:07</span><span class="n">几条重要的注意事项</span><span class="d">1:19</span></div>
+<div class="ch" data-t="567.408"><span class="t">9:27</span><span class="n">日常三件事，拉取、提交、推送</span><span class="d">1:29</span></div>
+<div class="ch" data-t="656.904"><span class="t">10:56</span><span class="n">命令行 A I 工具，和集成开发环境有什么不同</span><span class="d">1:41</span></div>
+<div class="ch" data-t="758.808"><span class="t">12:38</span><span class="n">对比表与常见工具</span><span class="d">2:03</span></div>
+<div class="ch" data-t="881.832"><span class="t">14:41</span><span class="n">收尾</span><span class="d">1:29</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe · 创建你的第一个仓库、SSH 绑定与日常 Git 协作 — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-2/backend/git-workflow/index.md</code>），为<strong>二次演绎配音版</strong>。原文作者与贡献者来自清华大学深圳国际研究生院及开源社区。本文在原文基础上做了口语化改写、结构重组与实践补充，观点与例子由演绎方添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>stage-2-backend-git-workflow-37</code></li>
+<li>所属章节：第 7 章</li>
+<li>原文覆盖小节：在 GitHub 上创建你的第一个仓库、绑定本地 SSH、为什么需要 SSH 协议绑定、&quot;绑定&quot;的核心逻辑、&quot;绑定&quot;的具体步骤、重要注意事项、Git pull、Git commit &amp; Git push、从 CLI 说起、和 AI IDE 有什么不同、常见的 CLI AI 编程工具</li>
+<li>对应音频：<code>stage-2-backend-git-workflow-37-播客.mp3</code></li>
+<li>字幕：<code>stage-2-backend-git-workflow-37-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>在讲完后端能力栈之后，原文把话题拉回一个更基础、却更容易卡住新人的环节：<strong>代码怎么存、怎么传、怎么和别人协作。</strong></p>
+<p>这一集要回答三个问题：</p>
+<ol>
+<li><strong>仓库从哪来</strong> —— 在托管平台上创建第一个远程仓库，五个字段分别意味着什么；</li>
+<li><strong>怎么证明「我是我」</strong> —— SSH 密钥对的原理、绑定步骤与注意事项；</li>
+<li><strong>日常怎么干活</strong> —— 拉取、提交、推送三步节奏，以及用 AI 工具代敲命令的新做法。</li>
+</ol>
+<p>最后原文顺势引入了 <strong>CLI AI 编程工具</strong>这个概念，把它和前面讲过的 AI IDE 做了一次对照，并给出选型建议。</p>
+<p>音频稿按「建仓库 → 为什么绑 SSH → 密钥对原理 → 绑定步骤 → 注意事项 → 日常三步 → CLI 是什么 → 对比与选型 → 收尾」重排，重点补足了原文省略的「为什么」部分。</p>
+<hr>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>能力项</th><th>原文怎么说的</th><th>演绎方的解读</th><th>所属环节</th></tr>
+<tr><td>仓库字段认知</td><td>Repository name / Description / Choose visibility / README / .gitignore + license</td><td>visibility 决定谁能看，README 决定别人看懂的速度</td><td>建仓库</td></tr>
+<tr><td>.gitignore 作用</td><td>告诉 Git 忽略某些文件，不再被跟踪</td><td>临时文件、依赖包、大文件的标准去处</td><td>建仓库</td></tr>
+<tr><td>license 作用</td><td>规定他人能否商用及附加条款</td><td>不写等于默认保留全部权利</td><td>建仓库</td></tr>
+<tr><td>两种协议</td><td>HTTPS 每次要密码；SSH 靠密钥对</td><td><strong>SSH 不是可选优化，是启用 SSH 认证的前提</strong></td><td>SSH 绑定</td></tr>
+<tr><td>门禁卡类比</td><td>本地设备的 SSH 公钥 = 专属门禁卡</td><td>把「认证」翻译成日常经验，最有效的一句类比</td><td>SSH 绑定</td></tr>
+<tr><td>密钥对分工</td><td>公钥交给平台，私钥留本地，绝不分享</td><td>谁拿到私钥谁就是你</td><td>SSH 绑定</td></tr>
+<tr><td>三次握手式验权</td><td>私钥加密请求 → 平台用公钥解密 → 成功则放行</td><td>看懂这三步，所有报错都能自己归位</td><td>SSH 绑定</td></tr>
+<tr><td>多设备规则</td><td>每台设备各生成一对，各自绑定同一账号</td><td>一张门禁卡不能两台机器共用</td><td>SSH 绑定</td></tr>
+<tr><td>地址格式</td><td>绑定后用 SSH 格式地址，而非 HTTPS</td><td><strong>绑好了却仍走 HTTPS，是新人最常见的白绑</strong></td><td>SSH 绑定</td></tr>
+<tr><td>日常三步</td><td>pull → commit → push</td><td>跳第一步很可能覆盖别人的改动</td><td>日常协作</td></tr>
+<tr><td>CLI 认知</td><td>纯文本命令操作，区别于图形界面 GUI</td><td>服务器集群场景通常只能用 CLI</td><td>CLI 工具</td></tr>
+<tr><td>工具对照</td><td>CLI AI 工具 ≈ 特殊的网页端 AI 平台 ≈ IDE 中的 Agent 模块</td><td>赢管委会能干重活，IDE 赢在好用</td><td>CLI 工具</td></tr>
+</table>
+<hr>
+<h2>三、逐节解读</h2>
+<h3>3.1 创建仓库时的五个字段</h3>
+<p>原文逐一说明了新建仓库页面上的字段，其中三个值得重点留意：</p>
+<ul>
+<li><strong>可见性（Choose visibility）</strong>：个人仓库私有则只有你和受邀者可见，公开则所有人可见。原文建议新手<strong>先设为私有</strong>。</li>
+<li><strong>README</strong>：原文称其为「仓库的完整介绍」，并给出惯例建议——每个仓库都应该有。</li>
+<li><strong>.gitignore 与 license</strong>：前者告诉 Git 忽略指定文件，一旦指定就不再被跟踪，适合临时测试文件、依赖包与大文件；后者规定他人能否商用及附加条款。</li>
+</ul>
+<p>原文给出的新手初始设置是：<strong>勾选 Add README + 可见性设 Private + 自定义名称描述 → Create repository。</strong></p>
+<h3>3.2 为什么必须用 SSH，而不是省事与否的问题</h3>
+<p>原文此处有一句极容易被读漏的话：</p>
+<blockquote>&quot;SSH 协议绑定&quot;是启用 GitHub SSH 认证的前提步骤——只有将本地 SSH 公钥&quot;绑定&quot;到 GitHub 账号后，GitHub 才能识别你的设备并允许对仓库进行 SSH 操作。</blockquote>
+<p>这句话意味着：<strong>没有绑定，SSH 通道根本不存在</strong>，而不是「不绑会麻烦一点」。</p>
+<p>两种协议的差异：</p>
+<table>
+<tr><th>协议</th><th>验证方式</th><th>体验</th></tr>
+<tr><td>HTTPS</td><td>每次操作需输入账号密码或个人访问令牌（PAT）</td><td>繁琐，且有密码泄露风险</td></tr>
+<tr><td>SSH</td><td>通过密钥对完成身份验证</td><td>无需重复输密码，加密传输更安全</td></tr>
+</table>
+<h3>3.3 密钥对：把「锁与钥匙」的比喻讲准</h3>
+<p>原文的比喻是：私钥是<strong>你的专属钥匙</strong>（留在本地，绝不分享），公钥是<strong>可以公开分享的锁</strong>（复制到平台的 SSH keys list）。</p>
+<p>整个验证过程是三步：</p>
+<ol>
+<li>本地设备用<strong>私钥</strong>加密操作请求后发出；</li>
+<li>平台用你之前绑定的<strong>公钥</strong>尝试解密；</li>
+<li>解密成功 → 确认为授权设备，允许操作；失败 → 拒绝。</li>
+</ol>
+<p>由这三步可以直接推出两条结论：<strong>私钥泄露等同于身份被盗</strong>；<strong>换设备必须重新生成并重新绑定</strong>。</p>
+<h3>3.4 绑定的两条路径</h3>
+<p>原文给了两种获取公钥的方式：</p>
+<ul>
+<li><strong>推荐给零基础</strong>：让 AI IDE 代生成。提示词的要点是「帮我在某某平台登录用的 SSH 密钥生成一下，我的邮箱是某某，请把公钥返回给我复制」。特别提醒：输入后需在左侧终端按 Enter，否则命令会一直等待。</li>
+<li><strong>手动方式</strong>：在本地终端执行生成命令，把示例邮箱替换为注册账号所用邮箱，按 Enter 接受默认值，随后在用户目录下的 <code>.ssh</code> 中得到私钥与 <code>.pub</code> 公钥两个文件。</li>
+</ul>
+<p>随后是统一的三步：<strong>复制公钥全文 → 平台 Settings → SSH and GPG keys → New SSH key → 粘贴保存 → 终端执行测试命令验证。</strong></p>
+<p>原文给出的常见失败原因是：公钥复制不完整、私钥权限过高（本地 <code>.ssh</code> 目录应仅本人可读写）。</p>
+<h3>3.5 三条被单独列出的注意事项</h3>
+<ol>
+<li><strong>多设备各绑各的</strong> —— 每台设备生成各自的密钥对，公钥可绑到同一账号；</li>
+<li><strong>私钥绝不分享</strong> —— 泄露后立即删除对应公钥并重新生成；</li>
+<li><strong>用 SSH 格式地址</strong> —— 若此前用 HTTPS 克隆，可用 <code>git remote set-url</code> 切换协议。</li>
+</ol>
+<p>演绎方补一条高频误解：<strong>很多人绑好了密钥却仍用 HTTPS 地址克隆，于是每次推送照样要密码，最后得出「SSH 没用」的错误结论。</strong> 不是 SSH 没用，是走的根本不是那条通道。</p>
+<h3>3.6 CLI AI 工具与 AI IDE 的定位差异</h3>
+<p>原文的类比很清晰：CLI AI 工具 ≈ <strong>一种特殊的网页端 AI 编程平台</strong>（同样只要一个对话入口就自动执行），也 ≈ <strong>AI IDE 中的 Agent 模块</strong>（侧边那块对话区域）。</p>
+<p>差异在于：不同 AI IDE 对 Agent 的实现差异很大，效果不稳定，因此 CLI AI 工具多由大厂直接开发。</p>
+<p>原文给出的对照表（以 Claude Code 与 Cursor 为例）可压缩成一句话：<strong>CLI AI 工具赢在能干重活（自动任务、多文件、长上下文、一体化提交），AI IDE 赢在好用（原生编辑器、实时补全、上手简单）。</strong></p>
+<hr>
+<h3>3.7 一张把原文对照表压缩后的速查表</h3>
+<p>音频里逐条念了对照结论，这里把原文那张「CLI AI 工具 vs AI IDE」对比表完整重排，方便对照记忆：</p>
+<table>
+<tr><th>功能特性</th><th>CLI AI 工具（以 Claude Code 为例）</th><th>AI IDE（以 Cursor 为例）</th><th>原文判定更优者</th></tr>
+<tr><td>自动任务执行</td><td>非常强</td><td>能力有限</td><td>CLI AI 工具</td></tr>
+<tr><td>IDE 集成</td><td>仅命令行</td><td>原生编辑器集成</td><td>AI IDE</td></tr>
+<tr><td>实时代码补全</td><td>无</td><td>体验极佳</td><td>AI IDE</td></tr>
+<tr><td>多文件操作</td><td>非常强</td><td>还不错</td><td>CLI AI 工具</td></tr>
+<tr><td>平台一体化操作</td><td>可直接提交</td><td>需要手动操作</td><td>CLI AI 工具</td></tr>
+<tr><td>学习成本</td><td>中等</td><td>上手简单</td><td>AI IDE</td></tr>
+<tr><td>上下文长度</td><td>非常长</td><td>较好</td><td>CLI AI 工具</td></tr>
+<tr><td>调试辅助</td><td>自动化</td><td>较多需手动</td><td>CLI AI 工具</td></tr>
+</table>
+<p>原文的表格来源标注在表格之后，本文保留其结论未作改动。</p>
+<p>把这张表读成一件事：<strong>在「模型驱动的任务完成」这一维度上，CLI AI 工具全面领先；在「编辑器内的编码体验」这一维度上，AI IDE 不可替代。</strong> 因此原文推荐的并不是二选一，而是按场景灵活切换。</p>
+<p>原文总结的 CLI AI 工具三大收益也值得单列：</p>
+<ol>
+<li><strong>支持更长时间的连续对话</strong> —— 甚至可以帮你「工作一整天」；</li>
+<li><strong>提供更长的上下文窗口</strong> —— 不再频繁需要你说「继续」；</li>
+<li><strong>响应速度更快</strong> —— 可以接入更多自定义模型接口。</li>
+</ol>
+<p>而选型态度原文说得非常务实：<strong>只推荐两大类作为首选组合，按习惯任选其一，但强烈建议都试一试。</strong> 并且由于模型版本更新极快，建议优先选择「性价比（效果 ÷ 成本）」最优的方案。</p>
+<hr>
+<h2>四、审查清单</h2>
+<ul>
+<li>仓库可见性已按需要设置（新手建议 <strong>Private</strong>）</li>
+<li>仓库<strong>已有 README</strong></li>
+<li>已添加 <strong>.gitignore</strong>，依赖包与大文件未被跟踪</li>
+<li>已明确选择的 <strong>license</strong> 及其商用条款</li>
+<li>本地已生成 SSH 密钥对，且<strong>私钥未分享、未上传</strong></li>
+<li>公钥已<strong>完整复制</strong>并绑定到平台账号</li>
+<li>已通过<strong>测试命令</strong>确认平台能识别本机</li>
+<li>每台开发机<strong>各自持有独立密钥对</strong></li>
+<li>仓库远程地址使用的是 <strong>SSH 格式</strong>，而非 HTTPS</li>
+<li>开工前<strong>先 pull</strong>，再改再 commit，最后 push</li>
+<li>拉取 / 推送提示词中<strong>写清了文件夹相对或绝对路径</strong></li>
+<li>CLI AI 工具已按实际项目亲自测试过，而非仅凭口碑选型</li>
+</ul>
+<hr>
+<h2>五、实践提示</h2>
+<h3>提示1 · 绑完立刻换地址</h3>
+<p>SSH 绑定只是拿到了门禁卡，走的门还得选对。绑定成功后，请检查仓库的远程地址是否为 SSH 格式。若此前用 HTTPS 克隆，用 <code>git remote set-url</code> 切过去。这一步漏掉，前面所有努力都白费。</p>
+<h3>提示2 · 开工先拉取，不要跳过</h3>
+<p>多人维护的仓库，pull 不是可选项。跳过 pull 直接 push，最常见的结果不是报错，而是<strong>悄悄覆盖别人的改动</strong>——这类问题往往几天后才被发现，排查成本极高。</p>
+<h3>提示3 · 私钥权限要收紧</h3>
+<p>原文点出了「私钥权限过高」这个失败原因。检查本地 <code>.ssh</code> 目录是否为仅本人可读写。权限设置不是洁癖，它直接决定 SSH 是否愿意使用你的密钥。</p>
+<h3>提示4 · 工具选型先亲手测试</h3>
+<p>原文反复强调「哪一个在实际项目中更好用，只能通过亲自测试来判断」。做法是：<strong>同一个小任务，用两个工具各跑一遍</strong>，比较完成度和返工次数。由于模型版本更新快，建议优先选性价比最高的那个，而不是名气最大的那个。</p>
+<hr>
+<h2>六、约束说明</h2>
+<ol>
+<li><strong>本集内容全部来自原文 <code>stage-2/backend/git-workflow/index.md</code>，未跨文件取材。</strong> 原文出现的术语（SSH 密钥对、PAT、GUI、CLI、Agent）、目录路径（用户目录下的 <code>.ssh</code> 目录）、文件名（私钥与 <code>.pub</code> 公钥）、菜单路径（Settings → SSH and GPG keys → New SSH key）等均按原文转述。</li>
+<li><strong>原文中的英文提示词未逐字朗读。</strong> 音频中改为描述其含义（例如「帮我把当前目录下的这个仓库拉取一下」），这是为了零基础听众的可听性，也避免 TTS 中英混杂。完整提示词以原文为准。</li>
+<li><strong>原文对比表数据未被修改。</strong> CLI AI 工具与 AI IDE 的各项对照结论均出自原文表格，本文未添加原文未提及的对比维度或工具。</li>
+<li><strong>原文未给出的信息不作补充。</strong> 例如 SSH 密钥的具体生成命令原文以代码块形式呈现、各 CLI 工具的具体定价等，本文未展开。</li>
+<li><strong>演绎方添加的内容限于三类</strong>：结构性提炼（三次握手式验权、赢在能干重活与赢在好用）、高频误解纠正（绑好了却仍走 HTTPS）、以及实践提醒（私钥权限、开工先拉取）。这些内容属于实践补充，不等同于原文观点。</li>
+<li><strong>安全声明。</strong> 本集涉及的所有密钥、邮箱、令牌均为流程说明，不包含任何真实可用的凭据。</li>
+</ol>
+<hr>
+<h2>七、这一集在整条链路上的位置</h2>
+<p>这一集看似是「基础操作」，实际承担的是<strong>从本地到云端的连接建立</strong>：</p>
+<ul>
+<li>前面的所有产出（一个能跑的应用）目前只存在于你的电脑上；</li>
+<li>有了仓库与 SSH，你的代码才第一次有了<strong>远程副本与版本历史</strong>；</li>
+<li>有了 pull / commit / push 的节奏，协作才成为可能。</li>
+</ul>
+<p>而引入 CLI AI 工具，则把这套流程进一步简化：<strong>你不再需要记住命令，只需要说清楚你想做什么。</strong> 这和整篇教程一贯的方法论是一致的——能用对话解决的事，不要先去记语法。</p>
+<p><strong>来源</strong>：Easy-Vibe（datawhalechina/easy-vibe）<code>docs/zh-cn/stage-2/backend/git-workflow/index.md</code>。本音频与本文为二次演绎配音版，非原文照读。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
