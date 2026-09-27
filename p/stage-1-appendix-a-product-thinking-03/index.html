@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>产品思维基础 · 2.2 得到可执行步骤：学会从抽象到具体</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 6 · EP 3</span>
+<h1>产品思维基础 · 2.2 得到可执行步骤：学会从抽象到具体</h1>
+<p class="sub">第 6 章 · 第 3 讲 · 16:17</p>
+<div class="meta"><span>时长 <b>16:17</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>6</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-1-appendix-a-product-thinking-03-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-1-appendix-a-product-thinking-03-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-1-appendix-a-product-thinking-03/stage-1-appendix-a-product-thinking-03-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-1-appendix-a-product-thinking-03/stage-1-appendix-a-product-thinking-03-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-6.html">← 第 6 章目录</a>
+<a href="/p/stage-1-appendix-a-product-thinking-02/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:29</span></div>
+<div class="ch" data-t="89.376"><span class="t">1:29</span><span class="n">我想吃汉堡，到底意味着什么</span><span class="d">2:14</span></div>
+<div class="ch" data-t="223.608"><span class="t">3:43</span><span class="n">第一层拆解，先把大词拆开</span><span class="d">3:59</span></div>
+<div class="ch" data-t="462.912"><span class="t">7:42</span><span class="n">第二层拆解，把中间目标继续往下压</span><span class="d">3:56</span></div>
+<div class="ch" data-t="699.072"><span class="t">11:39</span><span class="n">给速度定个数，给载体收个口</span><span class="d">2:17</span></div>
+<div class="ch" data-t="836.376"><span class="t">13:56</span><span class="n">从一句话到任务清单</span><span class="d">2:20</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>得到可执行步骤 · 学会从抽象到具体 —— 解读与音频稿件</h1>
+<blockquote>对应音频：stage-1-appendix-a-product-thinking-03-播客.mp3</blockquote>
+<blockquote>对应字幕：stage-1-appendix-a-product-thinking-03-播客.srt</blockquote>
+<blockquote>口播稿：script.txt</blockquote>
+<blockquote>来源：Easy-Vibe（datawhalechina/easy-vibe）docs/zh-cn/stage-1/appendix-a-product-thinking/index.md</blockquote>
+<hr>
+<h2>一、本集在讲什么</h2>
+<p>这一集对应原文档的 2.2 节，主题是<strong>拆解并细化</strong>，也就是把抽象变具体的能力。</p>
+<p>原文档开篇就点明了痛点：发散想法后，得到想法十分简单，但得到可执行步骤却非常难。「我要做一个提升效率的工具」「我要做一个帮助创作者的应用」，听起来都很宏大，但真的要动手的时候，抽象几乎帮不上忙。你每天面对的是一个个非常具体的问题——第一个版本到底要做哪一小块、需要哪些页面、要不要支持注册登录、要不要接入支付。</p>
+<p>所以本集要建立的不是某个具体技术，而是一种可重复的思维动作：</p>
+<blockquote>把一个大而泛的目标，一点点拆解并细化，到可以立刻动手的最小可行动项。</blockquote>
+<p>原文档强调，这个能力不仅在做产品时重要，在生活里也非常关键。因此它先用一个生活例子（我想吃汉堡）把动作演示一遍，再用一个应用例子（提高文档处理效率）做两层拆解，最后收敛成一条可以直接交给人工智能或工程师执行的一句话描述。</p>
+<hr>
+<h2>二、能力地图</h2>
+<h3>第一层：识别抽象</h3>
+<ul>
+<li>能听出「我要做一个提升效率的工具」这类句子里的空泛词</li>
+<li>能指出一句话里哪几个词是「大词」，需要被拆开</li>
+<li>能判断当前的描述停留在「愿望」「中间目标」还是「可执行方案」</li>
+</ul>
+<h3>第二层：定义与追问</h3>
+<ul>
+<li>能对核心名词下定义（什么叫文档、什么叫处理、什么叫应用）</li>
+<li>能对核心动词下定义（处理成什么，才算处理过）</li>
+<li>能对抽象指标追问（效率是指速度、质量、出错率，还是认知门槛）</li>
+<li>能追问路径依赖（一定要用人工智能吗，规则和模板能不能解决）</li>
+</ul>
+<h3>第三层：分层拆解</h3>
+<ul>
+<li>能做第一层拆解，把大词拆成类别、方式、形态、路径</li>
+<li>能做第二层拆解，对第一层产出的中间目标继续下压</li>
+<li>能识别拆解的每个分叉对应的代价（成本、开发难度、产品形态）</li>
+<li>能在拆解中主动做「收窄」，并把取舍明确写下来</li>
+</ul>
+<h3>第四层：收敛与交付</h3>
+<ul>
+<li>能把拆解结果收敛成一段完整的产品描述</li>
+<li>能再精简成一句话版本</li>
+<li>能把这句话直接当提示词交给人工智能，或交给设计师、工程师</li>
+<li>能把问题分解到原子化，落到「我来做」或「交给专家做」两个选项之一</li>
+</ul>
+<p>这四层是递进的。多数人卡在第一层到第二层之间——他们能感觉到哪里不对，但不会追问「什么叫处理」。而真正决定项目复杂度的，是第三层的收窄动作。</p>
+<hr>
+<h2>三、生活例子：我想吃汉堡</h2>
+<p>原文档用这个例子演示「看似简单的一句话里藏着多少分支」。拆解路径分三步：</p>
+<h3>第一步，动机与核心需求</h3>
+<p>你是真的想吃汉堡吗？可能的真实动机：</p>
+<ul>
+<li>馋味道</li>
+<li>想快速解决一餐</li>
+<li>想和朋友聚一下</li>
+<li>仅仅因为刷到了一张好看的图片</li>
+</ul>
+<p>这一步看似无关紧要，但<strong>会直接影响后面的选择</strong>。为了和朋友聚，对环境和体验会有要求；只是赶时间，则「快」比「好吃」重要。</p>
+<h3>第二步，动作的范围</h3>
+<ul>
+<li>什么品类的汉堡</li>
+<li>几点吃</li>
+<li>只要汉堡本身，还是要一整套搭配（饮料、薯条、甜点）</li>
+<li>晚点还有事、不想吃太撑，选择会不同</li>
+<li>要不要顺便解决明天的早餐</li>
+</ul>
+<h3>第三步，实现路径</h3>
+<table>
+<tr><th>选择</th><th>对应的一整套行动</th></tr>
+<tr><td>去店里吃</td><td>查位置、看时间、安排路程</td></tr>
+<tr><td>外卖</td><td>看平台、比较价格和时间</td></tr>
+<tr><td>自己做</td><td>准备食材、准备工具、找食谱</td></tr>
+</table>
+<p>拆完之后，「我想吃汉堡」会变成一串具体步骤：打开外卖应用，搜索某家之前吃过觉得不错的店，选择一个套餐，去掉饮料改成只要汉堡和薯条，设置备注不要酱，最后下单。</p>
+<p><strong>关键判断：这些动作非常细小，却都是可立即执行的。</strong> 而且细到这个程度，已经能被人工智能翻译成一套程序化的执行计划。</p>
+<hr>
+<h2>四、应用例子：两层拆解</h2>
+<h3>原始愿望</h3>
+<blockquote>我想做一个提高文档处理效率的应用。</blockquote>
+<p>方向对，但停在这里无从下手：不知道第一步画什么页面，不知道第一版做到什么程度，也不知道怎么跟别人解释。</p>
+<h3>第一层拆解：把大词拆开</h3>
+<h4>定义「文档」</h4>
+<p>文档是很宽的概念：</p>
+<ul>
+<li>表格</li>
+<li>报告文件</li>
+<li>P D F 文件</li>
+<li>记录代码注释的标记语言文本</li>
+<li>纯文本笔记</li>
+<li>扫描生成的图片式文档</li>
+<li>内嵌图表与公式的学术论文</li>
+</ul>
+<p><strong>不同类型的文档存在实现差异，后续的「处理」功能必须匹配文档的具体类型。</strong> 图片式文档可能需要先加文字识别；表格类文档的核心需求更可能是数据提取与分析，而非文字精简。</p>
+<h4>定义「处理」</h4>
+<p>「处理成什么，才算处理过？」三种典型答案：</p>
+<ol>
+<li>把一份五十页的报告精简成五页可读的概要</li>
+<li>把一堆杂乱格式的文档统一成一套规范模板</li>
+<li>翻译、改写、润色，让草稿变成可对外发布的正式版本</li>
+</ol>
+<p>一句追问就能定性：<strong>我说的「处理」，到底是要「看得更快」、「改得更好」，还是「传给别人更方便」？</strong> 答案不同，入口页和操作页会完全不一样。</p>
+<h4>定义「应用」</h4>
+<ul>
+<li>只给自己用的小工具，还是希望有一群用户使用</li>
+<li>网页程序、手机应用，还是嵌在现有系统里的小功能</li>
+</ul>
+<p>自己用可以做成简陋网页或命令行脚本，成本低很多；给团队用就要考虑账号体系、权限、协作入口。拆解阶段只需回答一句朴素的话：<strong>我打算在什么设备、什么场景下用到这个东西。</strong></p>
+<h4>追问「用什么提高」</h4>
+<p>一定要用人工智能吗？不一定。</p>
+<ul>
+<li>规则、模板、快捷键就能解决的：一键生成固定格式的报告封面、一键插入标准免责声明——根本不需要模型参与</li>
+<li>大量非结构化长文本、需要理解概括改写的：人工智能是非常自然的一环</li>
+</ul>
+<h4>追问「效率」</h4>
+<p>效率不只是一个词，至少包含：</p>
+<table>
+<tr><th>维度</th><th>具体表现</th></tr>
+<tr><td>速度</td><td>二十页文档从三十分钟看完，变成五分钟扫完要点</td></tr>
+<tr><td>质量</td><td>在摘要里快速发现错误逻辑、数据矛盾</td></tr>
+<tr><td>认知门槛</td><td>不熟悉专业术语的人，也能通过解释和标注看懂报告</td></tr>
+</table>
+<p>决定性追问：<strong>如果这个应用做得非常成功，对用户来说最大的变化是什么？</strong> 是「花在文档上的时间少了一半」，还是「做文档相关的事时，心没那么累了」。答清楚这句，功能优先级才有依据。</p>
+<h3>第一层产出</h3>
+<blockquote>我想做一个用人工智能提高 P D F 文档转成文字速度和质量的网页程序。</blockquote>
+<p>已明确：文档类型（P D F）、处理方式（转成文字）、优化方向（速度和质量）、技术路径（人工智能）、承载形态（网页程序）。</p>
+<h3>第二层拆解：继续下压</h3>
+<p>原文档明确指出：<strong>第一层产出仍然只是「中间目标」，还不是真正可执行的产品方案</strong>，因为「用什么人工智能」「提升到什么程度」「适配哪些场景」「面向什么用户」依然笼统。</p>
+<h4>拆解「人工智能」</h4>
+<ul>
+<li>只负责文字识别的轻量级识别模型</li>
+<li>引入大语言模型做纠错、重排</li>
+<li>多模态模型做版面重整、结构理解</li>
+</ul>
+<p>三个维度的后果：</p>
+<ol>
+<li><strong>成本消耗</strong>：算力成本、调用费用、推理时延；一次性投入为主还是持续开销为主</li>
+<li><strong>开发难度</strong>：简单集成现成接口，还是要设计复杂提示词、上下文管理、自训练与评估</li>
+<li><strong>产品形态</strong>：「快速提取文本的小工具」还是「文档智能处理平台」</li>
+</ol>
+<h4>拆解「P D F 文档」</h4>
+<p>限定为「以文字为主、可复制的纯文字 P D F」，则不必一开始就处理扫描件、复杂图表、公式排版、极端多栏。若要求「任何 P D F 都能扔进来」，则一上来就要同时解决识别、版面重建、图文混排、表格抽取，复杂度成倍提升。</p>
+<p><strong>这里要做一次刻意的收窄，并把取舍写下来</strong>：当前版本主要服务「结构较清晰、以文字为主的 P D F 报告和说明文档」，不对扫描件、重度图文混排文档的效果做保证。</p>
+<h4>拆解「质量」</h4>
+<p>三个可讨论、可权衡的维度：</p>
+<ol>
+<li><strong>识别是否大致正确</strong>：错别字、标点、特殊符号准确率，是否出现整段乱码</li>
+<li><strong>段落与标题结构是否保留</strong>：章节层级、段落分隔、列表结构、引用块能否还原</li>
+<li><strong>是否便于二次编辑与再利用</strong>：文本是否干净、格式是否规整、复制到别处是否还要大规模手工清理</li>
+</ol>
+<p>选出最在意的两三项作为主攻方向，例如优先保证「段落结构清晰」和「标题层级基本保留」，错别字只要求「用户几分钟内可快速人工修完」。</p>
+<p><strong>这样「高质量」就从空泛形容词，变成了写得出来、量得出来的产品标准。</strong></p>
+<h4>拆解「速度」</h4>
+<p>必须具体到可感知的量级，这里隐藏一个取舍：</p>
+<ul>
+<li>支持超长文档（几十页、上百页），用户愿意等较长时间</li>
+<li>只做中短篇，在页数受限前提下做到几秒到十几秒返回</li>
+</ul>
+<p>典型场景是会前把十几页报告快速转成可编辑文本，因此更自然的选择：单份文档不超过二十页的文字型 P D F，通常十秒左右完成处理。</p>
+<p>一旦写明，技术方案（是否并行、是否异步队列）、界面文案（预计时间、超时提示）、用户预期管理都能围绕这个核心体验优化。</p>
+<h4>拆解「网页程序」</h4>
+<p>关键问题：是「自己和小范围内部使用的临时工具」，还是「给一批真实用户长期使用的在线服务」。</p>
+<p>偏向前者就能砍掉大量复杂度：不做账号体系与权限管理，不做任务历史、项目管理、团队协作，只专注一条极简流程——<strong>打开网页，上传文件，等待处理，展示可编辑文本，一键复制或下载</strong>。</p>
+<hr>
+<h2>五、收敛成果</h2>
+<h3>完整描述版</h3>
+<blockquote>为用户提供一个基于浏览器的小工具，优先支持结构较清晰、以文字为主的 P D F 报告，通过适配的解析流程与轻量级人工智能清洗，在十秒左右输出一份段落结构明晰、标题层级基本保留、识别错误率可接受的可编辑文本，无需登录即可使用。</blockquote>
+<h3>一句话精简版</h3>
+<blockquote>为用户提供一个网页工具，让他上传一份不超过二十页的文字型 P D F，在十秒左右得到一份段落结构清晰、标题层级保留的可编辑文本，并支持一键复制和下载为纯文本。</blockquote>
+<h3>这段话的三个用法</h3>
+<ol>
+<li>丢给具备开发能力的人工智能，让它生成开发方案或直接生成最小可用版本</li>
+<li>交给设计师，据此画出具体的界面原型</li>
+<li>发给工程师同事，快速评估实现成本和技术方案</li>
+</ol>
+<h3>两件现实变化</h3>
+<ul>
+<li>你不再被「我要做一个提升效率的应用」压住，而是拥有能立即动手的步骤</li>
+<li>和别人的沟通成本急剧降低，因为拿出的已是一套拆到足够具体的初版方案</li>
+</ul>
+<h3>原子化结论</h3>
+<p>所有问题分解到原子化后，无非两个选项：</p>
+<ol>
+<li>我来解决、执行这个子问题</li>
+<li>人工智能或别的专家来执行这个子问题</li>
+</ol>
+<p><strong>只要能原子化，就能被执行。</strong></p>
+<hr>
+<h2>六、实践提示</h2>
+<h3>提示1 · 给你的愿望做一次「大词体检」</h3>
+<p>把你的想法写下来，圈出所有大词，然后逐个追问：</p>
+<ul>
+<li>「文档」具体是哪一类？</li>
+<li>「处理」做到什么程度算完成？</li>
+<li>「应用」在什么设备上、什么场景下用？</li>
+<li>「效率」指速度、质量、出错率还是认知负担？</li>
+</ul>
+<p>每圈出一个大词，就逼自己写出至少两个具体选项。写不出来，说明你还没真正想清楚，不要急着开工。</p>
+<h3>提示2 · 用汉堡练习法训练拆解肌肉</h3>
+<p>每天挑一句自己随口说的话（我想健身、我想学英语、我想做个副业），用三层拆法练一遍：动机、范围、实现路径。</p>
+<p>这个练习的价值不在于那一件事本身，而在于把「追问到具体」变成条件反射。原文档特意强调，这个能力在生活里同样关键。</p>
+<h3>提示3 · 主动收窄，并把取舍写进文档</h3>
+<p>拆解不是越细越好，而是要在关键分叉上<strong>刻意收窄</strong>。每次收窄都要留下书面记录：</p>
+<ul>
+<li>当前版本支持什么</li>
+<li>明确不支持什么</li>
+<li>不对哪类效果做保证</li>
+</ul>
+<p>有了这份记录，速度和质量的目标才有可控、可解释的前提，产品说明和用户预期管理也有依据。不敢写「不支持什么」，是拆解没做透的典型信号。</p>
+<h3>提示4 · 把指标写成能被验证的数字</h3>
+<p>把「快」「高质量」「好用」这类形容词，全部换成可验证的表述：</p>
+<ul>
+<li>不超过二十页的文字型 P D F</li>
+<li>通常十秒左右完成</li>
+<li>标题层级基本保留</li>
+<li>识别错误允许，但段落不可支离破碎</li>
+</ul>
+<p>写不出来具体数字，就意味着你没有想清楚边界，后面一定会返工。</p>
+<h3>提示5 · 收敛成一句话，再拿去当提示词</h3>
+<p>拆解完成后必须收敛。完整描述版用于对齐，一句话版用于传播和投喂。判断收敛是否合格的标准很简单：把这句话单独发给一个不了解背景的人（或人工智能），看他能不能直接开始干活。不能，就继续拆。</p>
+<hr>
+<h2>七、审查清单</h2>
+<p>在把方案交给任何人之前，逐条打勾。</p>
+<p><strong>定义是否清晰</strong></p>
+<ul>
+<li>核心名词（文档、应用、用户）已定义到具体类别</li>
+<li>核心动词（处理、优化）已回答「做成什么样算完成」</li>
+<li>使用设备与场景已明确写出</li>
+</ul>
+<p><strong>拆解是否充分</strong></p>
+<ul>
+<li>至少完成了两层拆解</li>
+<li>每个技术选择都评估了成本、开发难度、产品形态三个维度</li>
+<li>抽象指标（效率、质量、速度）已拆成多个子维度</li>
+</ul>
+<p><strong>取舍是否落纸</strong></p>
+<ul>
+<li>明确了当前版本支持的范围</li>
+<li>明确写出了不支持的内容和不对哪些效果做保证</li>
+<li>关键指标写成了可验证的数字或量级</li>
+</ul>
+<p><strong>收敛是否合格</strong></p>
+<ul>
+<li>已产出一段完整描述</li>
+<li>已精简出一句话版本</li>
+<li>这句话单独发给第三方也能直接开工</li>
+<li>剩余子问题已分解到「我做」或「交给专家做」的粒度</li>
+</ul>
+<hr>
+<h2>八、约束与边界说明</h2>
+<p><strong>约束一：原文档的演示深度限制</strong></p>
+<p>原文档在应用例子处明确说明「由于时间关系，此处只演示两层拆解方法」。真实项目中，两层未必够；本集严格按原文两层呈现，未自行增加第三层，避免虚构。</p>
+<p><strong>约束二：示例数字的来源</strong></p>
+<p>「二十页」「十秒左右」「五十页精简成五页」等数字均出自原文档示例，用于演示「把指标写到可验证量级」的方法，不是通用性能标准。套用到自己的项目时必须重新标定。</p>
+<p><strong>约束三：收窄不等于永远放弃</strong></p>
+<p>「不对扫描件、重度图文混排文档的效果做保证」是当前版本的边界声明，属于上线策略而非永久排除。原文档的语境是「避免过早卷入过重的产品形态」，后续版本可以逐步放开。</p>
+<p><strong>约束四：原子化的适用边界</strong></p>
+<p>「分解到原子化就只剩我做或交给专家做两个选项」是决策层面的简化，用于消除心理阻力。真实执行中还有第三个隐含选项——<strong>这个问题当前不解决</strong>，也就是主动砍需求。这一点原文档未展开，属本解读的补充提醒。</p>
+<p><strong>约束五：人工智能并非默认解</strong></p>
+<p>原文档明确提醒，规则、模板、快捷键就能解决的场景不需要模型参与。把「用人工智能」当成默认前提，会不必要地推高成本与复杂度。</p>
+<p><strong>约束六：音频内容的演绎性质</strong></p>
+<p>本音频为二次演绎配音版，口语化表达、例子取舍与结构顺序均有改编，不等于原文档的逐字朗读。涉及具体数据、案例与引文时，请以原文档为准。</p>
+<hr>
+<h2>九、关键句摘抄</h2>
+<ul>
+<li>发散想法后，得到想法十分简单，但得到可执行步骤却非常难。</li>
+<li>真的要动手的时候，抽象几乎帮不上忙。</li>
+<li>拆解并细化的意义，是帮你从一个听起来很大、很抽象的愿望，走到一个可以具体执行的列表。</li>
+<li>我说的「处理」，到底是要「看得更快」、「改得更好」，还是「传给别人更方便」？</li>
+<li>如果这个应用做得非常成功，对用户来说最大的变化是什么？</li>
+<li>这样的描述仍然只是一个「中间目标」，还称不上真正可执行的产品方案。</li>
+<li>「高质量」不再是一个空泛的形容词，而可以被转化为写得出来、量得出来的产品标准。</li>
+<li>只要能原子化，就能被执行。</li>
+</ul>
+<hr>
+<h2>十、音频与稿件信息</h2>
+<table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>集次标识</td><td>stage-1-appendix-a-product-thinking-03</td></tr>
+<tr><td>章节</td><td>产品思维基础（stage-1 附录 A）· 2.2 节</td></tr>
+<tr><td>标题</td><td>得到可执行步骤 · 学会从抽象到具体</td></tr>
+<tr><td>口播稿</td><td>script.txt（六段式，正文约五千字）</td></tr>
+<tr><td>音频文件</td><td>stage-1-appendix-a-product-thinking-03-播客.mp3</td></tr>
+<tr><td>字幕文件</td><td>stage-1-appendix-a-product-thinking-03-播客.srt</td></tr>
+<tr><td>演绎方式</td><td>二次演绎配音版，口语化改编</td></tr>
+<tr><td>收听建议</td><td>适合在写第一版需求描述之前听，配合第七节审查清单使用</td></tr>
+</table>
+<hr>
+<h2>十一、来源</h2>
+<p>本内容改编自开源项目 <strong>Easy-Vibe</strong>（datawhalechina/easy-vibe），原文位于</p>
+<p><code>docs/zh-cn/stage-1/appendix-a-product-thinking/index.md</code>，为二次演绎配音版。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
