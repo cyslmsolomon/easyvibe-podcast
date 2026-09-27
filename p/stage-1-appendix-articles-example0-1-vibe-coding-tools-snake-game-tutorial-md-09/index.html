@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>七款 AI 编程工具对比 · 1. 什么是 Vibe Coding？</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 6 · EP 9</span>
+<h1>七款 AI 编程工具对比 · 1. 什么是 Vibe Coding？</h1>
+<p class="sub">第 6 章 · 第 9 讲 · 15:39</p>
+<div class="meta"><span>时长 <b>15:39</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>6</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-1-appendix-articles-example0-1-vibe-coding-tools-snake-game-tutorial-md-09-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-1-appendix-articles-example0-1-vibe-coding-tools-snake-game-tutorial-md-09-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-1-appendix-articles-example0-1-vibe-coding-tools-snake-game-tutorial-md-09/stage-1-appendix-articles-example0-1-vibe-coding-tools-snake-game-tutorial-md-09-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-1-appendix-articles-example0-1-vibe-coding-tools-snake-game-tutorial-md-09/stage-1-appendix-articles-example0-1-vibe-coding-tools-snake-game-tutorial-md-09-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-6.html">← 第 6 章目录</a>
+<a href="/p/stage-1-appendix-a-product-thinking-07/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:43</span></div>
+<div class="ch" data-t="103.344"><span class="t">1:43</span><span class="n">一次说清楚，还是拆成小步</span><span class="d">2:36</span></div>
+<div class="ch" data-t="259.632"><span class="t">4:19</span><span class="n">在线平台，像拎包入住</span><span class="d">1:38</span></div>
+<div class="ch" data-t="357.768"><span class="t">5:57</span><span class="n">本地开发环境，像精装修</span><span class="d">1:38</span></div>
+<div class="ch" data-t="455.952"><span class="t">7:35</span><span class="n">智能体到底是个什么东西</span><span class="d">2:00</span></div>
+<div class="ch" data-t="576.024"><span class="t">9:36</span><span class="n">同一个任务，五款工具跑一遍</span><span class="d">3:02</span></div>
+<div class="ch" data-t="758.64"><span class="t">12:38</span><span class="n">怎么选，看你的位置</span><span class="d">1:42</span></div>
+<div class="ch" data-t="861.12"><span class="t">14:21</span><span class="n">收尾</span><span class="d">1:18</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>七款 AI 编程工具对比 · 什么是 Vibe Coding —— 解读与音频稿件</h1>
+<blockquote>本集对应 Easy-Vibe 教程「七款 AI 编程工具对比」的第一部分，覆盖 Vibe Coding（氛围编程）的定义与五步工作流、在线平台与本地 IDE 两条路线、AI Agent 的四个关键特征，以及用同一个「贪吃蛇 + 生成诗歌」任务横评五款工具的结果。</blockquote>
+<blockquote>音频为二次演绎配音版，不是原文朗读；本稿件是对音频内容的整理与补充，可以和音频对照使用。</blockquote>
+<hr>
+<h2>一、本集在讲什么</h2>
+<p>从这一集开始，内容从「想清楚做什么」转向「动手怎么做」。动手之前的第一件事是选工具，而选工具的前提是理解一种新的写代码方式。</p>
+<p>全篇四块：</p>
+<ol>
+<li><strong>Vibe Coding 是什么</strong>：从「以代码为中心」转向「以意图为中心」，工作流是一个「描述 → 生成 → 运行 → 反馈」的五步循环。</li>
+<li><strong>两条工具路线</strong>：在线平台（拎包入住） vs 本地 AI IDE（精装修），各自的能力边界与适合人群。</li>
+<li><strong>AI Agent 不是聊天助手</strong>：自主性、感知与记忆、目标导向、工具使用这四个特征，决定了你要「引导」它而不是「询问」它。</li>
+<li><strong>同一任务横评</strong>：用「接入大模型 API 的贪吃蛇网页游戏」这一个任务，看 Lovable、Cursor、Replit、Minimax、Trae 各自的表现差异。</li>
+</ol>
+<p>一句话概括：<strong>工具的名字会一直换，不变的是选择逻辑——先看你有没有基础和项目要不要长期维护，再决定走在线还是本地。</strong></p>
+<hr>
+<h2>二、能力地图</h2>
+<h3>第一层：理解层</h3>
+<ul>
+<li><strong>意图表达</strong>：能把想要的结果用自然语言说清楚，而不是从「第一行代码怎么写」开始构思。</li>
+<li><strong>任务拆解</strong>：能把一个大目标拆成一串可逐步验证的小待办，而不是指望一次到位。</li>
+<li><strong>循环意识</strong>：理解「描述 → 生成 → 运行 → 反馈 → 重复」是一个循环，并且知道每一步各自要验证什么。</li>
+</ul>
+<h3>第二层：选型层</h3>
+<ul>
+<li><strong>路线判断</strong>：能根据自身基础与项目性质，判断该走在线平台还是本地开发环境。</li>
+<li><strong>边界识别</strong>：知道在线平台在「需要本地资源、深度调试」时会不够用，也知道本地 IDE 的学习曲线陡在哪。</li>
+<li><strong>成本意识</strong>：了解免费版在复杂项目上可能跑不完、某些平台价格偏高但有学生优惠等现实约束。</li>
+</ul>
+<h3>第三层：协作层</h3>
+<ul>
+<li><strong>Agent 思维</strong>：能针对目标下达指令，而不是把它当搜索引擎用；能给它足够的上下文让它自主规划。</li>
+<li><strong>迭代诊断</strong>：运行后能定位问题出在哪一层，并给出精准的下一步指令，而不是笼统地说「不对，重写」。</li>
+<li><strong>安全习惯</strong>：涉及密钥时能用配置文件 + 忽略文件的方式隔离，不把密钥写进代码提交出去。</li>
+</ul>
+<hr>
+<h2>三、核心概念卡</h2>
+<h3>概念一：Vibe Coding</h3>
+<p>由 AI 研究者 Andrej Karpathy 提出的概念：开发者不再逐行手写代码，而是主要通过引导 AI Agent 来生成、优化和调试应用。它不是传统编程的替代品，而是一种更「对话式」的编程模式。</p>
+<p>核心转变是<strong>从 code-first（以代码为中心）到 intent-first（以意图为中心）</strong>。</p>
+<p>五步工作流：</p>
+<table>
+<tr><th>步骤</th><th>动作</th><th>要点</th></tr>
+<tr><td>1 描述目标</td><td>用一句话或一段话说清要什么</td><td>越具体越好，但不要一次塞进全部需求</td></tr>
+<tr><td>2 生成代码</td><td>Agent 解析需求，产出初版</td><td>包含基本结构、前端页面、后端逻辑</td></tr>
+<tr><td>3 运行观察</td><td>跑起来看是否符合预期</td><td>同时记录缺陷与不足</td></tr>
+<tr><td>4 反馈迭代</td><td>在对话里继续下指令</td><td>指令要指向具体现象，比如「蛇移动太慢，调快些」</td></tr>
+<tr><td>5 重复循环</td><td>回到第 1 步</td><td>直到达到满意状态</td></tr>
+</table>
+<p>四项主要优势：降低门槛、快速原型（想法到 MVP 的时间大幅缩短）、提高效率（自动化模板与重复编码）、利于试验（先产出再完善）。</p>
+<h3>概念二：为什么要拆小步</h3>
+<p>一次性把「做一个完整全栈应用」说完，当前工具确实有机会给出看上去不错的结果，但成功率与可控性都不如分阶段迭代。</p>
+<p>原因是<strong>可定位性</strong>：一次性生成的结果里，某处不满意时你很难判断问题出在哪一层；拆小步之后，每一步都能单独验证，出错就退回该步重来。</p>
+<p>示例拆解：</p>
+<ol>
+<li>先做一个贪吃蛇游戏的前端。</li>
+<li>再实现一个记录分数的后端。</li>
+<li>最后把前后端连起来。</li>
+</ol>
+<h3>概念三：两条工具路线</h3>
+<table>
+<tr><th>维度</th><th>在线平台（Web-based）</th><th>本地 AI IDE（PC）</th></tr>
+<tr><td>比喻</td><td>拎包入住的酒店式公寓</td><td>精装修的自有住房</td></tr>
+<tr><td>环境</td><td>不用配置，浏览器打开就用</td><td>需要理解项目结构、依赖管理、文件组织</td></tr>
+<tr><td>优势</td><td>一键预览与部署，分享链接方便</td><td>可访问本地文件与算力，可接本地数据库，可深度调试</td></tr>
+<tr><td>适合</td><td>快速验证想法、新手入门、轻量应用</td><td>专业项目、深度定制、数据隐私要求高</td></tr>
+<tr><td>代表</td><td>Lovable、Replit、Z.ai、v0</td><td>Cursor、Trae、VS Code + AI 插件</td></tr>
+</table>
+<p>两条路线不互斥，很多人都是从在线起步，项目复杂后再迁到本地。</p>
+<h3>概念四：AI Agent 的四个特征</h3>
+<ul>
+<li><strong>自主性（Autonomy）</strong>：不像传统程序需要人逐步触发，而是根据目标自主决定下一步。</li>
+<li><strong>感知与记忆（Perception &amp; Memory）</strong>：从环境收集数据（接口返回、用户输入等），并用记忆保留上下文、复用经验。</li>
+<li><strong>理性与目标导向（Rationality &amp; Goal-Orientation）</strong>：围绕给定目标做分析与规划，选择更优的行动序列。</li>
+<li><strong>工具使用（Tool Use）</strong>：能调用外部工具——浏览网页、运行代码、查询数据库、发送邮件，是「会调度工具的大脑」。</li>
+</ul>
+<p>三个比喻帮助区分：<strong>传统程序像计算器</strong>（按一下才算一下）；<strong>AI 助手像人类助理</strong>（给你选项，决策在你）；<strong>AI Agent 像一支自动化研究团队</strong>（给高层目标，它自己分解、查资料、调用接口、交付结果）。</p>
+<h3>概念五：横评任务设计</h3>
+<p>统一任务：构建一个接入大模型 API 的贪吃蛇网页应用。</p>
+<ul>
+<li>蛇吃到的是英文单词，收集到的单词跨局保留并累计计数。</li>
+<li>「生成诗歌」按钮调后端写诗，用到的单词从库存中移除。</li>
+<li>必备功能：键盘控制与画布渲染、单词收集与侧栏更新、跨局持久化、后端调用、密钥的配置文件管理与防泄漏。</li>
+<li>加分项：可选词生成诗歌、侧边栏与诗歌区布局合理、为初学者加注释。</li>
+</ul>
+<p>这个任务「不大但五脏俱全」，非常适合横评。</p>
+<hr>
+<h2>四、五款工具横评速览</h2>
+<table>
+<tr><th>工具</th><th>类型</th><th>工作流特点</th><th>适合谁</th><th>注意点</th></tr>
+<tr><td>Lovable</td><td>在线</td><td>自动完成连接数据库等初始化，多服务串联顺畅</td><td>第一次尝试 Vibe Coding 的新手</td><td>价格偏贵，学生邮箱可半价</td></tr>
+<tr><td>Cursor</td><td>本地 IDE</td><td>代码生成、智能重写、代码库查询嵌入开发环境，三平台支持</td><td>有编程基础的开发者</td><td>本地环境配置因人而异，新手学习曲线陡</td></tr>
+<tr><td>Replit</td><td>在线</td><td>一体化开发部署，先给行动计划，提供可视化编辑器改 UI 同步源码</td><td>新手、需要协作的场景</td><td>本轮实测约 3 轮迭代才达理想效果</td></tr>
+<tr><td>Minimax</td><td>在线</td><td>自动生成计划并自动发现修复错误</td><td>想观察 AI 如何定位与解决问题的学习者</td><td>耗时与用量消耗大，免费版复杂项目可能跑不完</td></tr>
+<tr><td>Trae</td><td>本地 IDE</td><td>与 Cursor 同属本地路线</td><td>有一定基础、需要深度定制的开发者</td><td>同本地 IDE 的共性门槛</td></tr>
+</table>
+<p>教程的工具总表还列出了 Z.ai、v0（在线）以及 Mastergo、Figma（UI/UX 方向）。其中 Z.ai 的一个明显特点是<strong>需要手动复制粘贴生成的代码、缺少实时预览窗口</strong>，更适合想看「原生 AI 输出代码」的人，而不是追求一键体验的人。</p>
+<hr>
+<h2>五、实践提示</h2>
+<h3>提示1 · 把大目标拆成一串可勾选的小待办</h3>
+<p>不要写「做一个贪吃蛇游戏」，而是写成三到五条待办，每条都能单独跑起来验证。拆完之后，你会发现每一条的提示词都好写多了，因为需求边界变清楚了。这一步的收益远远超过换一个更「聪明」的工具。</p>
+<h3>提示2 · 反馈指令要指向具体现象</h3>
+<p>迭代时不要说「不对，重写」，要说清楚现象。比如「蛇移动太慢了，把速度调快些」「配置文件里的密钥没被正确读取，请修复后端代码」。指向现象的指令能让 Agent 精准定位，笼统的抱怨只会让它整段重来，把之前已经做对的部分也一起推翻。</p>
+<h3>提示3 · 先用在线平台跑通闭环，再考虑本地</h3>
+<p>如果你是新手，建议先用在线平台完整走一遍「描述 → 生成 → 预览 → 部署 → 分享链接」的闭环。这个闭环跑通一次之后，你对整个流程就有了实感，再迁到本地 IDE 时，就不会被环境配置单独劝退。顺序反了，很容易卡在装环境这一步就放弃。</p>
+<h3>提示4 · 密钥一律走配置文件加忽略文件</h3>
+<p>只要涉及密钥，就把密钥单独放进本地配置文件，同时把这个文件名写进忽略列表，确保它不会被提交到代码仓库。这是本集任务里明确列为「必备功能」的一条，也是很多人第一次上线就踩的坑。现在养成习惯，后面能省掉一次事故。</p>
+<h3>提示5 · 用横评任务给工具做一次体检</h3>
+<p>挑一个你熟悉的小任务，比如本集的贪吃蛇，让两到三款工具各跑一遍，记录三件事：从下指令到能跑通用了多久、中间迭代了几轮、最终哪里没达到预期。有了这份自己的记录，你就不需要依赖任何一篇测评文章的结论了。</p>
+<h3>提示6 · 观察 Minimax 这类「自动修错」的过程</h3>
+<p>如果你的目的是学习，可以特意选一个会自动跑测试、自动修错误的平台，完整看一遍它怎么定位问题。这个过程比直接拿到正确结果有价值得多，你会慢慢建立起对「AI 容易在哪类问题上出错」的直觉。</p>
+<hr>
+<h2>六、审查清单</h2>
+<ul>
+<li>我能用自己的话说清 Vibe Coding 与传统编程的区别，并且能指出核心转变是「以意图为中心」。</li>
+<li>我在下指令之前已经把大目标拆成了一串小待办。</li>
+<li>我的反馈指令指向具体现象，而不是笼统地说不对。</li>
+<li>我清楚在线平台和本地 IDE 各自的边界，并且能说明理由。</li>
+<li>我理解 AI Agent 的四个特征，知道要「引导」而不是「询问」。</li>
+<li>涉及密钥时，我已经用配置文件加忽略文件做了隔离。</li>
+<li>我至少用同一个任务跑过两款工具，并记录了耗时、迭代轮数和未达预期的地方。</li>
+</ul>
+<hr>
+<h2>七、约束与边界说明</h2>
+<p><strong>关于工具评价的时效性。</strong> 本集提到的工具特性、价格、免费版额度都是教程撰写当时的观察，这类信息变化极快。请以你实际使用时的情况为准，不要把这些结论当成长期有效的选型依据。真正稳定的是选择逻辑：看基础、看项目性质、看是否需要本地资源和深度调试。</p>
+<p><strong>关于横评的公平性。</strong> 同一任务在不同时间、不同账号、不同网络条件下重跑，结果会有差异。教程中「Replit 约迭代三轮」这类数字是一次实测的记录，不是精确的性能指标。</p>
+<p><strong>关于未展开的工具。</strong> 教程的工具总表列出了七款编程工具以及 Mastergo、Figma 等 UI/UX 平台。本集口播只展开了其中五款，其余的请以原始文档为准。被省略不代表不重要，只是口播篇幅有限。</p>
+<p><strong>关于术语的口播处理。</strong> 音频中为便于中文听众理解，把 Vibe Coding 表述为「氛围编程」，把 API、IDE、MVP、Token 等英文缩写转成了中文说法。需要准确引用术语时请以原始文档和本稿件的对照表为准。</p>
+<p><strong>关于安全提示的适用范围。</strong> 「配置文件 + 忽略文件」是最小限度的安全习惯，它防的是「密钥被提交进公开仓库」这一类最常见的事故，不等于完整的密钥管理方案。涉及生产环境时请另行评估。</p>
+<p><strong>关于本音频的性质。</strong> 这是基于开源教程的二次演绎配音版，为便于口播做了口语化改写与结构重组，措辞和顺序与原文不完全一致。需要引用原文时请以原始文档为准。</p>
+<hr>
+<h2>八、关键句摘抄</h2>
+<ul>
+<li>从以代码为中心，变成以意图为中心。</li>
+<li>与其期待一次到位，不如把大目标拆成一条条可执行的小待办。</li>
+<li>工具的名字会一直换，不变的是选择逻辑。</li>
+<li>传统程序像计算器，AI 助手像人类助理，AI Agent 像一支自动化研究团队。</li>
+<li>你要做的是引导一个智能体，而不是简单地问它一个问题。</li>
+<li>在线平台是拎包入住，本地开发环境是精装修。</li>
+<li>只要涉及密钥，就别把它直接写进代码里提交出去。</li>
+</ul>
+<hr>
+<h2>九、音频与稿件信息</h2>
+<table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>集次标识</td><td>stage-1-appendix-articles-example0-1-vibe-coding-tools-snake-game-tutorial-md-09</td></tr>
+<tr><td>章节</td><td>实战对比篇（stage-1 附录 articles）</td></tr>
+<tr><td>标题</td><td>七款 AI 编程工具对比 · 什么是 Vibe Coding</td></tr>
+<tr><td>口播稿</td><td>script.txt（八段式，正文约四千八百字）</td></tr>
+<tr><td>音频文件</td><td>stage-1-appendix-articles-example0-1-vibe-coding-tools-snake-game-tutorial-md-09-播客.mp3</td></tr>
+<tr><td>字幕文件</td><td>stage-1-appendix-articles-example0-1-vibe-coding-tools-snake-game-tutorial-md-09-播客.srt</td></tr>
+<tr><td>演绎方式</td><td>二次演绎配音版，口语化改编</td></tr>
+<tr><td>收听建议</td><td>适合在挑选编程工具之前听，配合第六节审查清单使用</td></tr>
+</table>
+<hr>
+<h2>十、来源</h2>
+<p>本内容改编自开源项目 <strong>Easy-Vibe</strong>（datawhalechina/easy-vibe），原文位于</p>
+<p><code>docs/zh-cn/stage-1/appendix-articles/example0-1/vibe-coding-tools-snake-game-tutorial.md</code>，</p>
+<p>为二次演绎配音版。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
