@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>从数据库到 Supabase · 文件存储 (Storage)</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 7 · EP 36</span>
+<h1>从数据库到 Supabase · 文件存储 (Storage)</h1>
+<p class="sub">第 7 章 · 第 36 讲 · 15:21</p>
+<div class="meta"><span>时长 <b>15:21</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>7</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-backend-database-supabase-36-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-backend-database-supabase-36-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-2-backend-database-supabase-36/stage-2-backend-database-supabase-36-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-2-backend-database-supabase-36/stage-2-backend-database-supabase-36-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-7.html">← 第 7 章目录</a>
+<a href="/p/stage-2-backend-database-supabase-35/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:23</span></div>
+<div class="ch" data-t="83.4"><span class="t">1:23</span><span class="n">对象存储的替代方案，一</span><span class="d">1:48</span></div>
+<div class="ch" data-t="192.24"><span class="t">3:12</span><span class="n">对象存储的替代方案，二</span><span class="d">1:44</span></div>
+<div class="ch" data-t="297.216"><span class="t">4:57</span><span class="n">边缘函数的替代方案，一</span><span class="d">1:42</span></div>
+<div class="ch" data-t="399.6"><span class="t">6:39</span><span class="n">边缘函数的替代方案，二</span><span class="d">1:16</span></div>
+<div class="ch" data-t="475.848"><span class="t">7:55</span><span class="n">实时通信的替代方案</span><span class="d">1:58</span></div>
+<div class="ch" data-t="594.072"><span class="t">9:54</span><span class="n">数据库的替代方案，一</span><span class="d">1:58</span></div>
+<div class="ch" data-t="712.536"><span class="t">11:52</span><span class="n">数据库的替代方案，二</span><span class="d">1:53</span></div>
+<div class="ch" data-t="826.008"><span class="t">13:46</span><span class="n">收尾</span><span class="d">1:34</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe · 后端组件选型地图（对象存储、边缘函数、实时通信、数据库） — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-2/backend/database-supabase/index.md</code>「文件存储 (Storage)」「边缘函数 (Edge Functions)」「实时通信 (Realtime)」「数据库」四节选型对比表），为<strong>二次演绎配音版</strong>。原文作者与贡献者来自清华大学深圳国际研究生院及开源社区。本文在原文基础上做了口语化改写、结构重组与实践补充，观点与例子由演绎方添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>stage-2-backend-database-supabase-36</code></li>
+<li>所属章节：第 7 章</li>
+<li>原文覆盖小节：文件存储 (Storage) 替代方案表、边缘函数 (Edge Functions) 替代方案表、实时通信 (Realtime) 替代方案表、数据库替代方案表，以及其后的总结段</li>
+<li>对应音频：<code>stage-2-backend-database-supabase-36-播客.mp3</code></li>
+<li>字幕：<code>stage-2-backend-database-supabase-36-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>前面数集一直在讲「怎么用某一个平台」，本集换了一个更高的视角：<strong>如果用户不想用这套方案，还有哪些工具可选，各自适合谁。</strong></p>
+<p>原文在此处一口气给出四张对比表，覆盖后端技术栈的四个关键组件：</p>
+<ol>
+<li><strong>对象存储</strong> —— 非结构化文件放哪；</li>
+<li><strong>边缘函数</strong> —— 服务端逻辑在哪跑；</li>
+<li><strong>实时通信</strong> —— 推送能力怎么来；</li>
+<li><strong>数据库</strong> —— 结构化数据存哪。</li>
+</ol>
+<p>这四张表共同构成一张<strong>后端组件选型地图</strong>。音频稿按「存储上 → 存储下 → 边缘函数上 → 边缘函数下 → 实时 → 数据库上 → 数据库下 → 收尾总纲」的顺序重排，把表格语言转成口语，并补充了原文未明说、但对选型至关重要的判断规则。</p>
+<hr>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>组件</th><th>原文列出的候选</th><th>原文给出的关键差异</th><th>演绎方提炼的选型主线</th></tr>
+<tr><td>对象存储</td><td>Amazon S3、Google Cloud Storage / Firebase Storage、腾讯云 COS / 阿里云 OSS、MinIO、Cloudinary / Imgix</td><td>免费额度、与生态整合度、是否自建</td><td>省心 / 可控 / 专业，三者只能优先一个</td></tr>
+<tr><td>边缘函数</td><td>Cloudflare Workers、Vercel Edge Functions、Netlify Edge / Functions、AWS Lambda@Edge / CloudFront Functions</td><td>每日或每月请求额度、运行时限制、配置复杂度</td><td>先看代码在哪，再看谁离用户更近</td></tr>
+<tr><td>实时通信</td><td>Firebase Realtime Database / Firestore、Ably、Pusher Channels、自建 WebSocket / Socket.IO</td><td>消息额度、并发连接数、查询能力</td><td>前三种是买服务，第四种是买人力</td></tr>
+<tr><td>数据库</td><td>Neon、Aiven、CockroachDB Cloud、TiDB Cloud、MongoDB Atlas、SQLPub</td><td>类型（关系型 / 文档型）、存储额度、分布式能力</td><td>结构稳定的数据留关系型，结构常变的往文档型靠</td></tr>
+</table>
+<hr>
+<h2>三、逐节解读</h2>
+<h3>3.1 对象存储：一条从「省心」到「可控」的光谱</h3>
+<p>原文列出的五种方案，实际排成了一条光谱：</p>
+<ul>
+<li><strong>最省心</strong>：腾讯云 COS、阿里云 OSS —— 面向国内市场，文档完善，按量付费；</li>
+<li><strong>最标准</strong>：Amazon S3 —— 原文称其为行业标准，可靠性高、全球多区域部署，但定价复杂；</li>
+<li><strong>最易集成</strong>：Firebase Storage —— 与 Firebase / Google Cloud 紧密集成，支持 CDN 加速与细粒度安全规则；</li>
+<li><strong>最可控</strong>：MinIO —— 开源、兼容 S3 接口，可自建，代价是基础设施自己维护；</li>
+<li><strong>最专业</strong>：Cloudinary / Imgix —— 针对图片视频优化的云存储加 CDN，功能专一，当通用存储用则成本偏高。</li>
+</ul>
+<p>演绎方强调一个容易被忽略的点：<strong>S3 的接口规范已经成为行业通用语言</strong>，很多其他存储产品会主动兼容它。选一个接口被广泛兼容的服务，等于给未来留了一条迁移退路。</p>
+<h3>3.2 边缘函数：先看绑定，再看额度</h3>
+<p>四家候选的差异，本质上不是「谁更快」，而是<strong>你愿意被谁绑定</strong>：</p>
+<table>
+<tr><th>候选</th><th>绑定对象</th><th>免费额度要点</th><th>主要限制</th></tr>
+<tr><td>Cloudflare Workers</td><td>Cloudflare 边缘网络</td><td>免费计划每天 100k 请求</td><td>运行时限制，调试工具有限</td></tr>
+<tr><td>Vercel Edge Functions</td><td>Vercel 平台与前端框架</td><td>Hobby 免费每月 100 万函数调用与边缘请求</td><td>默认运行时 10s，可提升至 60s；免费版团队协作受限</td></tr>
+<tr><td>Netlify Edge / Functions</td><td>Netlify 平台</td><td>免费 300 代币 / 月，约合 1M 请求</td><td>构建、函数、带宽共用一份额度，需要精打细算</td></tr>
+<tr><td>AWS Lambda@Edge / CloudFront Functions</td><td>AWS 生态</td><td>与 AWS 免费额度叠加</td><td>配置复杂，延迟略高于 Cloudflare / Vercel</td></tr>
+</table>
+<p>演绎方补充一条看额度的技巧：<strong>不要只看请求次数，还要看单次运行时长上限。</strong> 若函数常跑十几秒，时长限制会比次数更早触顶。</p>
+<h3>3.3 实时通信：自建是一道人力采购题</h3>
+<p>原文给出的四选一，可以压缩成一句判据：</p>
+<ul>
+<li>要<strong>简单起步 + 生态集成</strong> → Firebase Realtime Database / Firestore（短板是文档型结构，复杂查询弱）；</li>
+<li>要<strong>高并发 + 大消息量</strong> → Ably（免费可达每月 600 万条消息）；</li>
+<li>要<strong>快速做聊天与通知</strong> → Pusher Channels（免费每日 200k 消息、100 并发连接）；</li>
+<li>要<strong>完全定制</strong> → 自建 WebSocket / Socket.IO（灵活度最高，但可用性、扩展、跨域全部自理）。</li>
+</ul>
+<p><strong>自建不是技术选择，是人力采购决策。</strong> 原文明确列出自建的代价：需自行处理可用性、扩展和跨域等问题。</p>
+<h3>3.4 数据库：看主打功能，反推它解决的问题</h3>
+<p>同为关系型数据库还能分出多家，原因是各家解决的痛点不同：</p>
+<table>
+<tr><th>候选</th><th>主打能力</th><th>免费额度要点</th></tr>
+<tr><td>Neon</td><td>Serverless PostgreSQL，支持分支（fork 测试）</td><td>0.5GB 存储，主分支永久在线，每月 20h 分支计算</td></tr>
+<tr><td>Aiven</td><td>托管关系型，支持跨云多区域迁移</td><td>1GB 存储、1 vCPU、1GB 内存</td></tr>
+<tr><td>CockroachDB Cloud</td><td>分布式 SQL，兼容 PostgreSQL，自动分片</td><td>10GB 存储</td></tr>
+<tr><td>TiDB Cloud</td><td>分布式关系型，兼容 MySQL 协议</td><td>每节点 5GB，总计最多 25GB</td></tr>
+<tr><td>MongoDB Atlas</td><td>文档型（NoSQL）</td><td>M0 集群 0.5GB 存储</td></tr>
+<tr><td>SQLPub</td><td>多数据库一站式</td><td>每小时 36,000 请求、30 并发、500MB 存储</td></tr>
+</table>
+<p><strong>看主打功能就能反推它当初想解决的问题</strong>：Neon 针对「改库结构太危险」，Aiven 针对「不想被一朵云绑死」，CockroachDB 与 TiDB 针对「数据量大到单机装不下」。</p>
+<h3>3.5 原文给出的总纲</h3>
+<p>原文在四张表之后的总结段，是整份选型内容的收束，几乎可以原样作为决策起点：</p>
+<blockquote>开源更灵活可控（Keycloak、MinIO、Socket.IO、Neon、CockroachDB 等），云托管服务更易上手（Firebase、Auth0、Cloudflare、Vercel、Netlify、AWS、Aiven、MongoDB Atlas 等）。</blockquote>
+<p>四个权衡维度：<strong>项目需求、团队技术栈、预算、社区生态。</strong></p>
+<p>两类典型结论：</p>
+<ul>
+<li><strong>个人项目</strong> → 优先选免费配额充足、易集成的服务；</li>
+<li><strong>企业级或有特定安全需求</strong> → 考虑功能更丰富但收费较高的方案。</li>
+</ul>
+<p>原文最后一句特别值得记住：<strong>你可以在实际应用中不断尝试，直到选择出最适合的后端开发工具组件。</strong> 选型这件事，看十张表不如亲手跑一个小项目。</p>
+<hr>
+<h3>3.6 四张表的完整速查</h3>
+<p>音频为了可听性做了取舍，这里把原文四张对比表按「平台 — 免费额度 — 一句话定位」重排，方便对照查询。</p>
+<p><strong>对象存储</strong></p>
+<table>
+<tr><th>平台 / 服务</th><th>免费额度 / 定价</th><th>一句话定位</th></tr>
+<tr><td>Amazon S3</td><td>AWS 免费套餐 5GB 存储、20k GET/PUT 请求/月</td><td>行业标准，可靠性高，定价较复杂</td></tr>
+<tr><td>Google Cloud Storage（Firebase Storage）</td><td>Firebase Spark 1GB 存储 + 流量限制；Blaze 付费</td><td>与 Firebase / Google Cloud 紧密集成，支持细粒度安全规则</td></tr>
+<tr><td>腾讯云 COS / 阿里云 OSS</td><td>按量付费，各有新用户赠送额度（如 OSS 首年 40GB 免费）</td><td>面向国内市场，高性能大规模，文档完善</td></tr>
+<tr><td>MinIO</td><td>开源免费（自建）</td><td>轻量级高性能，兼容 S3 API，需自维护基础设施</td></tr>
+<tr><td>Cloudinary / Imgix 等</td><td>基本免费（如 Cloudinary 免费 25GB/月带宽）</td><td>媒体存储 + CDN，实时转码压缩，通用存储场景成本偏高</td></tr>
+</table>
+<p><strong>边缘函数</strong></p>
+<table>
+<tr><th>平台 / 服务</th><th>免费额度 / 定价</th><th>一句话定位</th></tr>
+<tr><td>Cloudflare Workers</td><td>免费每天 100k 请求；标准计划 $5/月含 1000 万请求</td><td>全球分布式，延迟极低；运行时与调试工具有限</td></tr>
+<tr><td>Vercel Edge Functions</td><td>Hobby 免费每月 100 万函数调用、100 万边缘请求</td><td>与前端框架无缝集成；默认 10s，可提至 60s</td></tr>
+<tr><td>Netlify Edge / Functions</td><td>免费 300 代币/月（约 1M 请求）</td><td>简便易用，集成 Git 部署；额度需精打细算</td></tr>
+<tr><td>AWS Lambda@Edge / CloudFront Functions</td><td>Lambda 1M 免费请求/月 + 400k GB-s；CloudFront 按调用计费</td><td>灵活强大，与 AWS 生态整合；配置复杂</td></tr>
+</table>
+<p><strong>实时通信与数据库</strong></p>
+<table>
+<tr><th>平台 / 服务</th><th>免费额度 / 定价</th><th>一句话定位</th></tr>
+<tr><td>Firebase Realtime Database / Firestore</td><td>Spark 免费，实时数据库 1GB 存储与限额</td><td>实时监听简单；文档型结构，复杂查询弱</td></tr>
+<tr><td>Ably</td><td>免费每月 6,000,000 条消息</td><td>高并发实时消息，支持 WebSocket、MQTT</td></tr>
+<tr><td>Pusher Channels</td><td>Sandbox 免费每日 200k 消息、100 并发连接</td><td>易用，文档齐全，适合聊天与通知</td></tr>
+<tr><td>自建 WebSocket / Socket.IO</td><td>自行托管成本</td><td>灵活度最高；可用性、扩展、跨域全部自理</td></tr>
+<tr><td>Neon</td><td>0.5GB 存储，主分支永久在线，20h 分支计算/月</td><td>Serverless PostgreSQL，支持分支测试</td></tr>
+<tr><td>Aiven PostgreSQL</td><td>1GB 存储、1 vCPU、1GB 内存</td><td>托管级，支持跨云多区域迁移</td></tr>
+<tr><td>CockroachDB Cloud</td><td>10GB 存储</td><td>分布式 SQL，自动分片扩展，高一致性</td></tr>
+<tr><td>TiDB Cloud</td><td>每节点 5GB，总计最多 25GB</td><td>MySQL 兼容，分布式，免费额度充足</td></tr>
+<tr><td>MongoDB Atlas</td><td>M0 集群 0.5GB 存储</td><td>文档型 NoSQL，模型灵活，可横向扩展</td></tr>
+<tr><td>SQLPub</td><td>36,000 请求/小时、30 并发连接、500MB 存储</td><td>多数据库一站式，适合学习与小项目</td></tr>
+</table>
+<hr>
+<h2>四、审查清单</h2>
+<ul>
+<li>已明确每个组件的<strong>选型优先级</strong>（省心 / 可控 / 专业，只能选一个）</li>
+<li>对象存储方案已确认<strong>接口兼容性</strong>，给自己留了迁移退路</li>
+<li>边缘函数除请求次数外，已核对<strong>单次运行时长上限</strong></li>
+<li>Netlify 类方案已确认<strong>额度是否多用途共用</strong></li>
+<li>实时方案已估算<strong>峰值并发连接数</strong>，而非只看消息量</li>
+<li>若考虑自建，已把<strong>运维人力</strong>折算进成本</li>
+<li>数据库选型已区分<strong>关系型与文档型</strong>的适用边界</li>
+<li>已按<strong>明年涨到一千用户</strong>的规模复核免费额度</li>
+<li>选型结论能说清<strong>放弃了什么</strong>，而不只是选了什么</li>
+</ul>
+<hr>
+<h2>五、实践提示</h2>
+<h3>提示1 · 用「未来规模」倒推，而不是用「当前规模」</h3>
+<p>免费额度看的是现在，选型看的是未来。看额度时请把用户量乘以十再算一遍，问自己：明年这个时候我还在免费额度里吗？如果答案是否定的，就要同时看清楚超出之后的计费规则。</p>
+<h3>提示2 · 优先选接口被广泛兼容的方案</h3>
+<p>对象存储选兼容 S3 接口的产品，数据库选兼容 PostgreSQL 或 MySQL 协议的产品。这类「事实标准」的兼容性，是你在未来换供应商时唯一的议价筹码。</p>
+<h3>提示3 · 自建前先折算人力成本</h3>
+<p>自建方案把成本从账单转移到了人的时间上。个人项目和小团队通常不划算。只有当存在数据不出机房的合规要求，或者规模大到云账单明显超过自运维成本时，才值得认真考虑。</p>
+<h3>提示4 · 记录你放弃了什么</h3>
+<p>选型最容易犯的错，是只记录选了什么、不记录放弃了什么。请在决策时写下被放弃方案的主要短板——半年后当新方案踩到同样的坑时，这份记录会告诉你当初的判断错在哪。</p>
+<hr>
+<h2>六、约束说明</h2>
+<ol>
+<li><strong>素材归属与排除。</strong> 本集素材取自原文 <code>stage-2/backend/database-supabase/index.md</code> 的选型对比部分。因原始切片尾部混入了属于其他页面的本地 Git 安装内容（Windows、MacOS、Git 初始化三节），与本页面无关，<strong>已按归属判断排除，不纳入本集讲述范围</strong>，并在音频开场中向听众作了说明。</li>
+<li><strong>表格数据按原文如实转述。</strong> 各工具的免费额度、定价方式、优缺点均出自原文四张对比表，本文未添加原文未提及的工具，也未修改原文给出的数字。</li>
+<li><strong>个别精确到价格的数字未在音频中念出。</strong> 例如 CloudFront 的按调用计费单价，为避免口语误读，音频中仅表述为「按调用量计费」，完整数字以本文与原文表格为准。</li>
+<li><strong>原文未给出的信息不作补充。</strong> 例如各工具的具体版本、地区可用性、审核流程等，原文未涉及，因此不在本集中出现。</li>
+<li><strong>演绎方添加的内容限于三类</strong>：结构性提炼（省心—可控—专业光谱、绑定对象优先于额度）、判据性建议（用未来规模倒推、自建折算人力、记录放弃了什么）、以及看额度的技巧（时长上限可能先于次数触顶）。这些内容属于实践补充，不等同于原文观点。</li>
+</ol>
+<hr>
+<h2>七、这一集在整条链路上的位置</h2>
+<p>如果把整个后端篇章分成三段，本集是第三段的收尾：</p>
+<ul>
+<li><strong>第一段</strong>：认识后端平台，能建表、能读写、能做用户体系；</li>
+<li><strong>第二段</strong>：补齐实时与存储，让应用具备「多人在线、各自有资产」的能力；</li>
+<li><strong>第三段</strong>：跳出单一工具，建立选型判断力。</li>
+</ul>
+<p>这三段对应着三种能力层级：<strong>会用 → 会配 → 会选</strong>。到了「会选」这一层，工具的更换就不再是一次推翻重来，而是一次有依据的迁移。</p>
+<p><strong>来源</strong>：Easy-Vibe（datawhalechina/easy-vibe）<code>docs/zh-cn/stage-2/backend/database-supabase/index.md</code>，文件存储 / 边缘函数 / 实时通信 / 数据库四节选型对比表。本音频与本文为二次演绎配音版，非原文照读。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
