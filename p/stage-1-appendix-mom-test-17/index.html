@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Mom Test：用户访谈方法 · 9.5 访谈结束后不整理</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 6 · EP 17</span>
+<h1>The Mom Test：用户访谈方法 · 9.5 访谈结束后不整理</h1>
+<p class="sub">第 6 章 · 第 17 讲 · 14:41</p>
+<div class="meta"><span>时长 <b>14:41</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>6</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-1-appendix-mom-test-17-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-1-appendix-mom-test-17-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-1-appendix-mom-test-17/stage-1-appendix-mom-test-17-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-1-appendix-mom-test-17/stage-1-appendix-mom-test-17-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-6.html">← 第 6 章目录</a>
+<a href="/p/stage-1-appendix-jobs-to-be-done-15/">← 上一讲</a>
+<a href="/p/stage-2-ai-capabilities-dify-knowledge-base-18/">下一讲 →</a>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">2:09</span></div>
+<div class="ch" data-t="129.648"><span class="t">2:09</span><span class="n">聊完别放着</span><span class="d">2:47</span></div>
+<div class="ch" data-t="297.24"><span class="t">4:57</span><span class="n">问行为不问意见</span><span class="d">2:30</span></div>
+<div class="ch" data-t="447.984"><span class="t">7:27</span><span class="n">对不同的人用不同的提纲</span><span class="d">2:18</span></div>
+<div class="ch" data-t="586.032"><span class="t">9:46</span><span class="n">让散落的信息重新归位</span><span class="d">1:44</span></div>
+<div class="ch" data-t="690.936"><span class="t">11:30</span><span class="n">访谈前先做轻量搜索</span><span class="d">1:35</span></div>
+<div class="ch" data-t="786.216"><span class="t">13:06</span><span class="n">动手练一次</span><span class="d">1:34</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>The Mom Test：用户访谈方法 · 访谈结束后不整理 —— 解读与音频稿件</h1>
+<blockquote>对应音频：stage-1-appendix-mom-test-17-播客.mp3</blockquote>
+<blockquote>对应字幕：stage-1-appendix-mom-test-17-播客.srt</blockquote>
+<blockquote>口播稿：script.txt</blockquote>
+<blockquote>来源：Easy-Vibe（datawhalechina/easy-vibe）docs/zh-cn/stage-1/appendix-mom-test/index.md</blockquote>
+<hr>
+<h2>一、本集在讲什么</h2>
+<p>这一集对应原文档「用户访谈方法」这一附录里的两节核心内容：访谈结束后的整理，以及怎么用大模型把访谈这件事准备得更顺、整理得更清。它解决的是一个很常见的落差——很多人以为只要去聊了，信息就在脑子里，结果过两天只剩模糊的好感。</p>
+<p>原文档借用了那本讲用户访谈的经典书（中文常译作《妈妈测试》）的核心主张：不要问别人怎么看你的点子，要去问别人真实做过什么。这一集把它拆成可操作的几步，并告诉你大模型能在哪些环节当助手，又有哪些底线大模型碰不得。</p>
+<p>本集口播稿覆盖原文档的以下部分：</p>
+<ol>
+<li>访谈结束后为什么要立刻整理，以及该记哪五类东西</li>
+<li>亲和图这种从证据到模式的整理方法</li>
+<li>问行为、不问意见这条铁律，以及怎么让大模型帮你改写问题</li>
+<li>面对新手、重度、付费三类用户，访谈重点有何不同</li>
+<li>把碎片化的访谈记录整理成结构化笔记时，如何不脱离原话</li>
+<li>访谈之前可以做的轻量外部调研</li>
+</ol>
+<blockquote>说明：原文档这一节后面还接了一段关于「从截图做网页」的实战课（涉及某款集成开发工具和几款参考产品），那属于另一个完全不同的主题，与用户访谈无关，本集及本切片均不涉及，避免主题串味。</blockquote>
+<hr>
+<h2>二、能力地图</h2>
+<p>听完这一集，你应该能建立下面这张能力地图。它分三层，从「能辨认」到「能判别」再到「能产出」。</p>
+<h3>第一层：辨认层</h3>
+<ul>
+<li>能认出一次访谈结束后，哪些信息正在快速流失、必须马上记</li>
+<li>能区分对方说的是意见还是行为，是客套还是真痛点</li>
+<li>能看出一份访谈记录里，哪些是原话、哪些是自己的推论</li>
+</ul>
+<h3>第二层：判别层</h3>
+<ul>
+<li>能用五类清单（高频问题、情绪词、替代方案、已付成本、自己的新判断）去整理一场访谈</li>
+<li>能用亲和图，把单场访谈的碎片聚成跨多场的模式</li>
+<li>能把「你会不会用」这类假设题，改写成「你最近一次真实经历」这类行为题</li>
+<li>能根据对方是新手、重度还是付费用户，切换访谈重点</li>
+</ul>
+<h3>第三层：产出层</h3>
+<ul>
+<li>能让大模型把零散对话整理成结构化笔记，且每条结论都能回到原话</li>
+<li>能在大模型生成提纲、改写问题、做轻量搜索时，守住「不替你做真人访谈」的边界</li>
+<li>能完成一次完整的练习：写五问、删假设、做一次访谈、记下做法与成本</li>
+</ul>
+<p>这三层的关系是递进的：辨认是前提，判别是核心，产出是目的。大多数人卡在第二层——他们愿意去聊，却不会把聊到的东西变成能支撑判断的证据。</p>
+<hr>
+<h2>三、核心概念卡</h2>
+<h3>概念一：访谈后必记的五类东西</h3>
+<p>聊完不能放着，最好在不久后立刻整理，至少记下这五类：</p>
+<table>
+<tr><th>类别</th><th>它回答的问题</th><th>为什么重要</th></tr>
+<tr><td>出现频率高的问题</td><td>哪些事被反复提到</td><td>重复即信号，比单次随口一说可靠</td></tr>
+<tr><td>原话里的情绪词</td><td>用户用什么词形容困扰</td><td>烦、怕、懒得、将就背后是真实痛感</td></tr>
+<tr><td>当前替代方案</td><td>没有你的产品时他怎么凑合</td><td>这就是你产品要替代的对象</td></tr>
+<tr><td>已付成本</td><td>他为此花过多少钱、时间、精力</td><td>愿意付过费，需求强度完全不同</td></tr>
+<tr><td>自己的新判断</td><td>你突然意识到的事</td><td>防止一直用旧画像误判用户</td></tr>
+</table>
+<h3>概念二：亲和图</h3>
+<p>亲和图是一种从证据到模式的整理法：先把一次访谈里看到的、听到的拆成一条条证据小纸条，再按重复出现的主题聚到一起。它的价值不在于记下了多少句原话，而在于让你看到跨好几场访谈才显现的规律，而不是停留在一句「我觉得大家都需要」。</p>
+<h3>概念三：问行为，不问意见</h3>
+<p>这是整本《妈妈测试》最反直觉的一点。问「你觉得我这个想法怎么样」，对方出于礼貌几乎必然回答「挺好的」，这句话既不能验证需求，也不能指导设计。正确方向是问对方真实的过去：你上一次遇到这件事是什么时候，当时怎么解决的，那个办法哪里让你难受。大模型在这里特别好用——你可以把准备问的问题先交给它，让它把「问意见」的句子改写成「问行为」的句子。</p>
+<h3>概念四：按人群切换重点</h3>
+<p>同一个方向，面对不同人群，访谈重点几乎是三件不同的事：</p>
+<ul>
+<li><strong>新手用户</strong>：重点问最近一次真实经历，印象最新鲜，最容易挖出初次使用的卡点</li>
+<li><strong>重度用户</strong>：重点问替代方案和痛感，他们踩过的坑最多，最有细节</li>
+<li><strong>付费用户</strong>：重点问是否真为类似问题付过钱，付过费的人需求强度更高</li>
+</ul>
+<p>让大模型针对这几类人各出一版提纲，你真去聊时才不会见谁都问同一套。</p>
+<h3>概念五：整理不能脱离原话</h3>
+<p>大模型适合把碎片化的对话整理成结构化笔记，但有一条铁律：结论必须能回到用户的原话。原文档举的口述史例子里，转写被特别强调为让记录真正可用的关键一步。模型能帮你转写、归类，但最终判断要能指回那句原话，否则就是把客套话当成了需求。</p>
+<h3>概念六：访谈前的轻量搜索</h3>
+<p>还没开始访谈时，可以让大模型做很轻的外部调研：社区里大家怎么抱怨、现有工具被吐槽什么、用户是否为此花过钱、市场上有哪些替代方案。它不能替代真人访谈，但能让你带着切入口去聊，而不是从零找话题。</p>
+<hr>
+<h2>四、实践提示</h2>
+<h3>提示1 · 把五个假设题改写成行为题</h3>
+<p>拿你准备问的五个问题，逐个过一遍，凡是「你会不会用」「你觉得怎么样」这类，都改成对方最近的真实经历。标准改法：把「你喜不喜欢」换成「你上一次遇到这件事是什么时候，当时怎么解决的」。改写完再拿去聊，你会发现对方的话立刻具体了。</p>
+<h3>提示2 · 用亲和图代替「我觉得」</h3>
+<p>每场访谈后，把听到的事实写成一条条小纸条，再按主题聚类。当你想写「用户都需要」这种结论时，先问自己：有几张纸条支持它，分别来自哪几次访谈。凑不出三张以上独立纸条的，先别下结论。</p>
+<h3>提示3 · 给三类人各写一版提纲</h3>
+<p>挑一个方向，让大模型分别给新手、重度、付费三类人出一版提纲，重点参照上文的三类差异。真正聊之前花十分钟读一遍，你现场就不会慌，也不会把所有人都问成同一套。</p>
+<h3>提示4 · 让模型整理，但每条结论回原话</h3>
+<p>把录音或笔记交给大模型整理成结构化笔记后，逐条检查：这一条能不能指回一句用户原话。指不回去的，标记为推断而非事实，写方案时只用事实那部分。</p>
+<h3>提示5 · 先听后说，一次只问一件事</h3>
+<p>访谈时先听，别急着介绍你自己的方案。一次认真的访谈，价值远高于收集很多句「这个想法不错」。聊完立刻按五类清单整理，趁记忆还热。</p>
+<hr>
+<h2>五、审查清单</h2>
+<p>在去做下一次访谈之前，逐条打勾。任何一条不过，先回到上一步。</p>
+<p><strong>关于访谈问题</strong></p>
+<ul>
+<li>我没有问「你会不会用」这类假设题</li>
+<li>我的问题都在问真实行为，而不是主观意见</li>
+<li>我给不同人群准备了不同重点的提纲</li>
+</ul>
+<p><strong>关于访谈现场</strong></p>
+<ul>
+<li>我先听，没有抢着介绍自己的方案</li>
+<li>我记下了对方的原话，而不只是我的总结</li>
+<li>我留意了对方话里的情绪词</li>
+</ul>
+<p><strong>关于访谈后整理</strong></p>
+<ul>
+<li>我在不久后立刻整理了五类信息</li>
+<li>我用了亲和图，而不是只写一句「我觉得」</li>
+<li>我让模型整理的每条结论都能回到原话</li>
+<li>我区分了事实与推断，写方案时只用事实</li>
+</ul>
+<p><strong>关于边界</strong></p>
+<ul>
+<li>我没有用轻量搜索替代真人访谈</li>
+<li>我没有把客套话当成需求</li>
+<li>我知道大模型是助手，真人对话还得自己聊</li>
+</ul>
+<hr>
+<h2>六、约束与边界说明</h2>
+<p>为了避免误用，这里明确列出本集结论的适用范围与已知限制。</p>
+<p><strong>约束一：主题边界</strong></p>
+<p>本集只覆盖原文档用户访谈方法相关的小节。原文档同一文件后段接了「从截图做网页」的实战课，属于另一个主题，本集未涉及，避免把访谈方法和编程实战混为一谈。</p>
+<p><strong>约束二：改编边界</strong></p>
+<p>本音频为二次演绎配音版，口语化表达、例子取舍与结构顺序均有改编，不等于原文档逐字朗读。涉及具体书名的引用，请以原书《妈妈测试》（英文名 The Mom Test）为准。</p>
+<p><strong>约束三：大模型的边界</strong></p>
+<p>大模型可以改写问题、生成提纲、整理笔记、做轻量搜索，但绝不能替代真人访谈。它给出的推断必须回到原话验证，否则就是把模型的归纳当成了需求证据，这正是本集所反对的把客套话当需求的一种变体。</p>
+<p><strong>约束四：样本边界</strong></p>
+<p>五类清单和亲和图都依赖真实访谈样本。样本太少时，你看到的模式可能是巧合，不要急着下结论，先多聊几场再回头聚。</p>
+<p><strong>约束五：情绪词的局限</strong></p>
+<p>原话里的情绪词是强信号，但不是唯一信号。一个人说「烦」可能是真痛点，也可能只是当下情绪，需要结合替代方案和已付成本一起判断，不要单凭一个词下定论。</p>
+<p><strong>约束六：AI 参与的边界</strong></p>
+<p>用大模型帮你准备和整理时，它的产出是输入材料，不是结论。是否构成真需求，仍然要回到真实用户那里验证。</p>
+<hr>
+<h2>七、关键句摘抄</h2>
+<ul>
+<li>访谈完成，只代表原材料到手，整理才是把原材料变成判断的那道工序。</li>
+<li>别问别人怎么看你这个点子，要去问别人真实做过什么。</li>
+<li>一次认真的访谈，比收集很多句「这个想法不错」要有用得多。</li>
+<li>整理不能脱离原始材料，结论必须能回到用户的原话。</li>
+<li>大模型是助手，不是替你做访谈的人。</li>
+<li>五类清单和亲和图都依赖真实样本，样本太少时先别急着下结论。</li>
+</ul>
+<hr>
+<h2>八、音频与稿件信息</h2>
+<table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>集次标识</td><td>stage-1-appendix-mom-test-17</td></tr>
+<tr><td>章节</td><td>用户访谈方法（stage-1 附录）</td></tr>
+<tr><td>标题</td><td>The Mom Test：用户访谈方法 · 访谈结束后不整理</td></tr>
+<tr><td>口播稿</td><td>script.txt（七段式，正文约四千八百字）</td></tr>
+<tr><td>音频文件</td><td>stage-1-appendix-mom-test-17-播客.mp3</td></tr>
+<tr><td>字幕文件</td><td>stage-1-appendix-mom-test-17-播客.srt</td></tr>
+<tr><td>演绎方式</td><td>二次演绎配音版，口语化改编</td></tr>
+<tr><td>收听建议</td><td>适合在准备第一次用户访谈之前听，配合第五节审查清单使用</td></tr>
+</table>
+<hr>
+<h2>九、来源</h2>
+<p>本内容改编自开源项目 <strong>Easy-Vibe</strong>（datawhalechina/easy-vibe），原文位于</p>
+<p><code>docs/zh-cn/stage-1/appendix-mom-test/index.md</code>，为二次演绎配音版。</p>
+<h2>十、常见误区与澄清</h2>
+<p>做用户访谈，新手最容易踩的坑其实就那么几个，这里集中澄清一下，免得你白费功夫。</p>
+<p><strong>误区一：聊得越多越好。</strong> 错。三场有准备、有整理的深度访谈，远胜过十场漫无目的的闲聊。关键不在数量，在于你每一场有没有按五类清单记下真东西。</p>
+<p><strong>误区二：用户说想要，就等于真需求。</strong> 这是把客套话当需求的典型。用户说想要某个功能，往往只是现场的一种礼貌性配合，不代表他真的会去用、会去付钱。只有他过去的真实行为、已经付过的成本，才是需求的硬证据。</p>
+<p><strong>误区三：有了大模型，访谈可以省了。</strong> 绝对不行。大模型能帮你准备提纲、改写问题、整理笔记、做轻量搜索，但它没有坐在你对面，听不到对方的叹息，也看不到对方犹豫时的眼神。它替代的是案头工作，不是人和人的对话。</p>
+<p><strong>误区四：整理是写方案时顺手做的事。</strong> 大错。记忆退潮极快，访谈当天的原话和情绪，过两天就只剩你自己的解读。整理必须在访谈后不久立刻做，而不是等写方案时凭记忆补。</p>
+<p><strong>误区五：亲和图是形式主义。</strong> 恰恰相反，亲和图是你对抗「我觉得」这种主观幻觉的武器。它逼你把每一个结论，挂到具体的原话纸条上，凑不出三张以上独立纸条的，就先别下结论。</p>
+<p><strong>误区六：只记结论不记原话。</strong> 很多人访谈后只写「用户想要更简单」，却写不出这句话对应的原话。没有原话的结论，等于没有证据，写方案时你根本不知道该信还是不信。记住，原话是你的护身符，结论只是你基于原话的判断。</p>
+<p><strong>误区七：一次访谈就下大结论。</strong> 单场访谈再深，也只是一个人的切片。你看到的规律，至少要跨三场以上、来自不同人，才算初步站得住。急着用一次聊天的收获定义整个用户群，是新手最容易犯的过度归纳。</p>
+<h2>十一、一次访谈的分钟级流程（示例）</h2>
+<p>如果你从没正式做过访谈，下面这个半小时的流程可以直接套用，帮你把这一集的方法落到一个可执行的节奏里。</p>
+<ul>
+<li><strong>访谈前十五分钟（准备）</strong>：让大模型针对你要聊的人群出一版提纲，删掉所有问意见的题目；再做一次轻量外部搜索，找到两三个社区里真实存在的切入口。</li>
+<li><strong>访谈中二十分钟（执行）</strong>：前五分钟寒暄建立信任，中间十二分钟只问行为、只听，最后三分钟确认你记下的关键原话没有理解偏差。全程先听后说，别抢着介绍自己的方案。</li>
+<li><strong>访谈后十五分钟（整理）</strong>：趁记忆还热，按五类清单写下频率和情绪词、替代方案、已付成本、自己的新判断；用亲和图把这次的纸条和之前几场归到一起。</li>
+<li><strong>当天收尾五分钟（留存）</strong>：把整理好的笔记和一句成本总结发给自己留档，标注每条结论对应的原话出处，找不到出处的标成假设而非事实。</li>
+</ul>
+<p>这套流程走下来，单次访谈的投入大约一小时，但换回来的是一条条能支撑判断的证据，而不是一句模糊的好感。坚持做上五场以上，你对用户的判断力会明显不一样。</p>
+<h2>十二、自我检验三问</h2>
+<p>读完、听完这一集，用下面三个问题检验自己是不是真学会了，而不是只是「感觉懂了」。</p>
+<ol>
+<li>如果明天要访谈一个用户，你能不能在不提自己方案的前提下，写出五个问行为的题目？写不出来的，回到概念三和提示一。</li>
+<li>如果有人拿一句「用户都说想要这个功能」来论证需求，你能不能立刻指出它缺了哪两类证据（真实行为、已付成本）？指不出来的，回到概念一和约束五。</li>
+<li>如果让大模型帮你整理了一堆访谈笔记，你能不能逐条标出每条结论对应的原话？标不出来的，回到概念五和提示四。</li>
+</ol>
+<p>三问都能答上来，这一集才算真正过了。最后再提醒一句。这一集你可能会觉得方法很多、记不住，那没关系，先把五类清单和问行为这两条刻进脑子里，剩下的慢慢练。真正的高手也不是一次就做对的，而是一开始就选对了方向，然后一场一场把判断磨准的。这半小时的投入，比你之后花三天返工改方案，划算太多。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>

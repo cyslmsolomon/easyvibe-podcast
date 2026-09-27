@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dify 入门与知识库集成 · 1.1 最简单的智能体：基于知识库的问答机器人</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 7 · EP 18</span>
+<h1>Dify 入门与知识库集成 · 1.1 最简单的智能体：基于知识库的问答机器人</h1>
+<p class="sub">第 7 章 · 第 18 讲 · 16:57</p>
+<div class="meta"><span>时长 <b>16:57</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>7</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-ai-capabilities-dify-knowledge-base-18-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-ai-capabilities-dify-knowledge-base-18-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-2-ai-capabilities-dify-knowledge-base-18/stage-2-ai-capabilities-dify-knowledge-base-18-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-2-ai-capabilities-dify-knowledge-base-18/stage-2-ai-capabilities-dify-knowledge-base-18-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-7.html">← 第 7 章目录</a>
+<a href="/p/stage-1-appendix-mom-test-17/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场 · 最简单的智能体长什么样</span><span class="d">1:29</span></div>
+<div class="ch" data-t="89.784"><span class="t">1:29</span><span class="n">检索增强生成 · 让回答有据可依</span><span class="d">2:30</span></div>
+<div class="ch" data-t="240.744"><span class="t">4:00</span><span class="n">从会聊天到能做事 · 为什么需要工作流</span><span class="d">2:52</span></div>
+<div class="ch" data-t="412.968"><span class="t">6:52</span><span class="n">低代码平台 · 把门槛从数周压到数小时</span><span class="d">2:42</span></div>
+<div class="ch" data-t="575.496"><span class="t">9:35</span><span class="n">三个代表平台各有什么脾气</span><span class="d">1:39</span></div>
+<div class="ch" data-t="675.336"><span class="t">11:15</span><span class="n">n8n 与国内大厂方案</span><span class="d">2:01</span></div>
+<div class="ch" data-t="796.368"><span class="t">13:16</span><span class="n">回到 Dify · 工作流到底是什么手感</span><span class="d">1:30</span></div>
+<div class="ch" data-t="886.992"><span class="t">14:46</span><span class="n">电商客服六步 · 把节点串成一条线</span><span class="d">2:09</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Dify 入门与知识库集成 · 解读与音频稿件</h1>
+<blockquote>本集对应开源项目 Easy-Vibe（datawhalechina/easy-vibe）</blockquote>
+<blockquote><code>docs/zh-cn/stage-2/ai-capabilities/dify-knowledge-base/index.md</code></blockquote>
+<blockquote>音频为二次演绎配音版，本文是与音频配套的文字解读，可与音频对照阅读。</blockquote>
+<h2>这一集在讲什么</h2>
+<p>如果说前面几章解决的是「想做什么」，那么这一章开始回答「怎么让它真的跑起来」。</p>
+<p>本集覆盖源文档的两大块：</p>
+<ol>
+<li><strong>第一章 1.1 到 1.3</strong>：为什么最简单的智能体是「基于知识库的问答机器人」，检索增强生成（RAG）如何工作，为什么对话式智能体不够用、必须升级为工作流，以及主流低代码平台的全景。</li>
+<li><strong>第二章 2.1 什么是 Dify</strong>：Dify 平台的定位、工作流的手感，以及一个电商客服工作流的六节点拆解。</li>
+</ol>
+<p>一条主线贯穿始终：<strong>让模型的回答从「凭空生成」变成「有据可依」，再让这套有据可依的流程从「一次性对话」变成「可复用的标准化执行路径」。</strong></p>
+<h2>能力地图</h2>
+<p>学完这一集，你应该能在这六个位置定位自己：</p>
+<table>
+<tr><th>能力项</th><th>你能做到什么</th><th>本集覆盖</th></tr>
+<tr><td>识别最小可用智能体</td><td>判断一个需求是否只需要「知识库问答」就够了</td><td>1.1</td></tr>
+<tr><td>解释检索增强生成</td><td>用大白话讲清检索、注入、生成三步，说清它治的是什么病</td><td>1.1</td></tr>
+<tr><td>判断何时需要工作流</td><td>识别「多步骤、需协同、要可审计」的信号</td><td>1.2</td></tr>
+<tr><td>平台选型</td><td>在 Dify / Coze / n8n / 大厂方案之间做出有理由的选择</td><td>1.3</td></tr>
+<tr><td>读懂工作流节点</td><td>分清触发、分类、检索、模型、条件、输出六类节点的职责</td><td>2.1</td></tr>
+<tr><td>迁移能力</td><td>掌握一种平台后，能把思路平移到另一个平台</td><td>1.3 收尾</td></tr>
+</table>
+<p>其中「识别最小可用智能体」是最容易被忽略、也最值钱的一项。很多人一上来就想做能自主规划的智能体，结果卡在工具调用和流程编排上几个月。<strong>源文档给出的提醒很明确：大量真实需求只需要专属知识服务能力。</strong></p>
+<h2>逐段精讲</h2>
+<h3>1. 最简单的智能体，为什么反而最有用</h3>
+<p>源文档的论证链条是这样的：</p>
+<ul>
+<li>智能体有多项核心能力，但只实现其中一项也能做出可用的东西。</li>
+<li>真实业务里，用户的核心诉求往往不是「替我执行复杂操作」，而是「基于我们自己的资料给我准确答案」。</li>
+<li>这正好对应三大能力中的第一项：专属知识服务能力。</li>
+</ul>
+<p>所以最小形态就是<strong>基于知识库的问答机器人</strong>。它没有工具调用，没有自主规划，但关键突破在于——<strong>回答不再凭空生成，而是有据可依</strong>。</p>
+<p>一个容易读漏的点：源文档强调这个形态「尚未具备工具调用或自主规划能力」。这不是缺陷清单，而是边界声明。做产品时，先把边界画清楚，比先堆能力重要。</p>
+<h3>2. 检索增强生成：三步而已</h3>
+<p>核心难题很直白：企业有成千上万页文档，模型怎么在每一轮对话里快速找到最相关的内容。</p>
+<p>检索增强生成的解法也只有三步：</p>
+<ol>
+<li><strong>检索</strong>：用户提问时，先从知识库里取出与问题<strong>语义最相关</strong>的若干文本片段。</li>
+<li><strong>注入</strong>：把这些片段作为上下文放进模型的输入。</li>
+<li><strong>生成</strong>：让模型基于这些真实资料作答。</li>
+</ol>
+<p>它的收益有四层：真实性、准确性、一致性，以及<strong>符合人设</strong>（统一客服口径或技术文档风格）。</p>
+<p>源文档给了一个很有画面感的反面例子：以 CFO 或咨询顾问身份询问某个时间段的具体数据，模型很可能编造日期和事件。这就是「幻觉」。检索增强生成的价值不是让模型变聪明，而是<strong>把模型的发挥范围约束在你提供的权威信息上</strong>。</p>
+<h3>3. 从对话到工作流：真正的分水岭</h3>
+<p>源文档用了一个完整的例子来说明对话式智能体的天花板：</p>
+<blockquote>「我们新上线的 SaaS 产品最近有哪些功能更新？能帮我整理成一份给客户的简报吗？」</blockquote>
+<p>这个请求背后是四步：检索近一月发布记录 → 过滤面向客户的关键特性 → 转成客户友好语言 → 推送到邮箱或存进文档模板。</p>
+<p>靠一个大模型自由推理，问题不在于「能不能」，而在于：</p>
+<ul>
+<li>容易遗漏关键信息</li>
+<li>容易混淆内部术语与客户语言</li>
+<li>无法结构化输出</li>
+<li><strong>不可审计、不可复用、不可监控</strong></li>
+</ul>
+<p>最后一条才是企业真正的痛点。源文档原话：非预期的结果很可能会带来预期外的严重损失。</p>
+<p>工作流的定义随之而来：把复杂任务拆成多个<strong>有序、可配置、可自动执行</strong>的子步骤，用可视化或代码编排逻辑关系（条件判断、循环、并行）。把 AI 能力 SOP 化，就是把「怎么用 AI 完成某项任务的经验」固化成可复用模板。</p>
+<p>一句话总结本段：<strong>智能体让 AI 从会聊天走向能做事，工作流让 AI 从偶尔做成一件事，迈向稳定、可靠、规模化地完成一类事。</strong></p>
+<h3>4. 低代码平台全景</h3>
+<p>低代码平台的本质：用可视化配置、节点式拖拽替代直接写代码，在<strong>开发效率</strong>与<strong>场景灵活性</strong>之间取平衡。源文档给出的量化收益是从「数周」缩短到「数小时」。</p>
+<table>
+<tr><th>平台</th><th>特点</th><th>适用场景</th></tr>
+<tr><td>Dify</td><td>开源、支持知识库 RAG 与 LLM 编排、可 API 输出、中文友好</td><td>企业知识库问答、定制化 Agent、API 服务</td></tr>
+<tr><td>Coze（字节跳动）</td><td>国内可用、集成抖音/飞书生态、插件丰富</td><td>社交机器人、国内小程序集成</td></tr>
+<tr><td>n8n</td><td>通用自动化工具，支持 AI 节点，强调 API 编排</td><td>跨系统数据同步、AI + 传统 SaaS 自动化</td></tr>
+<tr><td>百度千帆 / 阿里百炼 / 腾讯 HunYuan</td><td>大厂云原生方案，集成自家模型</td><td>企业级部署、合规要求高场景</td></tr>
+</table>
+<p>三大主流平台胜出的原因：极致易用性、高灵活性、成熟生态。并且都支持把智能体以标准 API 输出，可集成到前端 Web 应用、企业 ERP 系统或移动端 APP。</p>
+<h3>5. 三个平台的脾气</h3>
+<ul>
+<li><strong>Dify</strong>：定位 LLM 应用开发与运营平台，覆盖全生命周期。可视化工作流编排、智能体构建、知识库管理、多模型支持。知识库能力突出（多格式文档 + 高效向量检索），兼容多种 LLM，一键发布为标准 API。开源、可私有化部署，强调企业级合规。</li>
+<li><strong>Coze</strong>：把 Bot 构建简化为搭积木。配置角色与知识库，用丰富内置插件加外部能力（新闻、旅游、图像生成），一键发布到豆包、飞书、微信公众号。云服务为主，<strong>私有化部署能力相对有限</strong>。</li>
+<li><strong>n8n</strong>：通用可编程工作流自动化引擎，数百种集成节点，可视化 + 代码结合（可注入 JavaScript / Python）。擅长后端数据密集型任务（数据同步、ETL、API 编排）。<strong>源码可见、可自托管</strong>，对数据安全要求高的行业有吸引力。社区生态极强。</li>
+</ul>
+<p>国内大厂方案：百度千帆 AppBuilder（全流程支持，深度集成文心）、阿里云百炼（通义千问系列，重安全与私有化）、腾讯云 TI 平台（聚焦金融医疗，预置方案模板）。它们与各自云生态深度绑定，适合已在对应技术体系内的企业。</p>
+<p>源文档给出的选型建议很务实：<strong>掌握任意一种平台的设计思路与操作方法，即具备快速迁移到其他类似工具的基础。</strong> 不要在选型上无限纠结。</p>
+<h3>6. 什么是 Dify，以及工作流的手感</h3>
+<p>Dify 是开源的 LLM 应用开发平台，把 Agent 工作流、RAG 流水线、工具能力、模型管理、可观测性整合在一个直观界面里，目标是帮你<strong>从原型走向生产</strong>。</p>
+<p>工作流就是把原本手动一步步做的事（数据检索、模型调用、网页搜索、结果过滤、格式整理）按业务逻辑串成自动化、可复用的流程。源文档用了一个很准的比喻：<strong>像拼搭积木或拼图</strong>。</p>
+<p>三类节点：</p>
+<ul>
+<li><strong>大语言模型节点</strong>：负责理解和生成</li>
+<li><strong>工具节点</strong>：负责执行具体动作（查数据库、发邮件、翻译文本）</li>
+<li><strong>数据节点</strong>：负责读取、存储信息</li>
+</ul>
+<h3>7. 电商客服工作流：六节点串成一条线</h3>
+<p>源文档给出的完整链路：</p>
+<ol>
+<li><strong>触发节点</strong>：接收用户咨询，例如「这个商品的质保期有多长？」</li>
+<li><strong>问题分类节点</strong>：用模型判断是售后（质保）、使用方法，还是其他</li>
+<li><strong>知识检索节点</strong>：按分类结果访问对应知识库（如售后 SOP 知识库）</li>
+<li><strong>大语言模型节点</strong>：把用户问题 + 检索内容一起发给模型，生成用户友好的回复</li>
+<li><strong>条件节点</strong>：检查回答是否含清晰的质保时间（1 年 / 3 年）；有则继续，无则回复「请提供产品型号」</li>
+<li><strong>输出节点</strong>：返回答案，并自动把咨询记录到表格中</li>
+</ol>
+<p>两个值得记住的细节：</p>
+<ul>
+<li>全程不需要手动翻知识库、反复调回答、单独记录数据。</li>
+<li><strong>扩展是增量的</strong>：想加一条「问质保范围时调另一个知识库」的规则，只需多加一个条件节点，无需重构整个系统。</li>
+</ul>
+<h2>审查清单</h2>
+<p>搭完一个知识库问答机器人或工作流之后，用这张清单逐项过一遍：</p>
+<ul>
+<li>我是否确认过这个需求<strong>只需要</strong>知识服务，不需要工具调用或自主规划？</li>
+<li>检索回来的片段是否真的来自我提供的权威资料，而不是模型的泛化知识？</li>
+<li>回答里是否出现了具体日期、数字、条款？它们能否在原文中一一对应？</li>
+<li>如果答不上来，系统是否会明确说不知道，而不是硬编一个？</li>
+<li>多步骤任务是否已被拆成有序节点，每个节点的输入输出是否清晰？</li>
+<li>关键分支（如条件节点）是否覆盖了「信息缺失」这一情况？</li>
+<li>整个流程是否可追踪、可调试、可复现？换个人跑会不会得到不同结果？</li>
+<li>输出是否已结构化（写入表格、生成文档），而不是只有一句聊天回复？</li>
+<li>选型理由是否写清楚了：为什么是这个平台，而不是另外三个？</li>
+<li>新增一条业务规则时，是否只需加一个节点，而不必推倒重来？</li>
+</ul>
+<h2>实践提示</h2>
+<h3>提示一 · 先做「只会查资料」的版本，别急着加工具</h3>
+<p>新手最常见的浪费，是一开始就冲着「能自主规划的智能体」去。源文档明确说，大量真实需求的核心只是基于专属资料的问答。先把知识库问答做扎实，验证它确实解决了问题，再考虑加工具调用。这一步能省下几周。</p>
+<h3>提示二 · 用「能否在原文中对应」来检验回答质量</h3>
+<p>判断一个检索增强生成系统好不好，别只看回答流不流畅。挑回答里的具体日期、数字、条款，回到原文里逐条比对。对得上的比例，才是这个系统真实的质量线。源文档特别提醒：模型很可能编造日期和事件。</p>
+<h3>提示三 · 遇到「多步骤 + 要可审计」就立刻升级为工作流</h3>
+<p>判断该不该上工作流的信号很清晰：任务需要多个协同步骤，且结果要能被追踪、复用、监控。源文档那句「非预期的结果很可能会带来预期外的严重损失」，值得贴在显示器上。个人玩玩可以靠对话，落到企业流程必须靠工作流。</p>
+<h3>提示四 · 选型纠结时，先随便挑一个平台动手</h3>
+<p>源文档给出的结论是，各平台核心逻辑一致——用可视化方式编排和连接能力模块。掌握其中一种，就具备迁移到其他工具的基础。所以与其在 Dify、Coze、n8n 之间反复比较，不如挑一个立刻搭出第一个流程。<strong>迁移成本远低于你的想象，而迟迟不动手的成本远高于你的想象。</strong></p>
+<h2>约束说明</h2>
+<p>本节内容严格限定在源文档 <code>stage-2/ai-capabilities/dify-knowledge-base/index.md</code> 的范围之内，未引入任何源文档之外的案例、数据或引文。</p>
+<p>具体边界如下：</p>
+<ol>
+<li><strong>不虚构操作细节</strong>：源文档在本节只讲概念与流程设计，未给出 Dify 控制台的逐屏操作步骤、参数设置数值或界面截图说明，因此本集不涉及这些细节。</li>
+<li><strong>平台对比表按原文呈现</strong>：表格中的「特点」与「适用场景」直接来自源文档，未补充各平台当前版本号、定价或功能更新。</li>
+<li><strong>图片来源说明</strong>：源文档中两处配图分别标注来自 Datacamp 与 Databricks 的检索增强生成科普页面，音频与本文均未对图片内容做额外描述。</li>
+<li><strong>节点命名保留原文</strong>：六节点示例中源文档标注了「类似 START」「类似 QUESTION CLASSIFIER」「类似 KNOWLEDGE RETRIEVAL」「类似 ANSWER」等对应关系，本文在音频中做了口语化处理，语义保持一致。</li>
+<li><strong>不承诺效果</strong>：源文档未给出准确率、召回率等量化指标，本集不作任何效果承诺。</li>
+<li><strong>二次演绎边界</strong>：音频为配音演绎版，段落顺序与举例方式做了口语化重组，但所有事实性陈述均可在源文档中找到对应出处。</li>
+</ol>
+<h2>常见疑问</h2>
+<p><strong>问：知识库和直接把文档贴进对话框，有什么区别？</strong></p>
+<p>区别在于规模和自动化。贴文档要靠你手动挑、手动复制，篇幅受上下文长度限制，而且每次都要重来。知识库做的是自动检索：系统按语义相似度自己找到相关片段，只把最相关的那几段注入模型。文档量越大，这个差别越明显。</p>
+<p><strong>问：检索增强生成能彻底消除幻觉吗？</strong></p>
+<p>不能，它只是大幅降低幻觉。检索回来的内容质量、切片方式、相似度阈值都会影响最终结果。所以审查清单里那条「回到原文逐条比对」不能省。</p>
+<p><strong>问：我先学会了 Dify，换到 Coze 是不是要从头学？</strong></p>
+<p>不需要。源文档的说法是，各平台核心逻辑一致，都是用可视化方式编排和连接能力模块。你要重新熟悉的只是界面和节点命名，设计思路是通用的。</p>
+<p><strong>问：个人项目也需要工作流吗？</strong></p>
+<p>看场景。一次性、不重要、错了也无所谓的任务，对话就够了。但只要满足「要重复做」和「错了有代价」中任意一条，就值得花时间做成工作流。</p>
+<p><strong>问：为什么源文档反复强调可监控、可复现？</strong></p>
+<p>因为这是企业愿意为 AI 应用付费的前提。一个跑一次成功一次失败的流程，无论演示效果多惊艳，都没法真正进入业务。可监控意味着出问题能定位，可复现意味着同样的输入能得到同样的输出。这两点正是工作流相对自由对话的核心优势。</p>
+<h2>一句话收尾</h2>
+<p><strong>先让回答有据可依，再让流程可复用可审计——这就是从「一个会聊天的机器人」走向「一套能稳定交付的 AI 应用」的全部路径。</strong></p>
+<hr>
+<p>来源：Easy-Vibe（datawhalechina/easy-vibe）</p>
+<p><code>docs/zh-cn/stage-2/ai-capabilities/dify-knowledge-base/index.md</code></p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>

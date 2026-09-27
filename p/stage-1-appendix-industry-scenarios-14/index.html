@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>从真实工作流里找 AI 场景 · 参考资料</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 6 · EP 14</span>
+<h1>从真实工作流里找 AI 场景 · 参考资料</h1>
+<p class="sub">第 6 章 · 第 14 讲 · 14:52</p>
+<div class="meta"><span>时长 <b>14:52</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>6</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-1-appendix-industry-scenarios-14-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-1-appendix-industry-scenarios-14-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-1-appendix-industry-scenarios-14/stage-1-appendix-industry-scenarios-14-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-1-appendix-industry-scenarios-14/stage-1-appendix-industry-scenarios-14-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-6.html">← 第 6 章目录</a>
+<a href="/p/stage-1-appendix-industry-scenarios-13/">← 上一讲</a>
+<a href="/p/stage-1-appendix-jobs-to-be-done-15/">下一讲 →</a>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">2:18</span></div>
+<div class="ch" data-t="138.912"><span class="t">2:18</span><span class="n">清单长什么样</span><span class="d">3:19</span></div>
+<div class="ch" data-t="338.88"><span class="t">5:38</span><span class="n">挑着看而不是从头读</span><span class="d">2:25</span></div>
+<div class="ch" data-t="484.872"><span class="t">8:04</span><span class="n">三种立场要分清</span><span class="d">2:09</span></div>
+<div class="ch" data-t="614.16"><span class="t">10:14</span><span class="n">别被百分比带跑</span><span class="d">1:36</span></div>
+<div class="ch" data-t="710.208"><span class="t">11:50</span><span class="n">新手最容易踩的两个坑</span><span class="d">1:32</span></div>
+<div class="ch" data-t="802.32"><span class="t">13:22</span><span class="n">给你的用法建议</span><span class="d">1:29</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>从真实工作流里找 AI 场景 · 参考资料 —— 解读与音频稿件</h1>
+<blockquote>对应音频：stage-1-appendix-industry-scenarios-14-播客.mp3</blockquote>
+<blockquote>对应字幕：stage-1-appendix-industry-scenarios-14-播客.srt</blockquote>
+<blockquote>口播稿：script.txt</blockquote>
+<blockquote>来源：Easy-Vibe（datawhalechina/easy-vibe）docs/zh-cn/stage-1/appendix-industry-scenarios/index.md</blockquote>
+<hr>
+<h2>一、本集在讲什么</h2>
+<p>这一集对应原文档「从真实工作流里找 AI 场景」这一章的参考资料部分。它解决的是一个非常具体的起点问题：当你想为某个真实场景找人工智能切入点时，该去哪里找靠谱的素材，又该怎么读这些素材，才不会被海量的报告和案例淹没。</p>
+<p>原文档的这一节，主体是一份包含六十多个信息源的清单，再加上一小段方法论提醒。清单本身只是一张目录，真正的价值在那段提醒里：它告诉你该优先看什么、该警惕什么、以及报告里的数字到底能不能信。</p>
+<p>本集的口播稿没有带你去背这六十多个名字，而是把这份清单当成一个切片，讲清楚三件事：</p>
+<ol>
+<li>这份清单为什么按「总览、行业、产品、消费者、投资」这五个块来排，每一块各自给你什么信号</li>
+<li>读这类材料时必须分清的三种立场——咨询公司、厂商、券商，它们的动机有何不同</li>
+<li>新手最容易踩的几个坑，以及一份能马上执行的阅读节奏</li>
+</ol>
+<blockquote>说明：原文档的参考资料是一份信息源目录，正文主体是方法论而非叙述性内容。出于不虚构的原则，口播稿与本文只在原清单明确列出的机构、类别和提醒范围内展开，不补充原清单没有的具体数据、不替任何机构背书、不臆造未列出的案例。</blockquote>
+<p>这一集表面讲一份清单，实则教的是一种元能力——怎么在信息过载的环境里，当自己的过滤器。在人工智能这个每天都有新报告、新融资、新发布的领域，不会读材料的人，很容易被带节奏；会读材料的人，反而能从同样的清单里，稳稳捞出对自己有用的那几条。所以这一集值得反复听，它练的是你往后所有调研的基本功。</p>
+<hr>
+<h2>二、能力地图</h2>
+<p>听完这一集，你应该能建立下面这张能力地图。它分三层，从「能辨认」到「能判别」再到「能产出」。</p>
+<p>这三层不是考试要点，而是你读任何一份行业资料时，脑子里应当自动跑起来的三道工序。第一道帮你定位，第二道帮你质疑，第三道帮你落地。哪一道理不清，这份材料对你来说就只是收藏夹里多了一个链接，而不是你真正长出来的判断力。</p>
+<h3>第一层：辨认层</h3>
+<ul>
+<li>能认出一份材料属于哪一类信息源（总览报告、行业研究、产品案例、消费者报告、券商研究）</li>
+<li>能说出这份清单的五个块，各自对应的阅读目的，而不是把它们混为一谈</li>
+<li>能意识到一份材料背后站着谁，以及它想让你相信什么</li>
+</ul>
+<h3>第二层：判别层</h3>
+<ul>
+<li>能用「优先看方法清楚的材料」这条原则，把清单里的靠谱来源先筛出来</li>
+<li>能区分「钱往哪走」（券商视角）和「人痛在哪」（用户需求），不让两者互相替代</li>
+<li>能对一个漂亮的百分比保持警惕，追问样本、地区、口径这三个前提</li>
+<li>能识别大厂案例、国内案例、国外案例各自的迁移边界</li>
+</ul>
+<h3>第三层：产出层</h3>
+<ul>
+<li>能建立自己的小案例库，记录「它解决了谁的什么麻烦」而不是「它吹了什么牛」</li>
+<li>能给自己安排一个可执行的阅读节奏，把读报告变成每周固定动作</li>
+<li>能把清单当成地图而非目的地，读完就出门去做用户访谈——这一条看似简单，却是绝大多数人过不去的最后一关，因为出门访谈比坐在电脑前读报告难得多，也真实得多</li>
+</ul>
+<p>这三层的关系是递进的：辨认是前提，判别是核心，产出是目的。大多数人卡在第二层——他们能背出五种信息源，但拿到一份报告时依然分不清立场和方法。</p>
+<hr>
+<h2>三、核心概念卡</h2>
+<h3>概念一：五个信息块各自的信号</h3>
+<p>原清单把六十多个来源分成五块，这个顺序本身就是一条线索：</p>
+<table>
+<tr><th>信息块</th><th>数量</th><th>它给你的信号</th><th>适合用来</th></tr>
+<tr><td>总体采用与企业价值</td><td>十五</td><td>大地图：整体价值与领先行业</td><td>建立全局认知，看清方向</td></tr>
+<tr><td>B 端行业、岗位与工作流</td><td>二十四</td><td>具体行业怎么落地</td><td>找垂直行业的切入点</td></tr>
+<tr><td>落地产品与企业案例</td><td>十</td><td>真实产品长什么样</td><td>看别人怎么把方向做成产品</td></tr>
+<tr><td>C 端消费者与产品</td><td>十三</td><td>普通人日常碰到什么</td><td>找面向个人的应用灵感</td></tr>
+<tr><td>国内券商视角</td><td>五</td><td>资本在关注什么方向</td><td>观察国内商业化热点</td></tr>
+</table>
+<p>最关键的一点是：找场景是从宏观到微观、从别人到自己的。你还没想清楚做什么，就跳去看券商报告，等于还没学会走路就去看赛车，除了头晕没别的好处。</p>
+<p>需要强调的是，这个数量分布本身就有信息量：行业块二十四份、几乎是其他块的总和，说明找场景的人最缺的不是方向，而是垂直行业的具体落点。你时间有限时，应该把最多精力压在第二块上，而不是平均分给每一块。</p>
+<h3>概念二：三种立场</h3>
+<p>翻开清单你会发现，材料来自三种完全不同的立场，动机各不相同：</p>
+<ul>
+<li><strong>咨询公司</strong>（如麦肯锡、德勤、埃森哲）：利益在于把市场讲得足够大，让你觉得转型紧迫、非找顾问不可</li>
+<li><strong>厂商</strong>（如微软、亚马逊，以及那家做开放人工智能的公司）：利益在于把产品讲得足够成熟，让你觉得现在就能上手</li>
+<li><strong>券商</strong>：利益在于把赛道讲得足够热，让资金流动起来</li>
+</ul>
+<p>这三方的信号方向常常一致，但动机完全不同。最该学会的，不是记住它们的结论，而是拿到任何材料先问一句：写这份东西的人，到底想让我相信什么。</p>
+<p>举个具体的例子帮你体会。假设市场都在说「人工智能能让客服效率翻倍」。咨询公司会把它写成一个几十页的转型机会，让你觉得再不行动就晚了；厂商会给你看一个演示，证明它的系统现在就能替你省下一半人力；券商会写一篇研报，论证这个赛道明年会爆发。三句话指向同一件事，但你要听的不是结论，而是各自的动机——然后自己去问：我的客服，到底卡在哪一步，省下的一半人力，省的是哪一半。</p>
+<h3>概念三：百分比不是事实</h3>
+<p>原清单的结尾提醒值得抄在屏幕边：报告里的比例数字，会受到样本、地区和厂商口径的影响，不能直接代替你对目标用户的访谈和试用数据。</p>
+<p>一个报告说某场景能提效三成，那个数字背后是一群很可能不代表你的人、在一个你可能不在的地区、按厂商想要的方式测出来的。它给你的是方向感，不是事实。真正的事实只能从你自己的目标用户嘴里、从你自己的试用数据里长出来。</p>
+<p>一个好用的自我检验是：当你准备把某个百分比写进方案或汇报时，先补上三个限定词——在谁身上、在哪个地区、用什么口径。补不上，就说明这个数字你还不能当成事实用。能补上，它才算一条有分寸的参考。这也是为什么口播里反复强调：百分比是别人的路况，不是你脚下的路。把别人的路况当自己的导航，迟早开进沟里。</p>
+<h3>概念四：两个常见陷阱与一个隐藏陷阱</h3>
+<ul>
+<li><strong>只看大厂案例</strong>：大厂有数据、算力、团队，它做成的事放到小团队未必成立。大厂案例适合开眼界，不适合当模板</li>
+<li><strong>只看国内或只看国外</strong>：只看国内会错过成熟方法，只看国外会忽略本地市场结构。清单特意收了国内券商和研究院报告，就是让你两边对照</li>
+<li><strong>囤积清单</strong>（更隐蔽）：把几十份存进收藏夹就当学了，收藏夹变成心理安慰。价值不在存了多少，而在真正读过、用过、验证过几条</li>
+</ul>
+<p>这三类陷阱的共同根源，是「收藏即学习」的错觉和「大就是好」的本能。克服的办法不是更努力地囤，而是更克制地读：每收一份，就逼自己写出它解决了谁的什么麻烦，写不出来就别收。你的案例库越精简，反而越有战斗力。</p>
+<hr>
+<h2>四、实践提示</h2>
+<h3>提示1 · 用三句话给清单做初筛</h3>
+<p>拿到任何长清单，先套用这三句：优先看方法清楚的材料；券商报告只看商业化方向、不当中用户需求；厂商案例必须和你的访谈与真实数据交叉验证。三句记住，你就能把水份滤掉大半。</p>
+<h3>提示2 · 用三个问题拆穿一个漂亮案例</h3>
+<p>看到「某银行用人工智能把客服成本降了四成」这类说法，别急着记结论，先问：降的是哪类成本（人力还是差错率）；对比基线是什么（和去年比还是和别家比）；有没有第三方报告佐证。三问问完，宣传语就变成可验证的线索。这个动作的本质，是强迫一份材料从「它说自己好」变成「我能验证它好」。一旦你习惯了凡数字必问基线，很多宣传话术会自然现原形。</p>
+<h3>提示3 · 把任何百分比改写成带条件的话</h3>
+<p>以后看到报告里的百分比，先在心里把它改成条件句。比如把「提效三成」改成「在报告所覆盖的那类企业里，部分流程有提效的观察」。这个习惯能让你汇报时说话有分寸，也不容易被一个数字带走。</p>
+<h3>提示4 · 给自己一个可执行的阅读节奏</h3>
+<p>这个周末只做一件事：从第一块挑一份最顺眼的报告，花一小时读一遍，重点看样本和方法而非结论。读完后写三行笔记：它研究了谁、用了什么方法、我能借鉴哪一点。一周三份，一个月就有九份真正属于你的材料，也练出了看报告的眼光。如果读着读着发现某份报告方法特别扎实，就把它升级成你的「标杆样本」，以后看别的报告都拿它当尺子比一比。标杆不用多，有三到五份就够你建立自己的评判标准了。</p>
+<h3>提示5 · 建一个只记「麻烦」的案例库</h3>
+<p>边看边建自己的小案例库，每条只记两件事：它解决了谁的什么麻烦，以及它用了什么方法。不要记它吹了什么牛。将来你写方案时，库里这些「麻烦」才是能直接用的真东西。</p>
+<hr>
+<h2>五、审查清单</h2>
+<p>在读这份清单、或任何类似参考资料之前，逐条打勾。任何一条不过，先回到上一步。下面这份清单不是让你一次性全过，而是读每一份材料前后各扫一遍：读前用它定方向，读后用它验成色。随着你读得多了，可以把它从纸面内化成直觉，那时你甚至不用再看这张表。</p>
+<p><strong>关于信息源分类</strong></p>
+<ul>
+<li>我能说出这份材料属于五个块里的哪一块</li>
+<li>我知道这一块该用来找方向，还是找案例，还是看热点</li>
+<li>我没有把券商报告当成用户需求来读</li>
+</ul>
+<p><strong>关于立场判别</strong></p>
+<ul>
+<li>我能说出这份材料的发布方是谁</li>
+<li>我能说出它想让我相信什么</li>
+<li>我确认它把研究方法讲清楚了，而不只是抛结论</li>
+</ul>
+<p><strong>关于数字可信度</strong></p>
+<ul>
+<li>我对报告里的百分比追问了样本、地区、口径</li>
+<li>我没有把别人的百分比当成自己的事实</li>
+<li>我打算用真实访谈和试用数据来替代或验证它</li>
+</ul>
+<p><strong>关于案例迁移</strong></p>
+<ul>
+<li>我没有把大厂案例直接当模板</li>
+<li>我把国内和国外的材料都对照看了</li>
+<li>我没有把清单囤进收藏夹就当学过了</li>
+</ul>
+<p><strong>关于行动落地</strong></p>
+<ul>
+<li>我从五个块里挑出了两到三份准备精读</li>
+<li>我给自己排了一周三份的阅读节奏</li>
+<li>我准备把清单当成地图，读完就出门做访谈</li>
+</ul>
+<hr>
+<h2>六、约束与边界说明</h2>
+<p>为了避免误用，这里明确列出本集结论的适用范围与已知限制。</p>
+<p><strong>约束一：清单的时效边界</strong></p>
+<p>这份材料整理于二〇二六年八月，其中的报告和厂商会持续更新，新的机构也会不断出现。本集所有举例都来自该时间点的原清单，不等于当下最新的市场全貌。请把清单当成会变的起点，隔段时间回头再看。</p>
+<p><strong>约束二：切片范围约束</strong></p>
+<p>本集只覆盖原文档参考资料一节的内容，即一份信息源目录加一段方法论提醒。原文档同章其他小节（如行业场景的具体拆解、医疗先做什么等）不在本切片内，本集未做补充，避免虚构。</p>
+<p><strong>约束三：机构举例的边界</strong></p>
+<p>口播稿中点到名字的咨询公司、厂商、券商，只是为了说明「立场」这一概念而举的例子，不代表本集对任何机构或其产品做出评价或推荐。判断是否采用某份材料，仍应以你自己的阅读为准。</p>
+<p><strong>约束四：音频内容的演绎性质</strong></p>
+<p>本音频为二次演绎配音版，口语化表达、例子取舍与结构顺序均有改编，不等于原文档的逐字朗读。涉及具体机构、报告与数字时，请以原文档和原始报告为准。</p>
+<p><strong>约束五：不虚构原则</strong></p>
+<p>原清单是一份目录，没有逐条展开每个来源的内容。本集未对清单之外的具体数据、未列出的机构或案例做任何补充，所有展开都严格限定在原清单明确列出的范围内。</p>
+<p><strong>约束六：AI 参与的边界</strong></p>
+<p>用大模型帮你整理、归纳或提炼看报告的方法时，模型的产出是你的输入材料，不是结论。一份报告值不值得信，仍然需要你回到样本、方法和立场去亲自判断。把模型的归纳当成终稿，是本集所反对的「被带偏」的另一种形式。</p>
+<p><strong>约束七：清单不是权威榜单</strong></p>
+<p>这份清单是编者按自己的判断做的筛选，不等于行业公认的权威排名，也不代表未被收录的来源就不好。它给你的是起点和线索，不是终点。真正可靠的判断，来自你按本集方法亲自读、亲自筛之后形成的标准。</p>
+<hr>
+<h2>七、关键句摘抄</h2>
+<ul>
+<li>这份清单是鱼竿，不是鱼。我教你怎么用鱼竿，至于钓到什么鱼，得你自己下水。</li>
+<li>报告里漂亮的数字，是别人的路况，不是你脚下的路。</li>
+<li>券商看到的是赛道热不热，你看到的是用户痛不痛，两件事要分开想。</li>
+<li>把动机看清楚，你才能拿到对你有用的那部分。</li>
+<li>清单的尽头不是读完，而是出门。</li>
+<li>哪怕只读三份，只要读透，都比囤几十份强。</li>
+<li>大厂案例适合开眼界，不适合当模板。</li>
+<li>立场决定它想带你去哪，方法决定你能不能信它。</li>
+</ul>
+<hr>
+<h2>八、音频与稿件信息</h2>
+<table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>集次标识</td><td>stage-1-appendix-industry-scenarios-14</td></tr>
+<tr><td>章节</td><td>从真实工作流里找 AI 场景（stage-1 附录）</td></tr>
+<tr><td>标题</td><td>从真实工作流里找 AI 场景 · 参考资料</td></tr>
+<tr><td>口播稿</td><td>script.txt（七段式，正文约四千六百字）</td></tr>
+<tr><td>音频文件</td><td>stage-1-appendix-industry-scenarios-14-播客.mp3</td></tr>
+<tr><td>字幕文件</td><td>stage-1-appendix-industry-scenarios-14-播客.srt</td></tr>
+<tr><td>演绎方式</td><td>二次演绎配音版，口语化改编</td></tr>
+<tr><td>收听建议</td><td>适合在动手做场景调研之前听，配合第五节审查清单使用</td></tr>
+</table>
+<hr>
+<h2>九、来源</h2>
+<p>本内容改编自开源项目 <strong>Easy-Vibe</strong>（datawhalechina/easy-vibe），原文位于</p>
+<p><code>docs/zh-cn/stage-1/appendix-industry-scenarios/index.md</code>，为二次演绎配音版。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
