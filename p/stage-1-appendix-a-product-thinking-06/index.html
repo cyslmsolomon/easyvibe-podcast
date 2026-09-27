@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>产品思维基础 · B 端应用: 面向组织的效率、成本和风险控制</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 6 · EP 6</span>
+<h1>产品思维基础 · B 端应用: 面向组织的效率、成本和风险控制</h1>
+<p class="sub">第 6 章 · 第 6 讲 · 17:02</p>
+<div class="meta"><span>时长 <b>17:02</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>6</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-1-appendix-a-product-thinking-06-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-1-appendix-a-product-thinking-06-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-1-appendix-a-product-thinking-06/stage-1-appendix-a-product-thinking-06-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-1-appendix-a-product-thinking-06/stage-1-appendix-a-product-thinking-06-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-6.html">← 第 6 章目录</a>
+<a href="/p/stage-1-appendix-a-product-thinking-05/">← 上一讲</a>
+<a href="/p/stage-1-appendix-a-product-thinking-07/">下一讲 →</a>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:04</span></div>
+<div class="ch" data-t="64.512"><span class="t">1:04</span><span class="n">面向组织的应用到底难在哪</span><span class="d">2:19</span></div>
+<div class="ch" data-t="203.832"><span class="t">3:23</span><span class="n">从你熟悉的行业里找切口</span><span class="d">2:09</span></div>
+<div class="ch" data-t="333.624"><span class="t">5:33</span><span class="n">让用户有出口说话</span><span class="d">1:48</span></div>
+<div class="ch" data-t="442.488"><span class="t">7:22</span><span class="n">把杂乱反馈分成三类</span><span class="d">1:55</span></div>
+<div class="ch" data-t="558.408"><span class="t">9:18</span><span class="n">三个指标判断要不要继续投入</span><span class="d">2:00</span></div>
+<div class="ch" data-t="678.432"><span class="t">11:18</span><span class="n">不要为了用人工智能而用人工智能</span><span class="d">2:21</span></div>
+<div class="ch" data-t="820.248"><span class="t">13:40</span><span class="n">给人工智能安排一个具体角色</span><span class="d">2:07</span></div>
+<div class="ch" data-t="947.712"><span class="t">15:47</span><span class="n">收尾</span><span class="d">1:14</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>产品思维基础 · 面向组织的应用与用数据打磨 —— 解读与音频稿件</h1>
+<blockquote>本集对应 Easy-Vibe 教程「产品思维基础」附录 A 的 B 端小节、3.4 节与 4.1、4.2 节，覆盖面向组织应用的四项关注点与行业切口、四类反馈收集渠道、反馈的三分类法、判断要不要继续投入的三个指标，以及「不要为了 AI 而 AI」的两问与人工智能在产品中的三种角色。</blockquote>
+<blockquote>音频为二次演绎配音版，不是原文朗读；本稿件是对音频内容的整理与补充，可以和音频对照使用。</blockquote>
+<hr>
+<h2>一、本集在讲什么</h2>
+<p>前面几集都在处理「从零到第一个版本」的问题。这一集往前走一步，处理两件更靠后的事：<strong>一是面向组织的应用该怎么做判断，二是版本上线之后该靠什么继续打磨。</strong></p>
+<p>全篇四块内容：</p>
+<ol>
+<li><strong>面向组织的应用</strong>：要同时满足使用者、决策者、组织本身三类角色，四项核心关注点是提高效率、降低成本、控制风险与合规、划清权限和责任边界。</li>
+<li><strong>反馈机制与三分类</strong>：用群聊、问卷、使用后弹窗、一对一访谈把反馈引进来，再分成程序缺陷、体验问题、新需求三类，打标签后围绕高频问题迭代。</li>
+<li><strong>三个判断指标</strong>：留存、复访频率、推荐意愿，用来回答「这个应用还值不值得继续投入」。</li>
+<li><strong>给人工智能定位</strong>：先用两个问题排除「为了用而用」，再决定它在产品里扮演大脑、眼睛还是手。</li>
+</ol>
+<p>一句话概括：<strong>面向个人看爽不爽，面向组织看省不省、稳不稳、清不清；上线之后看反馈和指标，加智能之前先问两个问题。</strong></p>
+<hr>
+<h2>二、能力地图</h2>
+<h3>第一层：识别层</h3>
+<ul>
+<li><strong>多角色识别</strong>：拿到一个面向组织的场景，能立刻指出使用者是谁、决策者是谁、数据拥有者是谁、流程要跨哪些部门。</li>
+<li><strong>行业切口定位</strong>：能在熟悉行业里找出「特别依赖人工的流程」「散落在多个系统或私聊里的信息」「出错率高又难被发现的环节」这三类高价值位置。</li>
+<li><strong>成熟产品调研</strong>：能用「行业 + 核心需求 + 产品」这类关键词搜到成熟产品，看懂它们怎么解决同类问题。</li>
+</ul>
+<h3>第二层：运营层</h3>
+<ul>
+<li><strong>渠道搭建</strong>：能为自己的应用配上至少两条反馈渠道，并维持一个可以坦诚说话的氛围。</li>
+<li><strong>反馈分类与打标签</strong>：能把混杂的反馈稳定地归到程序缺陷、体验问题、新需求三类，并定期汇总，看出问题集中在哪几个功能上。</li>
+<li><strong>指标观测</strong>：能定义并持续观察留存、复访频率、推荐意愿这三个指标，且知道不同定位的应用要用不同标尺。</li>
+</ul>
+<h3>第三层：判断层</h3>
+<ul>
+<li><strong>继续还是收缩</strong>：能结合反馈与指标判断应用处在「值得继续投入」还是「该收缩回核心场景」的状态。</li>
+<li><strong>智能功能的两问过滤</strong>：能在加入任何智能功能之前，回答「不用它是否也成立」和「用了之后具体提升了什么」。</li>
+<li><strong>角色定位</strong>：能明确指定人工智能在产品中扮演大脑、眼睛还是手，并主动限制为只做一到两个角色。</li>
+</ul>
+<hr>
+<h2>三、核心概念卡</h2>
+<h3>概念一：面向组织应用的四项关注点</h3>
+<table>
+<tr><th>关注点</th><th>含义</th><th>典型反例</th></tr>
+<tr><td>提高效率</td><td>不是某一个人的时间变短，而是整体流程耗时减少、协作成本降低</td><td>只优化了一个岗位的操作，跨部门流转时间一点没变</td></tr>
+<tr><td>降低成本</td><td>人力成本、培训成本、系统维护成本都要算进去</td><td>功能强大但需要大量培训和维护才能跑起来，中小企业用不起</td></tr>
+<tr><td>控制风险与合规</td><td>牺牲一点使用自由度，换更明确的权限、更严谨的日志、更清晰的审批链路</td><td>为了好用砍掉日志和审批，后续审计无法追溯</td></tr>
+<tr><td>权限与责任边界</td><td>谁能看见什么、谁能改什么、谁对什么结果负责</td><td>权限模型混乱，出事之后无法界定责任</td></tr>
+</table>
+<p>判断这类应用好不好，不能只看界面顺不顺眼，还要看权限模型是否严谨、是否容易理解和维护。</p>
+<h3>概念二：从行业到应用的三类切口</h3>
+<ul>
+<li><strong>特别依赖人工的流程</strong>：例如教培的课程排班与教室利用率、制造业靠纸质记录或电子表格追踪生产进度。</li>
+<li><strong>散落各处的信息</strong>：例如电商商家在多个平台的订单分散，需要统一抓取与处理售后物流。</li>
+<li><strong>出错率高却难被发现的环节</strong>：例如金融、医疗里的合规检查、文档模板生成、审批材料清单管理。</li>
+</ul>
+<p>小工具不需要取代现有大系统，只要在一个具体环节上让某一类岗位的某一项任务变得更可控，就足以成立。</p>
+<h3>概念三：四类反馈渠道</h3>
+<table>
+<tr><th>渠道</th><th>适合场景</th><th>关键注意点</th></tr>
+<tr><td>群聊</td><td>日常、持续、低成本</td><td>认真回复、记录、定期总结，不要辩解或防御</td></tr>
+<tr><td>问卷</td><td>一次性收集较多结构化信息</td><td>不要太长，问题要具体，问「最常用哪个功能」「在哪一步卡壳最多」而不是「总体感觉如何」</td></tr>
+<tr><td>使用后弹窗</td><td>任务完成后的即时评分</td><td>越短越好，一个数字评分往往就够判断流程是否有明显问题</td></tr>
+<tr><td>一对一访谈</td><td>成本最高，回报也最大</td><td>约二十到四十分钟，让用户边操作边讲，你负责观察</td></tr>
+</table>
+<h3>概念四：反馈的三分类</h3>
+<ul>
+<li><strong>程序缺陷</strong>：说了会发生某种行为，但没发生或发生了错误行为。处理方式是尽快复现修复，并主动告知受影响用户。</li>
+<li><strong>体验问题</strong>：流程长度、操作位置、文案表达没选到最顺滑的路径。处理方式是结合数据与观察判断改不改、改到什么程度。</li>
+<li><strong>新需求</strong>：用户提出原本没想到的功能和场景。处理方式不是照做，而是辨别背后有没有共性问题、是否与你要服务的人群和核心任务一致。</li>
+</ul>
+<p>打标签并定期汇总，你才能从被动修补变成有意识地围绕高频问题迭代。</p>
+<h3>概念五：三个判断指标</h3>
+<table>
+<tr><th>指标</th><th>问的问题</th><th>怎么粗略统计</th></tr>
+<tr><td>留存</td><td>一段时间里还有多少人在持续使用</td><td>用一个星期后、一个月内还有多少人回来过</td></tr>
+<tr><td>复访频率</td><td>留下来的人多久回来一次</td><td>先给出合理的使用节奏预期，再对照真实数据看偏差</td></tr>
+<tr><td>推荐意愿</td><td>有没有人愿意主动推荐给别人</td><td>分享入口的实际使用率、群里是否有人自发安利、访谈时直接问</td></tr>
+</table>
+<p>推荐意愿通常比满意度分数更能说明问题，因为推荐是带个人信用背书的行为。</p>
+<h3>概念六：不要为了 AI 而 AI —— 两个前置问题</h3>
+<ol>
+<li><strong>不用 AI，这个应用是否也成立？</strong> 如果把所有智能能力抹掉，这件事本身还有没有价值、用户还愿不愿意投入真实时间。答不上来，说明抓的需求可能本身就不痛。</li>
+<li><strong>用了 AI 之后，具体提升了什么？</strong> 不接受「提升效率」「重构体验」这类宽泛总结，必须落到速度、质量、顺畅度、真实成本这几个用户能感知的维度上。</li>
+</ol>
+<p>顺序不能反：先保证不用 AI 也说得通，再问加了之后好在哪。</p>
+<h3>概念七：AI 的三种角色</h3>
+<table>
+<tr><th>角色</th><th>职责</th><th>例子</th></tr>
+<tr><td>大脑</td><td>理解与生成文字，在复杂信息之间做推理</td><td>会议纪要助手从长录音里抓出核心讨论点，而不是按时间罗列</td></tr>
+<tr><td>眼睛</td><td>处理图像、视频等非文本内容，转成机器可理解的描述</td><td>纸质文档工具通过拍照识别把发票合同变成可搜索文字</td></tr>
+<tr><td>手</td><td>执行一连串具体动作，而不只是给出建议</td><td>读邮件附件 → 总结要点 → 发群 → 存云盘 → 自动创建跟进任务</td></tr>
+</table>
+<p>原则是<strong>只选一到两个角色做透</strong>，不要一股脑全塞进去。同时要清醒认识当前技术的能力边界与易错场景。</p>
+<hr>
+<h2>四、操作说明</h2>
+<ol>
+<li>先判断你要做的是面向个人还是面向组织的应用。若是后者，写出使用者、决策者、数据拥有者三类角色分别是谁。</li>
+<li>用四项关注点逐条过一遍：效率提升怎么衡量、成本降低了哪几项、风险合规靠什么保证、权限和责任怎么划清。</li>
+<li>回到你熟悉的行业，找三类切口，挑一个最聚焦的做小工具，不要试图取代现有系统。</li>
+<li>上线前先配好至少两条反馈渠道，并在产品里留出说话的出口。</li>
+<li>收到反馈后逐条打标签，每周汇总一次，找出集中出现的高频问题。</li>
+<li>每月看一次留存、复访频率、推荐意愿，判断继续投入还是收缩回核心场景。</li>
+<li>任何智能功能上线前，先过两问；过了之后再指定它扮演大脑、眼睛还是手，并限制角色数量。</li>
+</ol>
+<hr>
+<h2>五、实践提示</h2>
+<h3>提示1 · 给面向组织的点子画一张「三角角色图」</h3>
+<p>拿一张纸，画出使用者、决策者、数据拥有者三个角，分别写下他们各自最在意什么。使用者在意顺不顺手，决策者在意投入产出比，组织在意风险与合规。三个角都写上之后，你会发现很多功能其实只服务了其中一个角——那正是需要补的地方。</p>
+<h3>提示2 · 用「行业 + 核心需求 + 产品」搜一轮成熟方案</h3>
+<p>选定行业之后，用这类关键词去搜，比如教培行业教务排班系统、电商多渠道订单管理工具。不要只看官网的功能介绍，重点看用户评价和行业案例，它们会告诉你成熟产品解决了什么、又留了什么缝隙。这一轮搜索能省掉大量从零摸索的试错成本。</p>
+<h3>提示3 · 建一张三类标签的反馈表，坚持每周汇总</h3>
+<p>表格列固定为：日期、来源渠道、原文摘要、标签（缺陷 / 体验 / 需求）、涉及功能。每条反馈进来就打标签，每周花十五分钟汇总一次，看哪一类问题集中在哪几个功能上。做了两周之后，你的迭代顺序会自己浮现出来，不再靠嗓门大的用户决定优先级。</p>
+<h3>提示4 · 给智能功能写一张「两问卡片」</h3>
+<p>在任何智能功能进入排期之前，先在卡片上写下两个答案。第一，抹掉这个功能之后，这个应用最朴素的价值是什么，请用一句话说清。第二，加上它之后，用户在速度、质量、顺畅度、真实成本这四个维度里，究竟哪一个能被他本人感知到提升。卡片写不满，就先不要排期。</p>
+<h3>提示5 · 明确指定一个角色，并写出来</h3>
+<p>在需求文档里写一句：在本版本中，人工智能扮演的是（大脑 / 眼睛 / 手），它负责的具体动作是某某。只写一个，最多两个。写下来之后，凡是超出这个角色范围的功能请求，一律放进下个版本讨论。这条规则能有效避免「哪里都沾一点智能，却说不出哪里离不开它」的困境。</p>
+<h3>提示6 · 给三个指标各设一条预警线</h3>
+<p>不要等感觉不对了才去看数据。上线时就给留存、复访频率、推荐意愿各设一条粗略的预警线，比如一个月留存低于某个比例就触发一次复盘。有了预警线，你才不会在错误的方向上连续投入好几个月。</p>
+<hr>
+<h2>六、审查清单</h2>
+<ul>
+<li>我已经分清这个应用面向的是个人还是组织；若是组织，已写出使用者、决策者、数据拥有者三类角色。</li>
+<li>四项关注点逐条过过：效率怎么衡量、成本降了哪几项、风险合规靠什么保证、权限和责任怎么划清。</li>
+<li>权限模型是否严谨、是否容易理解和维护，已经单独检查过，而不是只看界面。</li>
+<li>我从熟悉行业里找出了三类切口，并挑了一个最聚焦的做小工具，没有试图取代现有大系统。</li>
+<li>我搜过一轮成熟产品的官网、用户评价和行业案例。</li>
+<li>至少两条反馈渠道已经配好，并且群里的氛围允许坦诚说话。</li>
+<li>每条反馈都打了标签，并且有固定的汇总节奏。</li>
+<li>留存、复访频率、推荐意愿三个指标都能给出当前的粗略数字。</li>
+<li>任何智能功能上线前都过过了两问，并明确写出了它扮演的角色。</li>
+</ul>
+<hr>
+<h2>七、约束与边界说明</h2>
+<p><strong>关于面向组织应用的判断标准。</strong> 「界面好不好看」在这类应用里是很次要的指标。真正决定成败的是权限模型、审批链路和日志记录。如果你只按个人应用的审美标准去做，很容易做出一个好看但组织不敢用的东西。</p>
+<p><strong>关于行业例子的使用方式。</strong> 本集提到的教培排班、电商多渠道订单、制造工单跟踪、金融医疗合规辅助，都是教程举例，用来说明「切口在哪」的思考方式。你在实际使用时必须换成自己真正了解的行业和亲眼见过的流程，不能直接把例子当成需求结论。</p>
+<p><strong>关于反馈的分类。</strong> 三类标签是帮助判断的工具，不是绝对标准。同一条反馈在不同阶段可能归属不同类别，比如一个体验问题在被反复报告之后可能暴露出底层缺陷。分类的目的是看清结构，不是给反馈盖章。</p>
+<p><strong>关于三个指标的粗略性。</strong> 本集给出的都是可以手工统计的粗口径，用来做方向性判断。它们不足以支撑精细的增长分析，也不要拿小样本得出统计结论。指标的作用是提醒你回头看，不是替你下结论。</p>
+<p><strong>关于人工智能的定位。</strong> 「不要为了用而用」是一条过滤原则，不是反对使用智能能力。通过后两问的功能仍然值得做，而且往往能带来真实差异。真正要避免的是那种说不出提升点、只是为了让介绍页更好看而加的功能。原教程后续还介绍了大语言模型、视觉模型、语音模型等具体技术背景，本集只讲产品层面的角色划分，技术细节请以原始文档为准。</p>
+<p><strong>关于能力边界。</strong> 当前技术在很多场景下仍会出错，尤其是需要精确事实和严格合规的环节。设计功能和流程时要为错误预留人工确认和回退的余地，不要因为误判能力而埋下风险。</p>
+<p><strong>关于本音频的性质。</strong> 这是基于开源教程的二次演绎配音版，为便于口播做了口语化改写与结构重组，措辞和顺序与原文不完全一致。需要引用原文时请以原始文档为准。</p>
+<hr>
+<h2>八、关键句摘抄</h2>
+<ul>
+<li>面向个人看爽不爽，面向组织看省不省、稳不稳、清不清。</li>
+<li>判断这类应用好不好，不能只看界面顺不顺眼，还要看它的权限模型是不是严谨。</li>
+<li>你要做的不是辩解，而是观察。</li>
+<li>不是用户提什么你都要照做，真正要做的是辨别背后有没有共性问题。</li>
+<li>推荐是一种带着个人信用背书的行为。</li>
+<li>如果你的应用在拿掉智能之后就完全站不住脚，说明的往往是你抓的需求本身就不痛不痒。</li>
+<li>先选一两个角色做透，比堆一堆模糊的能力有用得多。</li>
+</ul>
+<hr>
+<h2>九、音频与稿件信息</h2>
+<table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>集次标识</td><td>stage-1-appendix-a-product-thinking-06</td></tr>
+<tr><td>章节</td><td>产品思维基础（stage-1 附录 A）</td></tr>
+<tr><td>标题</td><td>产品思维基础 · 面向组织的应用与用数据打磨</td></tr>
+<tr><td>口播稿</td><td>script.txt（九段式，正文约五千二百字）</td></tr>
+<tr><td>音频文件</td><td>stage-1-appendix-a-product-thinking-06-播客.mp3</td></tr>
+<tr><td>字幕文件</td><td>stage-1-appendix-a-product-thinking-06-播客.srt</td></tr>
+<tr><td>演绎方式</td><td>二次演绎配音版，口语化改编</td></tr>
+<tr><td>收听建议</td><td>适合在第一版上线、开始收反馈之前听，配合第六节审查清单使用</td></tr>
+</table>
+<hr>
+<h2>十、来源</h2>
+<p>本内容改编自开源项目 <strong>Easy-Vibe</strong>（datawhalechina/easy-vibe），原文位于</p>
+<p><code>docs/zh-cn/stage-1/appendix-a-product-thinking/index.md</code>，为二次演绎配音版。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
