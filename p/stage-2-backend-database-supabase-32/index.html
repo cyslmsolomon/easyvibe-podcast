@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>从数据库到 Supabase · 2.2 创建你的第一个 SQL 数据表</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 7 · EP 32</span>
+<h1>从数据库到 Supabase · 2.2 创建你的第一个 SQL 数据表</h1>
+<p class="sub">第 7 章 · 第 32 讲 · 15:16</p>
+<div class="meta"><span>时长 <b>15:16</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>7</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-backend-database-supabase-32-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-backend-database-supabase-32-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-2-backend-database-supabase-32/stage-2-backend-database-supabase-32-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-2-backend-database-supabase-32/stage-2-backend-database-supabase-32-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-7.html">← 第 7 章目录</a>
+<a href="/p/stage-2-backend-database-supabase-31/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场 · 真正动手建第一张表</span><span class="d">1:04</span></div>
+<div class="ch" data-t="64.416"><span class="t">1:04</span><span class="n">可视化建表 · 外键到底是什么</span><span class="d">1:58</span></div>
+<div class="ch" data-t="183.0"><span class="t">3:03</span><span class="n">建表和插入 · 先搭架子再放东西</span><span class="d">1:27</span></div>
+<div class="ch" data-t="270.552"><span class="t">4:30</span><span class="n">查询 · 用一条语句把要的东西挑出来</span><span class="d">1:23</span></div>
+<div class="ch" data-t="354.0"><span class="t">5:54</span><span class="n">删除 · 动手之前先看清要删什么</span><span class="d">1:20</span></div>
+<div class="ch" data-t="434.28"><span class="t">7:14</span><span class="n">让人工智能帮你设计表 · 一个排行榜的例子</span><span class="d">1:58</span></div>
+<div class="ch" data-t="552.936"><span class="t">9:12</span><span class="n">为什么选它 · 一栈式后端的取舍</span><span class="d">2:12</span></div>
+<div class="ch" data-t="685.68"><span class="t">11:25</span><span class="n">第三方登录 · 五步看懂授权代理</span><span class="d">2:11</span></div>
+<div class="ch" data-t="817.512"><span class="t">13:37</span><span class="n">配置要点与收尾 · 两个最容易出错的地方</span><span class="d">1:38</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>建表、增删改查与第三方登录：把数据库真正用起来 · 解读与音频稿件</h1>
+<blockquote>本内容改编自开源项目 Easy-Vibe，为二次演绎配音版。</blockquote>
+<blockquote>对应音频：<code>stage-2-backend-database-supabase-32-播客.mp3</code></blockquote>
+<blockquote>对应字幕：<code>stage-2-backend-database-supabase-32-播客.srt</code></blockquote>
+<blockquote>同页系列：第 31 集（控制台巡礼）、第 33-35 集（本页余下部分）</blockquote>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>上一集我们把控制台侧边栏走了一遍，知道每个模块是干什么的。但「知道有什么」和「能动手做出来」之间，还隔着一次真机操作。</p>
+<p>这一集填的就是这道缝：</p>
+<ul>
+<li>建表有哪两种方式，什么时候用哪种；</li>
+<li>「外键」这个听起来抽象的概念，落到班级表和学生表上到底是什么；</li>
+<li>增、查、删三条语句怎么跑，删之前要先做什么；</li>
+<li>怎么让人工智能帮你设计表结构，并把一个已有项目改造成带排行榜和登录的版本；</li>
+<li>为什么这么多人选这个平台，它又不适合谁；</li>
+<li>第三方登录背后的授权流程是怎么走的，配置时哪两个地方最容易出错。</li>
+</ul>
+<p>一句话概括：<strong>这一集是把「看得懂」推进到「做得出」</strong>。</p>
+<p>如果你时间有限，至少把第二节的外键、第五节的删除规矩和第八节的授权流程听完，这三处是新手最容易出事、也最值得反复确认的地方。</p>
+<h2>二、本集导航</h2>
+<table>
+<tr><th>段落</th><th>主题</th><th>你会得到什么</th></tr>
+<tr><td>开场</td><td>真正动手建第一张表</td><td>本集路线与两条核心习惯</td></tr>
+<tr><td>二</td><td>可视化建表与外键</td><td>两种建表方式、外键的直观解释</td></tr>
+<tr><td>三</td><td>建表与插入</td><td>搭架子、填数据、即时验证</td></tr>
+<tr><td>四</td><td>查询</td><td>四个层层递进的筛选示例</td></tr>
+<tr><td>五</td><td>删除</td><td>先查后删、能改不删、先备份</td></tr>
+<tr><td>六</td><td>让人工智能设计表</td><td>排行榜改造的完整提示词链条</td></tr>
+<tr><td>七</td><td>为什么选它</td><td>自建 vs 打包服务、开源与迁移成本</td></tr>
+<tr><td>八</td><td>第三方登录</td><td>授权五步流程</td></tr>
+<tr><td>九</td><td>配置要点与收尾</td><td>编号与密钥、两个高频错误点</td></tr>
+</table>
+<h2>三、能力地图</h2>
+<p>完成本集学习与实践后，你应该能够：</p>
+<ol>
+<li><strong>用两种方式建表</strong>：可视化新建，或让模型生成语句后执行。</li>
+<li><strong>解释外键</strong>：能用「班级表 / 学生表」的例子向别人讲清引用关系。</li>
+<li><strong>看懂表间连线</strong>：知道连线代表字段指向另一张表的主键。</li>
+<li><strong>建表时一次想清三件事</strong>：列名、类型、约束。</li>
+<li><strong>执行插入并即时验证</strong>：每插一批就查一次。</li>
+<li><strong>用条件层层收窄查询</strong>：从全表到指定列、指定状态、嵌套字段提取。</li>
+<li><strong>安全删除</strong>：先跑查询确认范围、能更新就不删除、批量前先导出。</li>
+<li><strong>组织提示词让模型设计表结构</strong>：先要设计，再要实现，再要排错。</li>
+<li><strong>说清选型理由</strong>：掌控力与上线速度的矛盾、开源带来的迁移自由。</li>
+<li><strong>复述授权五步流程</strong>：重定向、授权、授权码、换令牌、建会话。</li>
+<li><strong>完成第三方登录配置</strong>：拿到编号与密钥，填对重定向地址。</li>
+</ol>
+<h2>四、逐段要点</h2>
+<h3>开场 · 真正动手建第一张表</h3>
+<p>本集从建表一路走到第三方登录。两条贯穿习惯：<strong>动手前先想清数据结构；动手后先用查询确认范围再改数据</strong>。前提是先有一个可用项目。</p>
+<h3>二 · 可视化建表与外键</h3>
+<p>两种建表方式：推荐让模型生成语句后在语句执行器执行；或在数据库模块中新建表，用图形界面填写列名与类型。</p>
+<p><strong>外键</strong>：一个或一组字段，在子表中的值引用父表主键的值。</p>
+<p>示例：班级表主键为班级编号（一零一 = 一年级一班，一零二 = 一年级二班）；学生表增加「所属班级编号」列，该列即外键。理解了这一点，再看数据库模块里的表间连线，就会明白连线代表的是「某字段指向另一张表的主键」。</p>
+<p>平台中添加外键可直接选择关联表与列，无需手写语句。</p>
+<h3>三 · 建表与插入</h3>
+<p>创建表语句用于定义模式：列名、数据类型、约束。执行成功会提示脚本完成，可在表编辑器中看到新表。</p>
+<p>插入语句用于添加数据行。执行后可去表编辑器刷新，或在语句执行器中新开窗口查询全部数据验证。</p>
+<p><strong>建表时一次想清三件事</strong>：列名要有意义、类型要定对（文字 / 数字 / 日期）、约束要考虑（非空、唯一）。</p>
+<p>习惯：每插入一批数据立刻查一次，避免到最后才发现问题。</p>
+<h3>四 · 查询</h3>
+<p>四个递进示例：</p>
+<ol>
+<li>返回全部行与列 —— 适合表还很小的时候；</li>
+<li>加状态筛选 + 只取指定列 —— 结果从几十行收到几行；</li>
+<li>叠加第二个条件（已支付）—— 条件可叠加，越精确结果越小；</li>
+<li>从详情字段中提取商品数组 —— 说明数据库能挖掘嵌套内容。</li>
+</ol>
+<p>核心思路不变：用条件不断缩小范围。入门阶段不必纠结语句内部执行顺序，结果对即语句对。</p>
+<h3>五 · 删除</h3>
+<p>硬规矩：<strong>删除前先把条件放进查询语句跑一遍</strong>，确认选中范围无误，再把同样条件用于删除。</p>
+<p>其他要点：删除通常必须带条件，无条件删除等于清空整张表；能更新就别删除（很多时候真正想要的是改状态而非抹掉记录）；批量删除前先导出备份。</p>
+<h3>六 · 让人工智能设计表（排行榜案例）</h3>
+<p>第一轮提示词：说明「我有一个贪吃蛇游戏，目录在某处，想增加在线排行榜 + 用户登录，排行榜按用户名和邮箱显示排名，请分析需要哪些表、每张表有哪些字段」。</p>
+<p>第二轮提示词：基于上一轮设计与建表文件，实现排行榜页面，按邮箱和用户名区分总分，并支持基于邮箱的注册登录。</p>
+<p>实践技巧：对话轮次过多时，把建表文件作为上下文开新会话；登录实现不稳时，可附上已跑通的参考项目地址，并提醒检查连接后端的必要配置；效果不符时完整记录现象反馈给它。</p>
+<p>验收标准：用户能完成注册登录，登录后能看到属于自己的排行榜单。</p>
+<h3>七 · 为什么选它</h3>
+<p>矛盾：想要完全掌控后端，又必须快速上线。自建后端要投入数月搭建数据库、实时同步、认证、接口、存储、定时任务、监控告警等组件；在资金与窗口双重压力下容易陷入基础设施泥潭。</p>
+<p>平台把这些能力打包为开箱即用的服务，让团队聚焦核心功能。</p>
+<p>同类方案：PocketBase（轻量极简）、Appwrite（跨平台适配）。综合功能完整性、生态成熟度与社区关注度，本平台更适合长期运行。</p>
+<p>开源优势：支持私有化部署，规避闭源平台带来的绑定与高迁移成本。</p>
+<p>选型匹配规模：个人/极小测试用超轻量方案；复杂身份系统与合规审计用企业级身份治理；验证原型与承载早期用户，本平台可支撑万级用户并灵活集成支付、邮件、内容分发等第三方服务。</p>
+<p>务实提醒：没有银弹，关键是三个月后还能否快速迭代；选错不是灾难，代价是迁移时间。</p>
+<h3>八 · 第三方登录（授权五步）</h3>
+<p>核心是开放授权协议，本质是<strong>授权代理</strong>：允许应用访问第三方平台上的公开信息（邮箱、头像），但不暴露第三方密码。</p>
+<p>五步（以 Google 为例）：</p>
+<ol>
+<li>用户点击按钮 → 应用重定向到官方授权页面（防钓鱼）；</li>
+<li>用户在官方页面登录并同意授权范围；</li>
+<li>官方重定向回约定的回调地址，附带一次性、短期有效的<strong>授权码</strong>；</li>
+<li>平台后端用授权码向官方接口换取<strong>访问令牌</strong>（令牌不在前端传输）；</li>
+<li>平台用令牌拉取公开信息，自动创建或关联账户，生成会话，完成登录。</li>
+</ol>
+<p>配套能力：完整的认证系统必须提供安全可靠的密码重置；第三方登录不能完全取代邮箱验证，因为邮箱往往是在第三方账号出问题时唯一的联系通道。</p>
+<h3>九 · 配置要点与收尾</h3>
+<p>必备两样：客户端编号（Client ID）与客户端密钥（Client Secret）。</p>
+<p>以 Google 为例：进控制台创建或选择项目 → 配置授权同意屏幕（用户类型选外部，填应用名称与支持邮箱，授权域名添加平台域名）→ 创建凭据（应用类型选网络应用，填写已授权的重定向地址，该地址可在平台身份认证服务商页面找到）→ 创建瞬间弹出的编号与密钥<strong>务必立刻复制保存</strong>。</p>
+<p>两个高频错误点：<strong>重定向地址必须与平台显示的完全一致</strong>（多一个或少一个斜杠都会失败）；<strong>编号与密钥只显示一次</strong>，关掉弹窗只能重新生成。</p>
+<h2>五、审查清单</h2>
+<ul>
+<li>项目已创建且状态为可用</li>
+<li>已选定建表方式（语句执行器或可视化）</li>
+<li>列名、类型、约束在建表时已一次确定</li>
+<li>外键已建立，数据库模块中的表间连线符合预期</li>
+<li>插入数据后已立即执行查询验证</li>
+<li>查询条件已按需要从全表收窄到目标行</li>
+<li>删除前已用相同条件跑过查询确认范围</li>
+<li>批量删除前已导出备份</li>
+<li>让模型设计表结构时，提示词包含项目背景、目标功能与期望输出</li>
+<li>第三方登录的重定向地址与平台显示完全一致</li>
+<li>客户端编号与密钥已当场保存</li>
+<li>密码重置流程已验证可用</li>
+</ul>
+<h2>六、实践提示</h2>
+<h3>提示一 · 把外键想成「指向别人的身份证」</h3>
+<p>外键不是自己的主键，而是指向另一张表主键的一列。用班级表与学生表这个例子对别人讲一遍，讲得通就说明真懂了；讲不通，说明还需要再走一遍建表流程。</p>
+<h3>提示二 · 删除前先跑一遍查询</h3>
+<p>把「删除条件先当查询条件跑一遍」写成肌肉记忆。这条规矩的成本是几秒钟，收益是避免一次不可逆的数据丢失。</p>
+<h3>提示三 · 让模型先出设计再出代码</h3>
+<p>不要一上来就让它写代码。先要表结构设计，确认无误后再让它基于这份设计实现功能。两步走的好处是，设计阶段的错误很容易改，代码阶段的错误很难找。</p>
+<h3>提示四 · 提示词里说清「验收标准」</h3>
+<p>在让模型实现登录或排行榜时，把成功标准一起写进去，例如「用户能完成注册登录，登录后能看到属于自己的排行榜单」。有明确标准，它才知道什么时候算做完。</p>
+<h3>提示五 · 第三方登录配置只盯两件事</h3>
+<p>重定向地址是否完全一致、编号与密钥是否当场保存。绝大多数配置失败都出在这两处，其余步骤照着控制台走即可。</p>
+<h2>七、约束说明</h2>
+<ol>
+<li><strong>音频为本集的权威口径</strong>，本文是对音频的结构化补充与索引；若措辞有差异，以音频表述为准。</li>
+<li>本集涉及的界面入口、配置流程与术语均来自 Easy-Vibe 源文档写作时的记录。云平台界面与第三方登录配置会持续迭代，实际操作请以当前官网控制台为准。</li>
+<li>本集不含源文档之外的案例、数据或引文。排行榜改造案例与 OAuth 流程均为源文档给出的示例。</li>
+<li>口播稿中数字已按中文读法转写，专有产品名与代码标识符保留原文，便于检索官方文档。</li>
+<li>本集不涉及完整的项目代码、行级安全策略的编写语法，也不涉及企业级身份治理方案的落地细节。</li>
+<li>本切片对应源页为 <code>stage-2/backend/database-supabase/index.md</code>，覆盖该页的建表方式、外键说明、增删查改语句、排行榜改造案例、选型理由与第三方登录配置部分；同页的第 31、33-35 集覆盖其余部分，本集不越界取材。</li>
+</ol>
+<h2>八、术语速查</h2>
+<table>
+<tr><th>术语</th><th>一句话解释</th></tr>
+<tr><td>主键</td><td>一张表内唯一标识每一行记录的字段</td></tr>
+<tr><td>外键</td><td>指向另一张表主键的字段，用来表达表间引用</td></tr>
+<tr><td>约束</td><td>对字段取值的限制，如非空、唯一</td></tr>
+<tr><td>授权码</td><td>第三方平台返回的一次性短期凭证，用于换取令牌</td></tr>
+<tr><td>访问令牌</td><td>用于获取用户公开信息的凭证，只在服务端流转</td></tr>
+<tr><td>回调地址</td><td>第三方平台在授权完成后把用户送回的地址</td></tr>
+<tr><td>授权代理</td><td>不拿到用户密码，只取得有限信息访问权限的机制</td></tr>
+</table>
+<h2>九、常见误区与纠正</h2>
+<p><strong>误区一：把外键当成另一张表的主键。</strong></p>
+<p>外键在自己这张表里并不保证唯一，它只是「引用了别人的主键」。把它和主键混为一谈，设计出来的表结构往往会出错。</p>
+<p><strong>误区二：建表时随便定类型，后面再改。</strong></p>
+<p>类型一旦定了又改，已有数据的转换成本很高，尤其是数据量上来之后。宁可建表时多花五分钟想清楚。</p>
+<p><strong>误区三：直接执行删除语句。</strong></p>
+<p>没先用查询确认范围就删除，是数据事故最常见的起点。先查后删这条规矩，值得写成团队规范强制执行。</p>
+<p><strong>误区四：让模型一步到位写完整个功能。</strong></p>
+<p>先要设计、再要实现、最后再排错，三步走的成功率远高于一次性提一个大需求。设计阶段改起来最便宜。</p>
+<p><strong>误区五：认为第三方登录可以完全取代邮箱验证。</strong></p>
+<p>第三方账号可能失效、可能被封，邮箱往往是唯一还能联系到用户的通道。密码重置与邮箱验证仍然是认证系统的必备项。</p>
+<p><strong>误区六：以为重定向地址差不多就行。</strong></p>
+<p>授权流程对地址匹配要求严格，多一个或少一个斜杠都会失败。复制粘贴比手打可靠。</p>
+<h2>十、建议的动手顺序</h2>
+<p>如果你打算跟着做一遍，建议按下面的顺序推进，每一步都验证通过再进入下一步，避免在多个环节同时出错却不知道问题在哪。</p>
+<ol>
+<li>创建项目，等状态变为可用；</li>
+<li>用语句执行器建第一张表，去表编辑器确认表已出现；</li>
+<li>插入若干行数据，立刻查询验证；</li>
+<li>建立第二张表与外键，在数据库模块中确认连线正确；</li>
+<li>练习带条件的查询，从全表逐步收窄到目标行；</li>
+<li>用「先查询后删除」的方式删掉一行测试数据；</li>
+<li>让模型设计一个小功能的表结构，确认后再让它实现；</li>
+<li>最后再接第三方登录，先跑通邮箱登录作为对照。</li>
+</ol>
+<p>这套顺序的原则是，先建立对数据的感觉，再叠加认证与集成。跳过中间步骤直接做登录，很容易在表结构还没理顺的情况下同时遇到两类问题，排查起来非常痛苦。</p>
+<h2>十一、一页纸速览</h2>
+<ol>
+<li>建表两种方式，推荐让模型生成语句后执行。</li>
+<li>外键是指向别人主键的一列，表间连线画的就是它。</li>
+<li>建表一次想清三件事，列名、类型、约束。</li>
+<li>插一批查一次，别攒到最后再验证。</li>
+<li>查询就是不断用条件缩小范围。</li>
+<li>删除前先跑一遍查询，能更新就别删，批量前先备份。</li>
+<li>让模型先出设计再出代码，提示词里写清验收标准。</li>
+<li>选型看三点，上线速度、生态成熟度、迁移自由度。</li>
+<li>授权流程五步，关键是授权码换令牌只在服务端进行。</li>
+<li>第三方登录配置只盯两处，重定向地址与当场保存密钥。</li>
+</ol>
+<hr>
+<p><strong>来源</strong>：Easy-Vibe（datawhalechina/easy-vibe）docs/zh-cn/stage-2/backend/database-supabase/index.md</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
