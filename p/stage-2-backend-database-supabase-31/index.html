@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>从数据库到 Supabase · 非关系数据库 (NoSQL) 示例</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 7 · EP 31</span>
+<h1>从数据库到 Supabase · 非关系数据库 (NoSQL) 示例</h1>
+<p class="sub">第 7 章 · 第 31 讲 · 14:52</p>
+<div class="meta"><span>时长 <b>14:52</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>7</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-backend-database-supabase-31-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-backend-database-supabase-31-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-2-backend-database-supabase-31/stage-2-backend-database-supabase-31-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-2-backend-database-supabase-31/stage-2-backend-database-supabase-31-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-7.html">← 第 7 章目录</a>
+<a href="/p/stage-2-backend-cloud-server-deployment-29/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场 · 从一张表到一份文档</span><span class="d">1:03</span></div>
+<div class="ch" data-t="63.768"><span class="t">1:03</span><span class="n">非关系数据库 · 把相关信息打包在一起</span><span class="d">2:23</span></div>
+<div class="ch" data-t="207.48"><span class="t">3:27</span><span class="n">两类数据库速查 · 不用背但要眼熟</span><span class="d">0:58</span></div>
+<div class="ch" data-t="266.328"><span class="t">4:26</span><span class="n">建项目 · 侧边栏就是你的地图</span><span class="d">0:59</span></div>
+<div class="ch" data-t="325.968"><span class="t">5:25</span><span class="n">表编辑器与语句执行器 · 两种改数据的方式</span><span class="d">2:00</span></div>
+<div class="ch" data-t="446.784"><span class="t">7:26</span><span class="n">数据库管理中心与身份认证</span><span class="d">1:45</span></div>
+<div class="ch" data-t="552.192"><span class="t">9:12</span><span class="n">存储与边缘函数 · 不买服务器也能有后端</span><span class="d">1:50</span></div>
+<div class="ch" data-t="663.0"><span class="t">11:03</span><span class="n">边缘函数的典型场景 · 从回调到权限</span><span class="d">1:25</span></div>
+<div class="ch" data-t="748.992"><span class="t">12:28</span><span class="n">实时引擎与项目设置 · 最后两个关键参数</span><span class="d">2:22</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Supabase 控制台巡礼：从文档数据库到实时引擎 · 解读与音频稿件</h1>
+<blockquote>本内容改编自开源项目 Easy-Vibe，为二次演绎配音版。</blockquote>
+<blockquote>对应音频：<code>stage-2-backend-database-supabase-31-播客.mp3</code></blockquote>
+<blockquote>对应字幕：<code>stage-2-backend-database-supabase-31-播客.srt</code></blockquote>
+<blockquote>同页系列：第 32-35 集覆盖本页余下部分</blockquote>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>前面两集解决的是「项目放哪」：静态站、常驻服务、偶发任务各自该落在什么平台；数据库、缓存、加速又该自建还是上云。这一集往里再走一层，解决两件事。</p>
+<p><strong>第一件是数据形态。</strong> 关系型数据库把信息拆成多张表再用外键连起来，非关系型数据库把相关信息打包成一个文档。这两种设计思路正好相反，各自适合的场景也不同。搞不清这一点，后面选数据库就只能靠猜。</p>
+<p><strong>第二件是平台能力边界。</strong> 很多人听说某个后端平台很强，却说不清它到底提供哪几块能力。这一集沿着控制台侧边栏，把表编辑器、语句执行器、数据库管理中心、身份认证、存储、边缘函数、实时引擎、项目设置逐项走一遍，让你脑子里有一张完整的地图。</p>
+<p>贯穿全片的暗线是<strong>安全与权限</strong>：数据放在哪是一回事，谁能看到是另一回事。</p>
+<h2>二、本集导航</h2>
+<table>
+<tr><th>段落</th><th>主题</th><th>你会得到什么</th></tr>
+<tr><td>开场</td><td>从一张表到一份文档</td><td>本集路线与贯穿主题</td></tr>
+<tr><td>二</td><td>非关系数据库</td><td>聚合存储思路、文档数据库、读写比例权衡</td></tr>
+<tr><td>三</td><td>两类数据库速查</td><td>SQL 与 NoSQL 的常见产品名单</td></tr>
+<tr><td>四</td><td>建项目</td><td>创建流程与两个提醒</td></tr>
+<tr><td>五</td><td>表编辑器与语句执行器</td><td>模式容器的作用、两种改数据的方式</td></tr>
+<tr><td>六</td><td>数据库管理中心与身份认证</td><td>关联关系视图、开箱即用的用户体系</td></tr>
+<tr><td>七</td><td>存储与边缘函数</td><td>文件管理、S3 兼容、安全中间层</td></tr>
+<tr><td>八</td><td>边缘函数的典型场景</td><td>回调、权限继承、认证同步案例</td></tr>
+<tr><td>九</td><td>实时引擎与项目设置</td><td>三大实时能力、两类密钥的分界线</td></tr>
+</table>
+<h2>三、能力地图</h2>
+<p>完成本集学习与实践后，你应该能够：</p>
+<ol>
+<li><strong>说清两种设计思路的差异</strong>：关系型追求不重复，文档型追求一次取完。</li>
+<li><strong>判断读写比例</strong>：读多写少的场景敢于接受冗余；写多读少则要谨慎。</li>
+<li><strong>认出常见数据库产品</strong>：看到名字能分出它属于 SQL 还是 NoSQL 阵营。</li>
+<li><strong>独立完成项目创建</strong>：填好名称与密码，选对区域，等状态变为可用再操作。</li>
+<li><strong>理解模式的双重作用</strong>：避免命名冲突 + 实现权限隔离。</li>
+<li><strong>区分两个默认容器</strong>：公共容器放业务表，认证容器不要手动改。</li>
+<li><strong>用语句执行器建表</strong>：让大模型生成语句，运行后在表编辑器中验证。</li>
+<li><strong>看懂表间连线</strong>：理解外键约束所表达的数据引用关系。</li>
+<li><strong>配置登录方式</strong>：开关邮箱确认、设置限流、按需接入第三方认证。</li>
+<li><strong>把文件交给存储服务</strong>：区分公开/私有权限与永久/临时链接。</li>
+<li><strong>用边缘函数当安全中间层</strong>：密钥只留在服务端，通过环境变量读取。</li>
+<li><strong>选对实时能力</strong>：变更订阅 / 广播 / 在线状态三类各司其职。</li>
+<li><strong>守住密钥分界线</strong>：前端只能用受行级安全限制的那一把。</li>
+</ol>
+<h2>四、逐段要点</h2>
+<h3>开场 · 从一张表到一份文档</h3>
+<p>本集分两段：先用一小段对比两种数据库设计思路，再进入平台控制台逐项巡礼。贯穿主题是安全与权限。建议边听边打开控制台对照。</p>
+<h3>二 · 非关系数据库</h3>
+<p>思路与关系型相反：不强调拆分与规范，而是把业务上互相关联的数据打包聚合，以减少查询时的连接操作。</p>
+<p>文档数据库（MongoDB 为代表）以「文档」为基本单元，文档指类似通用数据格式的结构而非文章；无需预定义统一结构，字段可灵活增减。</p>
+<p>博客示例：关系型把一篇文章的信息分散在五张表；文档型把文章、作者、评论、标签放进同一个文档。查询只需按编号读一次，无需三四次表连接。</p>
+<p><strong>取舍</strong>：作者用户名被嵌入每篇文章，改名需遍历所有相关文档，存在更新失败与不一致风险。<strong>判断标准是读写比例</strong>：博客、资讯、商品详情这类读多写少场景，冗余可接受；频繁修改用户信息的写多读少场景需权衡。</p>
+<p>一句话总结：关系型追求不重复，文档型追求一次取完。</p>
+<h3>三 · 两类数据库速查</h3>
+<p>SQL 阵营：MySQL、PostgreSQL、YugabyteDB、CockroachDB、Oracle Database、Azure SQL Database。</p>
+<p>NoSQL 阵营：Redis、CouchDB、MongoDB、Cassandra、Elasticsearch、BigTable、HBase。</p>
+<p>用法：看到陌生名字回来查一眼即可判断脾气；初级阶段不必在选型上纠结过久，产品都很成熟，需要认真选时可直接咨询云厂商。</p>
+<h3>四 · 建项目</h3>
+<p>流程：官网登录 → 新建项目 → 填项目名称与数据库密码 → 选择离目标用户最近的区域。</p>
+<p>两个提醒：数据库密码只在创建时出现一次，务必当场保存；项目初始化需要时间，等状态变为可用再操作，否则会遇到莫名的报错。</p>
+<p>创建成功后，左侧侧边栏列出全部核心模块，本集即沿此顺序推进。</p>
+<h3>五 · 表编辑器与语句执行器</h3>
+<p>表编辑器 = 可视化数据表编辑器，像操作电子表格一样增删改查，无需写语句。</p>
+<p><strong>模式（Schema）</strong> 是数据库内的资源容器，作用有二：避免命名冲突（不同容器可有同名表）、实现权限隔离。日常只关注两个容器：</p>
+<ul>
+<li><code>public</code>：默认公共资源区，业务表放在这里。</li>
+<li><code>auth</code>：认证专属，其中的用户表自动存储注册用户信息，不建议手动修改。</li>
+</ul>
+<p>可把模式理解成文件夹：同名文件放不同文件夹互不干扰，还能分别设权限。</p>
+<p>语句执行器 = 用代码直接操作数据库。可让大模型生成语句，运行后到表编辑器的公共容器验证；执行过的语句保存在私有栏，可收藏复用。</p>
+<h3>六 · 数据库管理中心与身份认证</h3>
+<p>数据库管理中心：可视化查看与管理所有表，并通过表间连线理解关联关系（外键约束）。</p>
+<p>身份认证：管理注册、登录与权限，提供开箱即用的注册、登录、密码重置、邮箱验证，支持微信 / GitHub / Google 等第三方登录，所有用户数据自动同步到 <code>auth.users</code>。</p>
+<p>两个常用开关：关闭「确认邮箱」可免去注册后的邮件确认；「流量限制」可应对短期注册高峰。也可接入第三方认证服务（如专用认证工具）。</p>
+<p>隐藏价值：认证体系与业务库打通，业务表可直接引用认证用户表的用户编号，无需自建用户数据。</p>
+<p>节奏建议：只需邮箱登录时不必急着接第三方，先跑通主流程。</p>
+<h3>七 · 存储与边缘函数</h3>
+<p>存储：存放任意类型文件（图片 / 视频 / 文档 / 音频），提供公开或私有权限、永久或临时链接，并与认证系统无缝集成实现精细化访问控制。思路与对象存储一致——用户文件不要放应用服务器。</p>
+<p>S3 兼容的意义：该协议已存在近二十年，生态成熟，兼容即可直接复用现成工具、SDK 与文档，加速上线。</p>
+<p>边缘函数：全球分布式服务端函数，无需自建服务器即可编写并部署后端代码，自动在离用户最近的边缘节点运行。</p>
+<p><strong>核心价值是安全中间层</strong>：前端直接调用第三方服务会暴露接口密钥；改为前端只与自己的函数通信，密钥通过环境变量在服务端读取，永不进入浏览器。</p>
+<h3>八 · 边缘函数的典型场景</h3>
+<p>与认证系统集成：已登录用户调用函数时身份信息一并传入，函数内可识别用户做权限控制；函数操作数据库时自动遵循行级安全策略。</p>
+<p>典型用途：监听第三方回调（支付成功、代码提交）并触发数据处理；发送邮件通知；生成报告；封装复杂业务逻辑为自定义接口；任意服务端计算任务。</p>
+<p>案例：认证工具只管登录注册，不碰业务库；通过回调触发边缘函数，把认证状态同步进业务库，两端实时对齐，无需独立后端。</p>
+<p>成本认知：按请求触发，无调用时不占资源，无需单独维护机器，是小团队成本最低的后端形态。</p>
+<h3>九 · 实时引擎与项目设置</h3>
+<p>实时引擎让应用即时接收数据库变化，无需轮询；数据发生增 / 改 / 删时通过长连接推送给已连接客户端。三大能力：</p>
+<ol>
+<li><strong>变更订阅</strong>：监听表变化，可精确到表、事件、筛选条件，并与行级安全策略集成。</li>
+<li><strong>广播</strong>：客户端间通过频道发送低延迟临时消息，适合聊天室、实时光标、游戏状态同步。</li>
+<li><strong>在线状态</strong>：追踪谁在线、当前多少人在看，适合协作类应用。</li>
+</ol>
+<p>项目设置入门只需盯两项：</p>
+<ul>
+<li><strong>数据接口</strong>：形如项目地址的接口端点，是所有增删改查的入口，前端/服务端用它初始化客户端。</li>
+<li><strong>密钥</strong>：公开匿名密钥受行级安全严格限制，供前端使用；服务端高权限密钥可绕过行级安全，禁止公开，泄露须立即更换。</li>
+</ul>
+<p>判断标准：暴露在浏览器里的必须是受限制的那把；能绕过行级安全的只能待在服务端。</p>
+<h2>五、审查清单</h2>
+<ul>
+<li>已根据读写比例判断该用关系型还是文档型数据库</li>
+<li>文档型场景已确认冗余可接受的边界（哪些字段会被重复存储）</li>
+<li>项目创建时已保存数据库密码，且区域选择贴近目标用户</li>
+<li>项目状态变为可用后才开始建表操作</li>
+<li>业务表建在公共容器，未改动认证容器下的默认表</li>
+<li>已理解模式的两重作用，并按资源类型做了分组</li>
+<li>建表语句来自可复查的来源，运行后已在表编辑器中验证</li>
+<li>表间关联通过外键约束表达，关系视图可正常查看</li>
+<li>登录方式按需开启，未一次性接入过多第三方</li>
+<li>邮箱确认与限流策略已按业务需要配置</li>
+<li>用户上传文件走存储服务，未写入应用服务器</li>
+<li>第三方服务的密钥通过边缘函数的环境变量读取，未出现在前端代码</li>
+<li>已为需要实时性的功能选定正确的实时能力</li>
+<li>服务端高权限密钥未出现在任何前端配置或仓库记录中</li>
+</ul>
+<h2>六、实践提示</h2>
+<h3>提示一 · 用读写比例给数据库选型定调</h3>
+<p>别问「哪个数据库更好」，先问「这个数据被读得多还是被改得多」。读远多于写，接受冗余换取一次读全；写远多于读，就要认真评估聚合存储带来的更新成本。这一个变量能帮你砍掉大半的纠结。</p>
+<h3>提示二 · 把模式当成文件夹来用</h3>
+<p>模式听起来抽象，但当文件夹理解就通了：同名表放在不同容器里互不打扰，还能分别设置谁能访问。项目早期就养成按资源类型分组的习惯，等项目变大、要给别人开账号时，会省下大量返工。</p>
+<h3>提示三 · 前端永远只拿受限的那一把钥匙</h3>
+<p>判断标准只有一句：会暴露在浏览器里的密钥，必须是被行级安全策略限制过的；能绕过行级安全的，只能待在服务端。把这条写成团队规范，比任何事后审计都有效。</p>
+<h3>提示四 · 调第三方服务前先问一句：密钥会去哪</h3>
+<p>任何需要在前端调用第三方服务的场景，都先问「密钥会去哪」。如果答案是「会进浏览器」，那就该加一层边缘函数。这层中间件的成本极低，却能挡住一整类安全事故。</p>
+<h3>提示五 · 先把主流程跑通，再叠加登录方式</h3>
+<p>认证是容易过度设计的模块。只需要邮箱登录的时候，就别急着接第三方。每多一种登录方式，就多一份要维护的配置和一条可能出错的路径。等真实用户提出需求了再扩展，节奏会舒服很多。</p>
+<h2>七、约束说明</h2>
+<ol>
+<li><strong>音频为本集的权威口径</strong>，本文是对音频的结构化补充与索引；若措辞有差异，以音频表述为准。</li>
+<li>本集涉及的平台能力、界面入口与术语均来自 Easy-Vibe 源文档写作时的记录。云平台界面与功能会持续迭代，实际操作请以当前官网控制台为准。</li>
+<li>本集不含源文档之外的案例、数据或引文。所有示例均为源文档中给出的博客场景与认证同步场景。</li>
+<li>口播稿中数字已按中文读法转写，专有产品名与代码标识符保留原文，便于检索官方文档。</li>
+<li>本集不涉及具体项目的表结构设计、行级安全策略的编写语法，也不涉及生产级容量规划。</li>
+<li>本切片对应源页为 <code>stage-2/backend/database-supabase/index.md</code>，覆盖该页的非关系数据库示例、产品速查、项目创建、表编辑器、语句执行器、数据库管理中心、身份认证、存储、边缘函数、实时引擎与项目设置部分；同页的第 32-35 集覆盖其余部分，本集不越界取材。</li>
+</ol>
+<h2>八、术语速查</h2>
+<table>
+<tr><th>术语</th><th>一句话解释</th></tr>
+<tr><td>文档数据库</td><td>以类 JSON 结构为基本单元、无需预定义字段结构的数据库</td></tr>
+<tr><td>聚合存储</td><td>把相关联数据打包进同一文档，以冗余换取读取性能</td></tr>
+<tr><td>模式</td><td>数据库内的资源容器，用于分组管理与权限隔离</td></tr>
+<tr><td>外键约束</td><td>表与表之间的引用关系，表达数据归属</td></tr>
+<tr><td>行级安全策略</td><td>控制某用户能访问哪些数据行的规则</td></tr>
+<tr><td>边缘函数</td><td>运行在离用户最近节点的后端函数，无需自建服务器</td></tr>
+<tr><td>变更订阅</td><td>实时监听数据库表变化并推送给客户端的能力</td></tr>
+<tr><td>广播</td><td>客户端之间通过频道传递临时消息的实时能力</td></tr>
+<tr><td>在线状态</td><td>追踪并同步当前在线用户的能力</td></tr>
+</table>
+<h2>九、常见误区与纠正</h2>
+<p><strong>误区一：把「非关系」理解成「没有结构」。</strong></p>
+<p>非关系数据库不是没有结构，而是结构不必预先统一定义。每个文档仍可以有清晰的字段，只是允许不同文档字段不同。把这点搞清楚，才不会在项目后期误以为可以随意乱塞数据。</p>
+<p><strong>误区二：看到冗余就否定文档数据库。</strong></p>
+<p>冗余是设计取舍的结果，不是缺陷。读多写少的场景里，用少量重复换取一次读取拿全，往往是更优解。真正该问的是「这个字段多久改一次」，而不是「它重复了几遍」。</p>
+<p><strong>误区三：手动去改认证容器里的表。</strong></p>
+<p>认证容器下的用户表由系统自动维护，手动修改很容易破坏认证流程。需要扩展用户信息时，正确做法是在公共容器里建一张业务侧的扩展表，用用户编号关联。</p>
+<p><strong>误区四：把第三方服务的密钥写进前端。</strong></p>
+<p>这是最经典也最致命的一类事故。任何会进入浏览器的凭证，都必须假定它迟早会被看到。加一层服务端函数做中转，成本远低于事后处置。</p>
+<p><strong>误区五：用轮询实现实时。</strong></p>
+<p>反复请求接口不仅浪费资源，还会带来延迟。实时引擎已经提供了变更订阅、广播、在线状态三类能力，选对能力比多写几行代码有效得多。</p>
+<p><strong>误区六：一开始就接入所有登录方式。</strong></p>
+<p>每一种第三方登录都是一份需要长期维护的配置和一个潜在的故障点。先跑通主流程，等需求明确再扩展，节奏会舒服得多。</p>
+<h2>十、一页纸速览</h2>
+<ol>
+<li>关系型追求不重复，文档型追求一次取完，选型先看读写比例。</li>
+<li>模式当文件夹用，业务表放公共容器，认证容器不要手动改。</li>
+<li>不会写语句就让模型生成，运行后回表编辑器验证。</li>
+<li>表间连线就是外键约束，它表达的是数据归属。</li>
+<li>认证体系与业务库打通，业务表引用用户编号即可。</li>
+<li>用户文件走存储服务，不进应用服务器。</li>
+<li>第三方密钥只留在服务端，用边缘函数做中间层。</li>
+<li>实时需求先分三类，别一上来就轮询。</li>
+<li>前端只能用受限的那把密钥，高权限密钥一步都不许往外走。</li>
+</ol>
+<hr>
+<p><strong>来源</strong>：Easy-Vibe（datawhalechina/easy-vibe）docs/zh-cn/stage-2/backend/database-supabase/index.md</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
