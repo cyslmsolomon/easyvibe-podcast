@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>本节课你将学到 · 4.1 第一代 RAG：Naive RAG（基础检索增强）</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 8 · EP 52</span>
+<h1>本节课你将学到 · 4.1 第一代 RAG：Naive RAG（基础检索增强）</h1>
+<p class="sub">第 8 章 · 第 52 讲 · 15:40</p>
+<div class="meta"><span>时长 <b>15:40</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>8</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-ai-advanced-rag-introduction-52-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-ai-advanced-rag-introduction-52-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-3-ai-advanced-rag-introduction-52/stage-3-ai-advanced-rag-introduction-52-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-3-ai-advanced-rag-introduction-52/stage-3-ai-advanced-rag-introduction-52-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-8.html">← 第 8 章目录</a>
+<a href="/p/stage-2-frontend-ui-design-50/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:14</span></div>
+<div class="ch" data-t="74.592"><span class="t">1:14</span><span class="n">第一代的三步走</span><span class="d">1:40</span></div>
+<div class="ch" data-t="175.464"><span class="t">2:55</span><span class="n">第一代卡在哪三件事上</span><span class="d">1:42</span></div>
+<div class="ch" data-t="277.992"><span class="t">4:37</span><span class="n">第二代：先把存的想清楚</span><span class="d">1:37</span></div>
+<div class="ch" data-t="375.264"><span class="t">6:15</span><span class="n">把问题问清楚：重写与多路</span><span class="d">1:32</span></div>
+<div class="ch" data-t="467.712"><span class="t">7:47</span><span class="n">把问题问清楚：拆解与回溯</span><span class="d">1:24</span></div>
+<div class="ch" data-t="552.36"><span class="t">9:12</span><span class="n">检回来的东西怎么用才对</span><span class="d">1:32</span></div>
+<div class="ch" data-t="645.288"><span class="t">10:45</span><span class="n">第三代：不再是一条流水线</span><span class="d">2:34</span></div>
+<div class="ch" data-t="799.728"><span class="t">13:19</span><span class="n">学会自己决定要不要查</span><span class="d">2:19</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>检索增强生成的三代演进 · 从「能检索」到「会编排」</h1>
+<blockquote>本内容改编自开源项目 Easy-Vibe，为二次演绎配音版。本篇对应源文档 <code>stage-3/ai-advanced/rag-introduction/index.md</code> 的 4.1 - 4.3 三代演进与 5.1 模型选型部分，配套音频为本目录下的 <code>stage-3-ai-advanced-rag-introduction-52-播客.mp3</code>。</blockquote>
+<hr>
+<h2>一、这篇在讲什么</h2>
+<p>一句话概括：<strong>从「能跑」到「好用」之间，检索增强生成要补的到底是什么。</strong></p>
+<p>整条演进线的核心不是检索本身，而是三件事：</p>
+<blockquote><strong>把该存的存好，把该问的问清，把检回来的用对。</strong></blockquote>
+<table>
+<tr><th>代际</th><th>解决的问题</th><th>关键词</th></tr>
+<tr><td>第一代（基础形态）</td><td>有没有</td><td>先查再答这条路走得通</td></tr>
+<tr><td>第二代（精细化优化）</td><td>准不准</td><td>检索前 + 检索后双向优化</td></tr>
+<tr><td>第三代（模块化）</td><td>够不够用</td><td>可插拔模块 + 编排 + 自我决策</td></tr>
+</table>
+<hr>
+<h2>二、能力地图</h2>
+<p>完成这一节后，你应该具备：</p>
+<ol>
+<li><strong>代际判断能力</strong>：能说出一个 RAG 系统处在哪一代，以及下一步该补什么。</li>
+<li><strong>索引设计能力</strong>：理解语义感知分块、滑动窗口、元数据附加的价值。</li>
+<li><strong>查询改写能力</strong>：掌握查询重写、多路查询、子问题分解、回溯提示四种手法。</li>
+<li><strong>上下文治理能力</strong>：理解重排、去重压缩、引用对齐为什么必要。</li>
+<li><strong>架构视野</strong>：知道企业级场景需要哪些模块（路由 / 多源融合 / 记忆 / 治理）。</li>
+<li><strong>选型能力</strong>：知道选向量化模型要看维度和上下文长度两个参数。</li>
+</ol>
+<hr>
+<h2>三、第一代 · 基础检索增强</h2>
+<h3>三步走</h3>
+<table>
+<tr><th>步骤</th><th>动作</th><th>产出</th></tr>
+<tr><td>1. 预处理与索引</td><td>清洗 → 固定长度切块 → 向量化 → 写入向量库</td><td>可检索的向量集合</td></tr>
+<tr><td>2. 相似度检索</td><td>问题向量化 → 相似度搜索 → 取回 Top-K 文本块</td><td>候选片段</td></tr>
+<tr><td>3. 增强生成</td><td>片段 + 原问题直接拼接 → 长提示词 → 模型作答</td><td>最终回答</td></tr>
+</table>
+<h3>价值</h3>
+<p>以极低门槛验证了「先查再答」有效：相比完全依赖模型内部记忆，明显缓解知识截止与部分幻觉，成为大量演示、原型与入门教程的首选。</p>
+<h3>三条局限</h3>
+<table>
+<tr><th>局限</th><th>表现</th><th>后果</th></tr>
+<tr><td><strong>分块粗糙</strong></td><td>固定长度切分，截断完整语义段落 / 多主题混在一块</td><td>影响检索准确性，增加模型理解负担</td></tr>
+<tr><td><strong>信号单一</strong></td><td>只依赖向量相似度，不用关键词、时间戳、来源可信度、访问权限</td><td>无法回答「上个月改了什么」「某部门范围内生效的规定」</td></tr>
+<tr><td><strong>不做治理</strong></td><td>噪音、重复、矛盾片段原样塞进上下文</td><td>紧张的上下文窗口被低价值信息占据</td></tr>
+</table>
+<h3>提示一 · 一个方案成为教程首选，说明它简单，不说明它够用</h3>
+<p>很多人拿教程里的三行代码跑通之后直接搬进生产，然后被各种奇怪的召回失败折磨。</p>
+<p><strong>不是技术不行，而是用原型的标准去要求生产系统。分清你现在处在哪个阶段，比急着优化细节重要得多。</strong></p>
+<h3>提示二 · 三条局限指向同一个根因</h3>
+<p>第一代把检索当成了一次纯粹的数学运算——算向量距离。</p>
+<p>但真实的知识查找从来不只是比距离，你还关心<strong>这份资料是什么时候的、谁写的、能不能看、跟问题是不是真的相关</strong>。</p>
+<blockquote>把检索从一道算术题还原成一次有上下文的查找，正是后面两代要补的课。</blockquote>
+<hr>
+<h2>四、第二代 · 检索前后双向优化</h2>
+<h3>检索前 · 索引端</h3>
+<table>
+<tr><th>优化</th><th>从</th><th>到</th></tr>
+<tr><td>分块</td><td>固定长度切分</td><td>语义感知分块 + 分层索引（章节 / 小节 / 段落 / 句子边界 + 滑动窗口 + 多粒度）</td></tr>
+<tr><td>元数据</td><td>无</td><td>来源、时间、作者、主题、文档类型</td></tr>
+</table>
+<p><strong>滑动窗口的价值</strong>：让相邻文本块之间有重叠，即使段落被切开，两段各自仍保留上下文，不会出现半句话。</p>
+<blockquote>固定长度切分像是把一本书按页数均分；语义感知分块是按章节段落分，且每份都标好出处。<strong>检索从靠猜变成了靠条件。</strong></blockquote>
+<h3>检索前 · 查询端（四种手法）</h3>
+<table>
+<tr><th>手法</th><th>核心</th><th>示例</th></tr>
+<tr><td><strong>查询重写</strong></td><td>把模糊、口语化、不规范的原查询转成标准化表述</td><td>「咋查明天北京的天气啊」→「查询北京市明日全天实时天气」；结合历史行为「推荐好看的电影」→「推荐某年高分悬疑题材电影」</td></tr>
+<tr><td><strong>多路查询</strong></td><td>生成多个语义相关但角度不同的查询，覆盖用户未明确的需求</td><td>「如何给刚满月的宝宝拍嗝」→ 正确姿势 / 避免吐奶 / 零到一个月月龄 / 新手爸妈技巧</td></tr>
+<tr><td><strong>子问题分解</strong></td><td>复合问题拆成独立简单子查询</td><td>「北京到上海高铁的班次 / 票价 / 时长」→ 三条独立查询</td></tr>
+<tr><td><strong>回溯提示</strong></td><td>先生成更宏观的上位问题，再回推检索方向</td><td>「某品牌销量为何下降」→ 先问「影响新能源品牌短期销量波动的核心因素」，再检索产品更新 / 竞品定价 / 补贴政策</td></tr>
+</table>
+<h3>检索后 · 三件事</h3>
+<ol>
+<li><strong>重排</strong>：用专门的重排模型或大语言模型对候选文档二次排序，修正初步排序的语义偏差，让最关键内容优先进入上下文</li>
+<li><strong>筛选、去重与压缩</strong>：去掉无关或高度重复的片段，缓解长上下文中部信息被忽略的问题</li>
+<li><strong>轻量微调 + 引用</strong>：让模型更倾向于依据检索证据作答，并附带引用或出处</li>
+</ol>
+<h3>提示三 · 上下文不是越大越好</h3>
+<p>去重压缩这一步常被低估。<strong>窗口塞得太满反而会让模型抓不住重点。</strong></p>
+<p>第二代关注的三个更大挑战：</p>
+<ul>
+<li>能否精准定位到真正关键的段落</li>
+<li>传给模型的上下文是否简洁有序、易于高效利用</li>
+<li>面对信息噪音、内容冲突、多资料源时系统是否稳健</li>
+</ul>
+<hr>
+<h2>五、第三代 · 模块化</h2>
+<h3>三个企业级压力</h3>
+<ol>
+<li>同一系统既要支持简单问答，又要生成长篇报告、做代码检索、调用数据库</li>
+<li>需要同时接入向量库、全文检索、关系数据库、知识图谱、外部搜索引擎</li>
+<li>需要在多轮交互中保持用户偏好与历史决策记忆，并对输出做合规审核与溯源</li>
+</ol>
+<h3>四类典型模块</h3>
+<table>
+<tr><th>模块</th><th>职责</th><th>示例</th></tr>
+<tr><td><strong>查询理解与路由</strong></td><td>意图识别、问题重写、子任务拆解、路径选择</td><td>「这条错误日志代表什么问题」→ 代码与日志知识库；「该行业监管新规有哪些变化」→ 互联网搜索 / 合规法规库</td></tr>
+<tr><td><strong>多源检索与融合</strong></td><td>同时查向量库、全文检索、结构化 DB、知识图谱，统一融合排序</td><td>客户年度分析报告 = 成交额（业务系统）+ 项目复盘（文档库）+ 行业关系（知识图谱）</td></tr>
+<tr><td><strong>记忆与个性化</strong></td><td>长期用户画像、短期会话记忆、领域知识缓存</td><td>记住某用户偏好「先结论后细节」、所在业务线与常用术语</td></tr>
+<tr><td><strong>任务适配与治理</strong></td><td>适配器约束格式语气风格；事实核查、风险过滤、引用对齐</td><td>同一批检索结果 → 产品经理得到结构化需求文档模板，法务得到正式合规审查意见</td></tr>
+</table>
+<h3>提示四 · 真正的分水岭是「能不能回头再查」</h3>
+<p>传统做法是一轮检索配一轮生成就结束；模块化打破了这种单一流程。</p>
+<p><strong>当生成过程中发现信息不足，系统可以主动触发新的检索轮次，甚至多次往返。</strong></p>
+<p>再进一步的两个能力：</p>
+<ul>
+<li><strong>自我决策</strong>：把握大的问题直接基于内部知识或短上下文作答；不确定时才发起检索或调用工具，保证质量的前提下节约资源</li>
+<li><strong>假设性线索</strong>：对表达不清、信息缺失严重的查询，先由模型生成假设性答案或中间文档，再拿它当线索去检索真实文档，不断逼近可靠信息源</li>
+</ul>
+<blockquote>到这一步，它已不只是给模型补几段参考资料的组件，而是<strong>企业级智能应用的中枢式知识编排层</strong>。</blockquote>
+<hr>
+<h2>六、模型选型 · 三类模型与两个参数</h2>
+<h3>三类核心模型</h3>
+<table>
+<tr><th>模型</th><th>职责</th></tr>
+<tr><td>向量化模型</td><td>把文本转化为可检索的语义向量，决定召回质量</td></tr>
+<tr><td>重排模型</td><td>对初步检索结果做精细筛选与重排序</td></tr>
+<tr><td>大语言模型</td><td>基于筛选后的上下文生成最终答案</td></tr>
+</table>
+<h3>向量化模型的两个关键参数</h3>
+<table>
+<tr><th>参数</th><th>含义</th><th>选型建议</th></tr>
+<tr><td><strong>维度</strong></td><td>输出向量的维度数，反映描述语义时的「特征数量」</td><td>维度高 → 细节丰富、区分度强，适合医疗、法律等精准检索；维度低 → 成本低、速度快，适合千万级文档高并发强实时场景</td></tr>
+<tr><td><strong>上下文长度</strong></td><td>单次可处理的最大文本长度（词元计，1 中文词元约 1 个汉字），超出会被截断</td><td>短句 / 问答对选 512-1024；论文、报告等长文本选 2048 及以上</td></tr>
+</table>
+<h3>提示五 · 这两个参数选错，后面再怎么优化流程都补不回来</h3>
+<p>分块和查询改写都是在<strong>已有向量</strong>上做文章；如果向量本身因为维度太低丢了区分度、或者因为上下文长度不足被截断丢失关键信息，<strong>上游的缺陷无法在下游修复</strong>。</p>
+<hr>
+<h2>七、审查清单</h2>
+<ul>
+<li>能否说清自己的系统处在哪一代，下一步该补什么？</li>
+<li>分块是否用了语义感知策略与滑动窗口，而不是纯固定长度？</li>
+<li>文档块是否附加了来源、时间、作者、主题、文档类型等元数据？</li>
+<li>是否实现了至少一种查询改写手法（重写 / 多路 / 子问题 / 回溯）？</li>
+<li>检索后是否有重排环节？</li>
+<li>是否做了去重与压缩，而不是把候选片段全塞进去？</li>
+<li>回答是否附带引用或出处？</li>
+<li>多数据源场景是否有路由与融合模块？</li>
+<li>是否有记忆与个性化（用户偏好、业务线、常用术语）？</li>
+<li>是否有事实核查与引用对齐等治理机制？</li>
+<li>生成中信息不足时，能否触发新的检索轮次？</li>
+<li>向量化模型的维度与上下文长度是否匹配你的文档长度与精度要求？</li>
+</ul>
+<hr>
+<h2>八、约束说明</h2>
+<ol>
+<li><strong>素材边界</strong>：本篇内容全部来自 <code>stage-3/ai-advanced/rag-introduction/index.md</code>，未跨文件取材。</li>
+<li><strong>取舍说明</strong>：源文档该切片净可读约 5700 字，超出单集 4600 至 5300 字的口播容量上限。本篇以「三代演进」为主线完整覆盖，<strong>对 5.1 节的具体模型横向对比表（九款向量化模型的规模、优势与适用场景）做了取舍，只保留三类模型分工与两个关键选型参数</strong>；MTEB 评测基准仅作概念提及，未展开其八类任务与五十六个数据集的细节。</li>
+<li><strong>无虚构数据</strong>：本篇未引入源文档之外的案例、数字、模型名或评测结论。文中出现的四种查询改写手法及其示例、三类模型、维度与上下文长度的具体取值建议，均直接来自源文档。</li>
+<li><strong>口播化处理</strong>：口播稿为避免英文缩写的直接朗读，统一使用中文术语（检索增强生成、向量化模型、重排模型、查询重写、多路查询、子问题分解、回溯提示、词元），未改变原意。</li>
+<li><strong>二次演绎部分</strong>：源文档对「教程首选不等于生产可用」「三条局限指向同一根因」「上下文不是越大越好」「参数选错无法在下游修复」等未展开论证，本篇在提示一至提示五及正文类比中给出的推演属于合理延伸，不构成对源文档的新增事实声明。</li>
+<li><strong>合规声明</strong>：本内容改编自开源项目 Easy-Vibe，为二次演绎配音版，非官方原声，仅作学习交流使用。</li>
+</ol>
+<h3>能力自测</h3>
+<p>不用真的搭一套系统，用下面五个问题检验：</p>
+<ol>
+<li>用户问「上个月那份规定改了什么」，第一代系统为什么答不好？缺的是检索还是索引？</li>
+<li>固定长度切分把一个段落切成两半，滑动窗口是怎么救回来的？</li>
+<li>「北京到上海高铁的班次、票价、时长」该用四种查询手法里的哪一种？为什么多路查询解决不了它？</li>
+<li>候选片段有二十条、上下文只放得下五条，中间该加哪个环节？</li>
+<li>文档都是上万字的论文，你选向量化模型时最该看哪个参数？为什么？</li>
+</ol>
+<p>能答上三个以上，说明三代演进这条主线你已经抓住了。</p>
+<hr>
+<h2>九、时间不够时怎么砍出最小可用版本</h2>
+<table>
+<tr><th>优先级</th><th>项目</th><th>理由</th></tr>
+<tr><td>必做</td><td>语义感知分块 + 滑动窗口</td><td>投入小，直接决定召回质量</td></tr>
+<tr><td>必做</td><td>建索引时带上元数据</td><td>后期补元数据等于重建索引</td></tr>
+<tr><td>必做</td><td>至少一种查询改写</td><td>用户原话直接检索的效果通常很差</td></tr>
+<tr><td>次优先</td><td>加一个重排环节</td><td>收益明显，但需要额外模型</td></tr>
+<tr><td>次优先</td><td>去重与压缩</td><td>上下文紧张时才显著</td></tr>
+<tr><td>可后置</td><td>多源融合、记忆、治理模块</td><td>属于第三代能力，需求到了再做</td></tr>
+<tr><td>可后置</td><td>自我决策与假设性线索</td><td>对工程复杂度要求较高</td></tr>
+</table>
+<hr>
+<h2>十、常见误区与纠正</h2>
+<table>
+<tr><th>误区</th><th>表现</th><th>纠正</th></tr>
+<tr><td>教程跑通就上生产</td><td>三行代码直接搬到业务系统</td><td>分清原型标准与生产标准</td></tr>
+<tr><td>只优化提示词</td><td>召回失败却一直在改提示词</td><td>问题常在分块与检索阶段</td></tr>
+<tr><td>固定长度一刀切</td><td>段落被切成半句话</td><td>语义感知分块 + 滑动窗口</td></tr>
+<tr><td>忽略元数据</td><td>无法按时间、来源筛选</td><td>建索引时就把元数据带上</td></tr>
+<tr><td>拿用户原话直接检索</td><td>口语化问题召回很差</td><td>先做查询重写 / 多路 / 拆解</td></tr>
+<tr><td>候选片段全塞进去</td><td>上下文塞满，模型抓不住重点</td><td>重排 + 去重 + 压缩</td></tr>
+<tr><td>只接一种数据源</td><td>结构化数据查不到</td><td>多源检索与融合模块</td></tr>
+<tr><td>先选模型再想场景</td><td>维度与长度不匹配文档</td><td>先看文档长度与精度要求</td></tr>
+</table>
+<hr>
+<h2>十一、一页纸总结</h2>
+<table>
+<tr><th>环节</th><th>一句话要点</th></tr>
+<tr><td>主线</td><td>把该存的存好，把该问的问清，把检回来的用对</td></tr>
+<tr><td>第一代</td><td>三步走：切块索引 → 相似度检索 → 拼接生成</td></tr>
+<tr><td>第一代局限</td><td>分块粗糙、信号单一、不做治理</td></tr>
+<tr><td>第二代检索前</td><td>语义分块 + 元数据；查询重写 / 多路 / 拆解 / 回溯</td></tr>
+<tr><td>第二代检索后</td><td>重排、去重压缩、引用与微调</td></tr>
+<tr><td>第三代</td><td>模块化：路由 / 多源融合 / 记忆 / 治理</td></tr>
+<tr><td>分水岭</td><td>生成中发现不足可以回头再查</td></tr>
+<tr><td>终局</td><td>中枢式知识编排层</td></tr>
+<tr><td>选型</td><td>三类模型；向量化模型看维度与上下文长度</td></tr>
+</table>
+<hr>
+<p>*配套文件：口播稿 <code>script.txt</code>、音频 <code>stage-3-ai-advanced-rag-introduction-52-播客.mp3</code>、字幕 <code>stage-3-ai-advanced-rag-introduction-52-播客.srt</code>。*</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
