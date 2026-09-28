@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>如何构建微信小程序（包含后端） · 4.4 让用户只能看到自己的工单</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 8 · EP 85</span>
+<h1>如何构建微信小程序（包含后端） · 4.4 让用户只能看到自己的工单</h1>
+<p class="sub">第 8 章 · 第 85 讲 · 15:40</p>
+<div class="meta"><span>时长 <b>15:40</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>8</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-cross-platform-wechat-miniprogram-backend-85-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-cross-platform-wechat-miniprogram-backend-85-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-3-cross-platform-wechat-miniprogram-backend-85/stage-3-cross-platform-wechat-miniprogram-backend-85-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-3-cross-platform-wechat-miniprogram-backend-85/stage-3-cross-platform-wechat-miniprogram-backend-85-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-8.html">← 第 8 章目录</a>
+<a href="/p/stage-3-cross-platform-wechat-miniprogram-backend-84/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:35</span></div>
+<div class="ch" data-t="95.904"><span class="t">1:35</span><span class="n">权限为什么要查两遍</span><span class="d">2:09</span></div>
+<div class="ch" data-t="225.624"><span class="t">3:45</span><span class="n">用两个微信号测一遍</span><span class="d">2:10</span></div>
+<div class="ch" data-t="355.704"><span class="t">5:55</span><span class="n">图片凭证分三步</span><span class="d">2:14</span></div>
+<div class="ch" data-t="490.008"><span class="t">8:10</span><span class="n">出问题怎么跟 AI 说</span><span class="d">2:10</span></div>
+<div class="ch" data-t="620.52"><span class="t">10:20</span><span class="n">验收要看两个地方</span><span class="d">2:52</span></div>
+<div class="ch" data-t="792.744"><span class="t">13:12</span><span class="n">发布之前忍住三件事</span><span class="d">2:27</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe · 让用户只能看到自己的工单：双层权限、双账号测试与发布前的克制 — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-3/cross-platform/wechat-miniprogram-backend/index.md</code>），为<strong>二次演绎配音版</strong>。本文在原文基础上做了口语化改写、结构重组与实践补充，观点与例子由演绎方添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>stage-3-cross-platform-wechat-miniprogram-backend-85</code></li>
+<li>所属章节：第 8 章</li>
+<li>原文覆盖小节：4.4 让用户只能看到自己的工单、4.5 接入图片凭证、4.6 出现问题怎么办、4.7 同时检查页面与云端记录、5.1 上传前先检查环境、5.2 在微信开发者工具中上传体验版、5.3 用两个真实账号再试一次、5.4 体验版能打开以后先别急着正式发布、6 第一张真实工单已经跑通了</li>
+<li>对应音频：<code>stage-3-cross-platform-wechat-miniprogram-backend-85-播客.mp3</code></li>
+<li>字幕：<code>stage-3-cross-platform-wechat-miniprogram-backend-85-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>带后端的小程序做完提交功能之后，会撞上一堵几乎所有初学者都会撞的墙：<strong>用户 A 能不能看到用户 B 的工单？</strong> 功能都是通的，数据库也存进去了，但这一层归属没做对，前面所有工作都得打返工，而且是最难受的那种返工——不是做不出来，是不敢给人用。</p>
+<p>这一集把这个问题讲透，并且顺手带出三个伴生问题：图片怎么加、出了问题怎么跟 AI 说、发布之前要忍住什么。音频稿按七段展开：</p>
+<ol>
+<li><strong>权限为什么要查两遍</strong> —— 数据库规则与云函数检查各管一条路，只锁一道等于没锁；</li>
+<li><strong>用两个微信号测一遍</strong> —— 隔离生效的五步验证法；</li>
+<li><strong>图片凭证分三步</strong> —— 先文字后图片，容错、存储、限额一次一个；</li>
+<li><strong>出问题怎么跟 AI 说</strong> —— 现象加证据加范围的标准句式；</li>
+<li><strong>验收要看两个地方</strong> —— 页面结果与云端记录七条清单；</li>
+<li><strong>上传前检查与体验版</strong> —— 环境、云函数、版本管理三处易翻车；</li>
+<li><strong>发布之前忍住三件事</strong> —— 隐私合规、一项一项加、技术选型不追重。</li>
+</ol>
+<hr>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>能力项</th><th>原文怎么说的</th><th>演绎方的解读</th><th>所属环节</th></tr>
+<tr><td>双层权限</td><td>数据库规则挡直连，云函数要再确认一次</td><td>小区大门加楼里管家，防的不是同一类风险</td><td>数据权限</td></tr>
+<tr><td>归属字段</td><td>云函数保存时系统不自动生成身份标识</td><td>前端说我是谁就记谁，叫自己证明自己</td><td>数据权限</td></tr>
+<tr><td>可信上下文</td><td>提示词要求 AI 从可信上下文取归属信息</td><td>身份在后端验，前端只传内容</td><td>数据权限</td></tr>
+<tr><td>体验成员</td><td>把同事加入体验成员，用他的微信试</td><td>体验版是上线前离真实用户最近的一步</td><td>隔离测试</td></tr>
+<tr><td>五步验证</td><td>建单、自见、他不见、他建、回看</td><td>第三步「看不到」才是真验收标准</td><td>隔离测试</td></tr>
+<tr><td>先文字后图片</td><td>文字稳定后再加图片</td><td>两个问题叠在一起查，能查到天亮</td><td>图片凭证</td></tr>
+<tr><td>上传容错</td><td>失败时保留已填内容并告知重试方式</td><td>容错决定用户下次还来不来</td><td>图片凭证</td></tr>
+<tr><td>云存储加标识</td><td>图片进云存储，数据库只存文件标识</td><td>账本只记几号柜，不把东西塞进账本</td><td>图片凭证</td></tr>
+<tr><td>限额</td><td>限制图片数量、大小和格式</td><td>防一个异常上传打爆存储和流量</td><td>图片凭证</td></tr>
+<tr><td>内容审核</td><td>体验版可不开，真实用户前再加，单独计费</td><td>功能开关也是成本，开在哪阶段要有数</td><td>内容审核</td></tr>
+<tr><td>报障句式</td><td>现象加页面错误加脱敏日志，只改出错的地方</td><td>只改出错的地方是刹车，防顺手重构</td><td>问题排查</td></tr>
+<tr><td>日志检索</td><td>按时间、资源、关键词定位调用</td><td>从翻聊天记录到按图索骥</td><td>问题排查</td></tr>
+<tr><td>日志脱敏</td><td>保留编号、动作、结果、耗时、错误码</td><td>完整身份标识、手机号、令牌、密钥不入日志</td><td>数据安全</td></tr>
+<tr><td>双重验收</td><td>页面结果加云端记录，七条清单</td><td>前端看渲染，后端看留痕</td><td>验收</td></tr>
+<tr><td>迭代循环</td><td>叙述、修改、部署、操作、确认</td><td>每轮都知道自己走到哪一环</td><td>迭代节奏</td></tr>
+<tr><td>上传前检查</td><td>查环境、云函数、演示数据、调试、密钥、权限</td><td>环境编号填错，前端能跑后端全废</td><td>发布准备</td></tr>
+<tr><td>体验版设置</td><td>公众平台版本管理中设为体验版</td><td>前端上传成功不代表云函数已更新</td><td>发布准备</td></tr>
+<tr><td>隐私合规</td><td>隐私说明、服务类目、备案补完整</td><td>用户给的是信任，不是给你囤的资产</td><td>发布合规</td></tr>
+<tr><td>一次一项</td><td>支付、客服后台一项一项加</td><td>一次全上，炸了都不知道哪环炸</td><td>发布节奏</td></tr>
+<tr><td>选型克制</td><td>实时能力先看现有，复杂事务再上重数据库</td><td>向后拖一步，常常是向前进一步</td><td>技术选型</td></tr>
+<tr><td>三条底线</td><td>密钥不放前端、身份不听前端、关键数据过后端检查并留痕</td><td>功能会变，底线不会变</td><td>总结</td></tr>
+</table>
+<hr>
+<h2>三、逐节解读</h2>
+<h3>3.1 权限为什么要查两遍</h3>
+<p>原文开篇就把一个常见误解摁掉：数据库里设了权限规则，云函数里是不是就不用再检查了？答案是不行。数据库规则挡的是小程序直接操作数据这条路；业务走云函数时，云函数是后台真正办理业务的人，仍要再确认一次这张工单是不是当前用户的。演绎方用小区大门和楼里管家作比：大门认卡不认人，卡可以借可以仿；管家认户口本。两道验证防的不是同一类风险——大门防外来人，管家防进错门。数据泄露往往不是墙被炸塌了，而是门里面根本没拦。</p>
+<p>还要说清一件事：设了云函数检查，不等于数据库规则可以省。规则管的是直连那条路，管理端和后续工具也可能直连，两层都在，才叫纵深。</p>
+<p>本节最容易被忽略的是归属字段的写入时机。通过云函数或管理端保存记录时，系统不会自动生成那个用户身份标识字段，提示词里必须要求 AI 主动从可信上下文取归属信息写进去，绝不让前端自己决定。前端说我是谁就记谁，叫自己证明自己，一骗就倒；今天只是看到别人工单，明天就是改成别人的订单、地址。演绎方把这条总结为：身份在后端验，内容才敢往前端传。可信上下文和前端传参之间隔着一条信任的鸿沟，桥只能搭在后端。</p>
+<h3>3.2 用两个微信号测一遍</h3>
+<p>原文的测试法很朴素：自己先提交一张工单，再把同事加入体验成员，用他的微信打开体验版，两个账号看到的内容完全分开，权限才算生效。演绎方补了两个提醒。其一，必须是同事的真实微信，不是同一个人开小号改昵称——两个独立账号、两条独立登录态，才能测出归属是不是真按身份分开；同一个微信号切来切去，测的是寂寞。其二，体验版是上线前离真实用户最近的一步，在这里把隔离验穿，比上线后看投诉省事一万倍。</p>
+<p>五步验证建议拿笔记一下：账号 A 建单并记住工单编号；A 在我的工单里看到这条；账号 B 打开小程序，确认看不到 A 的工单；B 再建一张自己的；回到 A，确认两边没混。五步全过才叫隔离生效，少一步都不算。前两步只证明功能能用，第三步才开始证明权限生效；第四、五步防的是另一种更隐蔽的漏——新建的时候串了数据。分开是双向的，只测一个方向，等于只查了半边门。</p>
+<p>反常识的一点：体验版阶段不要只让开发者自己试。开发者账号往往带特殊权限，自己能看不代表普通用户能看，自己看不到也不代表真隔离，可能只是没数据。很多线上事故，根子就是上线前只测了开发者那一个账号。五步里任何一步对不上，别猜，回去查归属信息是谁写进去的。</p>
+<h3>3.3 图片凭证分三步</h3>
+<p>原文的顺序观很明确：文字工单稳定以后再加图片。这样上传出问题时，能判断是文字工单没成功还是图片没传上。功能一个一个接，是带后端项目的基本节奏。给 AI 的提示词也分三步：第一步先让图片能传，且上传失败时保留已填写的内容、告诉用户怎样重试——这一步考验的是容错不是功能，用户填了五百字一传图片全清了，没人愿意用第二次；出错之后用户不知道该干嘛，才是真的流失。第二步图片放云存储，数据库只存文件标识——账本只记东西放在几号柜，不把东西本身塞进账本，这样数据库轻、加载快、备份也小；这一步是打地基，图片直接进数据库，前期省事，后期迁移想哭。第三步再限制数量、大小和格式——一次只提一个要求，AI 一次改一处，你一次验一处；三步并成一句大提示词，出了问题都不知道该回滚哪。限制不是为了刁难用户，是为了不让一个异常上传把存储和流量一起打爆。</p>
+<p>内容审核这一功能，原文的建议是先别开。只是自己和同事用的体验版，审核可以不打开；真要给真实用户用了，再让 AI 给文字、图片、音频和文档加审核，新内容先进待审核，通过再展示，可疑的转人工。要提醒一句，腾讯云的内容审核单独计费，确认需要再开。别为省钱埋雷，也别为排场白烧钱——功能开关也是成本，开在哪一阶段，要有数。</p>
+<h3>3.4 出问题怎么跟 AI 说</h3>
+<p>AI 写的后端很难一次全对：页面看着没问题，一点提交就出事，云函数没部署、环境编号填错、数据库拒绝写入，都可能。这时最忌讳两件事：只丢给 AI 一句提交不了，或者让它立刻重写整个项目。前者信息太少，它看不到你屏幕上的画面，复现路径全靠你给；后者动静太大，它可能改错地方的同时把对的地方也改坏。省下的描述时间，会加倍还回去。</p>
+<p>原文给的标准句式值得原样收藏：提交工单后一直显示处理中，这是页面错误和已脱敏的云函数日志，下面粘贴内容，请找出原因，只修改出错的地方。精髓是三个都有——你点了什么、页面显示了什么、日志里最相关的那条是什么。现象加证据加范围，AI 才能精准下手；「只改出错的地方」是刹车，没有它，AI 很可能顺手重构半个项目。会描述问题的人，用 AI 是加速度；不会描述的人，用 AI 是抽奖。</p>
+<p>日志去哪找？云开发平台提供日志检索，可以按时间、资源和关键词定位到刚才那次调用，不用在几百行输出里盲翻。以前排查靠翻聊天记录，现在靠按图索骥，这是工具给的便利，要用起来。还有一个细节：让 AI 输出日志时，保留请求编号、动作、工单编号、结果、耗时和错误码就够；完整身份标识、手机号、令牌、密钥和工单敏感正文，不要往里放。日志是拿来排错的，不是拿来晒家底的。脱敏这个习惯从第一行代码就开始养，等项目大了再补，补不回来。</p>
+<h3>3.5 验收要看两个地方</h3>
+<p>原文把带后端的小程序和贪吃蛇做了对比：贪吃蛇能在屏幕上玩，基本就算成了；带后端的小程序要同时看两个地方——页面上的结果和云端留下的记录。前端点了有反应不算，数据库里真有这条、云端真有这次调用，才算。做到这一步，页面、云函数、微信身份、数据库和权限才算真正接在了一起，少任何一环都是各演各的。</p>
+<p>七条验收清单：会员首页能看；工单能提交；工单存进云端；连续点击不会创建重复工单；两个微信账号只能看到各自的数据；图片进云存储、数据库只保存文件标识；出现问题时能在日志里找到对应调用。七条全过，这一阶段才算完。注意这七条没有一条是前端特效，全是后端行为——这就是带后端项目和纯前端项目的分水岭：前端看渲染，后端看留痕。这张清单建议截图存手机，以后每做完一个带后端的小功能就拿出来对一遍。</p>
+<p>整个迭代过程是一个固定循环：自然语言叙述、AI 修改、部署云函数、在前端操作、再去数据库和日志里确认。这个循环走几轮不可怕，可怕的是每一轮都不知道自己走到了哪一环。</p>
+<h3>3.6 上传前检查与体验版</h3>
+<p>上传之前先让 AI 查一遍能不能上传体验版，重点查环境、云函数、演示数据、调试功能、密钥和权限，只列上传前必须改的问题。环境编号一个项目一个环境，填错了前端能跑、后端全废；顺带说一句，演示数据和调试功能也要在这一步清掉，带病上线，用户点到一个调试入口，比你没做这个功能还尴尬。等项目要给更多人用，再拆开发、测试、生产三套环境，让 AI 把环境编号集中配置。环境编号本身不是密钥，但截图给别人看时仍建议遮住一部分。</p>
+<p>上传时确认编号、云环境和云函数版本都正确，填好版本号和项目备注，再回到公众平台的版本管理，把刚上传的开发版本设为体验版。最大的坑在这里：小程序前端上传成功，不代表云函数也自动更新了。每次改后端，都要单独确认云函数部署到了体验版正在用的环境。前端后端两张皮，是体验版翻车重灾区。</p>
+<h3>3.7 发布之前忍住三件事</h3>
+<p>第一，隐私合规。这个小程序和贪吃蛇不一样，它存用户的联系方式、问题描述和图片。正式发布前，公众平台上的隐私说明、服务类目、备案信息都得补完整。原文还给了一段可以直接复制给 AI 的话：请检查这个小程序收集的联系方式、问题描述和图片，告诉我要哪些必须收集、保存多久、用户怎么删除，不必要的数据不要收集。演绎方的批注是：收集数据是本能，少收数据是本事；用户把联系方式和图片交给你，是信任，不是给你囤的资产。</p>
+<p>第二，别一次塞满。支付、客服后台、会员体系，想加可以，一项一项来，每加一项重新在模拟器和体验版走一遍完整流程。一次全上，出了问题连是哪一环炸的都不知道。真机上还要顺手测网络断开、图片权限、返回页面和重复点击，这四个地方最容易在体验版里埋雷。发现问题以后，仍按描述现象、最小修复、重新部署、再次验证的循环继续迭代。</p>
+<p>第三，别追重。想加实时能力，先看现有方式行不行，别一看到新词就迁云托管；真要复杂关联和强事务，再上关系型数据库。技术越重，不一定越适合第一版。第一版的任务是跑通一条真实链路，不是把技术栈攒齐。选型这件事，向后拖一步，常常是向前进一步。</p>
+<p>收尾是三条底线：密钥不要放在前端；用户是谁，不能听前端自己说；关键数据要经过后端检查，并且留下记录。以后换成预约、会员、课程或报修小程序，也可以从这样一条很小的真实记录开始，先让页面能操作，再一次只接一个后端能力，每次同时看前台结果和云端记录，确认以后再上传体验版。功能会变，底线不会变。</p>
+<hr>
+<h2>四、审查清单</h2>
+<ul>
+<li>能说清数据库规则与云函数检查各管哪条路，为什么只锁一道等于没锁</li>
+<li>提示词里要求 AI 从可信上下文取归属信息写入，没有让前端自己决定身份</li>
+<li>用同事的真实微信加入体验成员测过隔离，不是同一个人切小号</li>
+<li>走完五步验证，尤其是第三步「账号 B 看不到账号 A 的工单」</li>
+<li>分开是双向测过的，A 看不到 B，B 也看不到 A</li>
+<li>图片是文字工单稳定之后才加的，且上传失败会保留已填内容</li>
+<li>图片放在云存储，数据库只保存文件标识</li>
+<li>已限制图片的数量、大小和格式</li>
+<li>内容审核按阶段开启，开启前确认过单独计费</li>
+<li>报障用「现象加页面错误加脱敏日志，只改出错的地方」句式，没有让 AI 重写整个项目</li>
+<li>会按时间、资源、关键词检索云函数日志</li>
+<li>输出日志时已脱敏，不含完整身份标识、手机号、令牌、密钥和敏感正文</li>
+<li>按七条清单验收过，页面结果和云端记录两边都看过</li>
+<li>上传前让 AI 查过环境、云函数、演示数据、调试功能、密钥和权限</li>
+<li>每次改后端都单独确认云函数已部署到体验版所用环境</li>
+<li>发布前隐私说明、服务类目、备案信息已补完整</li>
+<li>新能力一项一项加，每加一项走一遍完整流程</li>
+<li>没有为赶时髦把第一版做成重技术栈</li>
+</ul>
+<hr>
+<h2>五、实践提示</h2>
+<h3>提示1 · 身份这件事，永远在后端验</h3>
+<p>凡是「用户是谁」的判断，都不能放在前端。前端传过来的身份参数，改一行代码就能伪造。正确姿势只有一种：微信登录态在后台验，验完的归属信息写进记录，前端只负责传业务内容。这条纪律在工单场景是防串数据，在支付场景就是防资金损失，越早养成越便宜。</p>
+<h3>提示2 · 「看不到」比「看得到」更难测也更重要</h3>
+<p>五步验证里，前两步证明功能能用，第三步才证明权限生效。很多人测到第二步就收工，因为能看到自己的数据心里就踏实了。恰恰第三步才是这一集的意义：别人看不到，你的系统才对。记得双向测，并且用真实的人的账号测。</p>
+<h3>提示3 · 给 AI 的提示词，一次只加一个要求</h3>
+<p>图片三步、环境三查、能力一项一项加，背后是同一条纪律：一次只提一个要求，AI 一次改一处，你一次验一处。三步并成一句大提示词，出了问题你连该回滚哪都不知道。会拆分需求的人，用 AI 才有效率；不会拆分的人，只会得到一团需要整体重写的代码。</p>
+<h3>提示4 · 报障三件套：现象、证据、范围</h3>
+<p>「提交不了」是情绪，「只改出错的地方」是刹车，中间必须垫上现象和证据：你点了什么、页面显示了什么、日志里最相关的那条是什么。再补一句脱敏要求，排错效率和安全能同时拿到。这个句式不只适用于小程序，适用于一切 AI 协作场景。</p>
+<h3>提示5 · 技术选型敢于向后拖</h3>
+<p>实时能力先看现有方式行不行，复杂事务再上重数据库。第一版的目标是跑通一条真实链路，不是把技术栈攒齐。多数项目不是死在技术太轻，是死在还没用户就背了一身迁移成本。向后拖一步，常常是向前进一步。</p>
+<hr>
+<h2>六、约束说明</h2>
+<ol>
+<li><strong>本集内容全部来自原文 <code>stage-3/cross-platform/wechat-miniprogram-backend/index.md</code>，未跨文件取材。</strong> 4.4 至第 6 节各小节内容均按原文转述，未虚构工具、数据、案例或结论；音频中提到的腾讯云内容审核单独计费、CloudBase 日志检索、公众平台版本管理等，均为原文明确写到的能力。</li>
+<li><strong>切片串页污染已排除。</strong> 本篇切片文件自「企业通常用小程序做什么」起的大段内容（含企业小程序用途清单、小程序与小游戏的区别、为什么使用 uni-app、2.1 到 2.4 工具准备与账号注册、3.2 到 3.4 贪吃蛇练习与摇杆改造，净字约二千二百字）经核对属于另一来源页，与本篇来源页不符，<strong>已整段排除，未在音频与本文中使用</strong>，该部分内容归入门小程序基础篇对应篇目。</li>
+<li><strong>原文的参考资料链接列表未在音频中朗读。</strong> 该列表为导航性质，包含上一节链接与 CloudBase 各项能力文档名，音频改为在相应知识点处提及对应能力。</li>
+<li><strong>原文以引用块给出的提示词做了口语化转述。</strong> 包括我的工单页面提示词、图片上传三步提示词、报障句式、隐私检查提示词等，音频保留其核心要求与措辞要点，具体文本以原文档为准。</li>
+<li><strong>原文的验收清单为项目符号列表，音频按原文逐条转述并补了一句分水岭批注。</strong> 七条清单本身未增删。</li>
+<li><strong>演绎方添加的内容限于五类</strong>：类比说明（小区大门与楼里管家、账本与几号柜、自己证明自己）、判断口诀（身份在后端验、一次只加一个要求、向后拖一步）、批注性解释（为什么双向测、为什么别一次塞满、为什么脱敏要从头养）、结构重组（七段音频结构、五步验证编号化）以及实践提醒（截图存清单、报障三件套）。这些内容属于实践补充，不等同于原文观点。</li>
+<li><strong>安全声明。</strong> 本集不涉及任何真实凭据、环境编号或可执行配置；文中提到的密钥、令牌、身份标识等均指管理要求，未出现任何真实值。</li>
+</ol>
+<hr>
+<h2>七、这一集在整条链路上的位置</h2>
+<p>在「从想法到软件」的微信小程序支线上，本集处在<strong>从能玩到能用的收口位置</strong>：</p>
+<ul>
+<li>前面的篇目解决了「把页面做出来、把后端接起来」（工单提交、云函数、数据库打通）；</li>
+<li>本集解决「接起来之后的第一层质量关」——归属、隔离、留痕、合规，全部是敢不敢给真实用户的分水岭；</li>
+<li>后面的篇目（支付、客服后台、会员体系）都建立在这层关之上：没有归属和留痕，往上一层都是漏的。</li>
+</ul>
+<p>送给读者的完整地图其实是一条链：<strong>先让页面能操作，再一次只接一个后端能力，每次同时看前台结果和云端记录，确认以后再上传体验版。</strong> 这条链不宽，但是通。走通一次，就有了做第二、第三个小程序的底气。功能会变，底线不会变——密钥不放前端、身份不听前端、关键数据过后端检查并留痕，这三条在任何项目里都不过时。</p>
+<hr>
+<p><strong>来源</strong>：Easy-Vibe（datawhalechina/easy-vibe）<code>docs/zh-cn/stage-3/cross-platform/wechat-miniprogram-backend/index.md</code>。本音频与本文为二次演绎配音版，非原文照读。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
