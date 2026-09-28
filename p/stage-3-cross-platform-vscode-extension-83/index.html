@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>如何开发 VS Code 插件 · Container Tools：从 Docke…</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 8 · EP 83</span>
+<h1>如何开发 VS Code 插件 · Container Tools：从 Docke…</h1>
+<p class="sub">第 8 章 · 第 83 讲 · 15:37</p>
+<div class="meta"><span>时长 <b>15:37</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>8</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-cross-platform-vscode-extension-83-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-cross-platform-vscode-extension-83-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-3-cross-platform-vscode-extension-83/stage-3-cross-platform-vscode-extension-83-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-3-cross-platform-vscode-extension-83/stage-3-cross-platform-vscode-extension-83-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-8.html">← 第 8 章目录</a>
+<a href="/p/stage-3-cross-platform-react-native-expo-82/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:20</span></div>
+<div class="ch" data-t="80.736"><span class="t">1:20</span><span class="n">两个真实插件</span><span class="d">1:52</span></div>
+<div class="ch" data-t="193.176"><span class="t">3:13</span><span class="n">内部插件学什么</span><span class="d">1:41</span></div>
+<div class="ch" data-t="294.84"><span class="t">4:54</span><span class="n">插件怎样进入编辑器</span><span class="d">1:21</span></div>
+<div class="ch" data-t="376.152"><span class="t">6:16</span><span class="n">创建 命令与规则</span><span class="d">2:35</span></div>
+<div class="ch" data-t="531.504"><span class="t">8:51</span><span class="n">侧边栏 菜单与状态栏</span><span class="d">2:06</span></div>
+<div class="ch" data-t="657.96"><span class="t">10:57</span><span class="n">模型放最后</span><span class="d">1:14</span></div>
+<div class="ch" data-t="732.168"><span class="t">12:12</span><span class="n">验收 打包与安装</span><span class="d">2:12</span></div>
+<div class="ch" data-t="864.648"><span class="t">14:24</span><span class="n">这条链路已经通了</span><span class="d">1:12</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>如何开发 VS Code 插件 · Engineering Guard：从命令到安装包</h1>
+<h2>一、这篇在讲什么</h2>
+<p>本篇从一个真实插件 Engineering Guard 出发，走完企业插件的完整链路：创建可调试项目、增加命令、加入本地规则、把结果放进侧边栏与问题面板、增加菜单和状态栏、让结果看得懂、把模型能力放到最后、从头验收、打包安装包、装进另一个编辑器。</p>
+<p>开始之前先看两个已成熟的插件建立分寸感：Container Tools 没有重做 Docker，ESLint 插件没有重做检查流水线。企业插件的方法论只有一句：<strong>克制地把最常用的几步接进来</strong>。为什么拿代码检查当例子。它足够小，规则写在本机、结果一眼可见；又足够真，企业里每天都要用。学会这一条链路，换成项目模板检查、依赖检查、发布前检查，路子不变。阅读前不需要编程基础，涉及的概念都用日常语言解释。</p>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>教程环节</th><th>对应能力</th><th>在企业工作中的位置</th></tr>
+<tr><td>两个真实插件</td><td>分辨插件与平台的边界</td><td>内部工具立项判断</td></tr>
+<tr><td>插件进入编辑器的方式</td><td>理解进程模型与注册机制</td><td>排查插件拖慢编辑器的根因</td></tr>
+<tr><td>创建可调试项目</td><td>用官方生成器起步</td><td>内部工具第一天</td></tr>
+<tr><td>增加一条命令</td><td>让插件读取编辑器上下文</td><td>插件最小可用形态</td></tr>
+<tr><td>三条本地规则</td><td>设计可验证的命中条件</td><td>检查类工具的核心</td></tr>
+<tr><td>侧边栏与问题面板</td><td>复用原生展示位</td><td>结果可见性设计</td></tr>
+<tr><td>菜单与状态栏</td><td>入口贴着用户动作且不打扰</td><td>交互分寸</td></tr>
+<tr><td>结果看得懂</td><td>一条结果回答三个问题</td><td>提示语设计</td></tr>
+<tr><td>模型放最后</td><td>本地底盘与选配分离</td><td>AI 功能的接入次序</td></tr>
+<tr><td>验收清单与打包</td><td>按发布标准验收</td><td>交付纪律</td></tr>
+</table>
+<h2>三、两个真实插件学克制</h2>
+<p>Container Tools 覆盖编写容器描述文件与编排文件、生成容器配置、启动调试、查看容器与日志、管理镜像网络数据卷和镜像仓库。它没有替代 Docker 或云平台，而是把最常用的容器动作整理成命令和树形视图，复杂能力留在后端工具中，插件提供上下文和操作入口。</p>
+<p>ESLint 插件读取项目安装的检查工具与规则配置，把错误直接标在代码里，并提供修复所有可自动修复问题等命令。它的价值来自一致性：规则随项目提交，编辑器按同一份配置提醒，持续集成在提交后再次检查。插件尽早反馈，流水线最后把关。</p>
+<p>判断一个插件想法值不值得做，先问一句：团队每天重复做的是哪几步，现在散落在几个窗口里。答案越具体越值得做；问不出来，说明还没找到真问题。</p>
+<h3>提示一 · 插件是接力的，不是重做的</h3>
+<p>平台已有的功能不在插件里重做；后端继续跑后端，插件只负责连接。重做会导致两边行为不一致，维护成本翻倍。接得准比功能多更接近企业真正想要的东西。</p>
+<h2>四、内部插件的五条做法</h2>
+<p>一，能放进命令面板、侧边栏或问题面板的就沿用编辑器原有位置。二，平台与内部系统继续在后端运行，插件只负责连接。三，打开哪个仓库、文件或代码位置，就显示与这里有关的操作，不堆一排用不上的按钮。四，出错时不只报失败，还告诉用户问题在哪、下一步怎么办。五，需要登录、读取文件或连接公司系统时，把权限说清楚，不悄悄来。这五条合起来就是一个词，分寸，知道哪里是自己的边界，边界外的事交给后端和平台。</p>
+<p>内部插件常见形态：创建符合规范的新项目、检查依赖版本、查当前服务负责人、打开内部文档、提交工单、发布前跑安全检查。先把每天重复的几步接进来即可，不必一开始上模型。</p>
+<h2>五、插件怎样进入编辑器</h2>
+<p>普通桌面插件运行在扩展宿主进程。编辑器负责界面、命令面板、侧边栏与状态栏，插件通过扩展接口注册功能。某个插件出错时，不应把编辑器主界面一起拖死。分工上，清单文件告诉编辑器有哪些命令与界面入口，插件入口执行检查，树视图或问题面板展示结果。官方示例中文件是父节点、命中位置是子节点、点击回到代码。本插件沿用原生交互，不为显示几行结果先做复杂页面。插件跑在独立进程里，出错只挂插件本身，把展示层交给原生面板也是守这条边界。</p>
+<h2>六、十关分解（上）：创建调试、命令、规则</h2>
+<p>第一关创建能调试的插件：安装当前长期支持版本 Node.js 与 VS Code，用官方生成器创建 TypeScript 插件，按 F 键加数字五调试，打开带有扩展开发宿主标记的测试窗口；调试失败只修调试配置；看到默认通知说明项目、编译与调试环境已连通。注意两个窗口的分工：原窗口写代码看日志，测试窗口当用户，验收要跑到测试窗口点。</p>
+<p>第二关先增加一条命令：检查当前文件，运行后先显示文件名。验收两个状态，打开文件时文件名正确，未打开文件时提示请先打开文件。两个状态正常，说明插件已能读取编辑器上下文。</p>
+<p>第三关加入三条本地规则：疑似硬编码密钥、没有超时的网络请求、字符串拼接 SQL，只扫描当前文件不上传代码。用专门测试文件每种问题放一处，三条都出现，改一处再查对应问题消失。规则不要一次加几十条，企业检查最怕什么都报、最后所有人学会忽略。每条规则要有清楚的命中条件、位置和修改建议，三样缺一样就成了摆设。</p>
+<h3>提示二 · 能复用原生位置和交互，就不要自己造</h3>
+<p>用户已熟悉问题面板的用法，插件复用即零学习成本。为显示几行结果先做复杂页面，成本花在刀背上。</p>
+<h2>七、十关分解（中）：侧边栏、菜单、状态栏、看得懂</h2>
+<p>第四关把结果显示在问题面板和侧边栏，点击跳到对应文件与行号。侧边栏先处理四种状态：还没检查、没有问题、发现问题、原文件已关闭；空状态也要告诉用户下一步做什么。第五关增加菜单与状态栏：编辑器右键菜单增加检查选中代码，无选中内容时不显示；资源管理器右键增加检查这些文件，跳过图片、依赖目录和超大文件；状态栏显示最近一次结果，点击打开侧边栏，只显示未检查、通过或问题数量，不闪烁不弹通知。入口贴着用户动作但不打扰。第六关让结果看得懂：每条结果回答哪里有问题、为什么有风险、下一步做什么，点击回到对应代码，不让用户自己搜行号。最重要的不是风险分数。</p>
+<h2>八、十关分解（下）：模型放最后、验收、打包、安装</h2>
+<p>第七关模型能力放最后：本地规则完整跑通后，才加可选的解释入口，只解释当前选中结果，无模型权限时本地检查继续工作。发送代码前明确告诉用户包含哪些内容；企业版本遵守仓库权限、组织策略与数据边界，不默认把整个项目上传外部服务。判断标准应写死在规则里，模型只做解释与润色。</p>
+<p>第八关从头验收八项：命令面板可找到检查当前文件；无问题文件显示通过；测试文件稳定命中三条规则；点击侧边栏与问题面板结果回到正确行；编辑器右键与资源管理器多选都能运行；修复后旧问题消失；禁用模型后本地检查仍可用；重新加载窗口后命令、视图、状态栏仍存在。失败时只描述第几部失败、现象是什么，请只修复这一项。</p>
+<p>第九关打包：先补齐名称、版本、图标、仓库、许可证和隐私说明，再用官方工具打包并排除测试数据；换配置或换电脑从安装文件安装后重跑一遍。内部可放制品库或走组织分发，公开发布再按发布文档创建发布者提交。</p>
+<p>第十关装进另一个编辑器：打开测试代码，从命令面板运行检查，侧边栏出结果、点击回行、关掉模型本地规则仍工作，才算真的离开开发窗口。十关连起来是一条完整链路：编辑器命令，读取当前文件，本地规则，问题面板与树视图，菜单与状态栏，安装包。这个插件还不是企业级代码安全产品，但命令、规则、定位与安装包已经齐备，后续可以把规则换成公司的项目模板、规则服务、代码负责人、工单系统或发布门禁。无论接入多少能力，三件事不能丢：让用户知道插件读了什么，让错误能回到具体代码，别让本地检查因为模型不可用就一起消失。</p>
+<h3>提示三 · 本地能力是底盘，模型是选配</h3>
+<p>先做不依赖任何外部的本地能力，再谈智能。模型一抖动整个插件就像没做完。这个次序不能颠倒。落到企业场景还有一层：哪些代码算高危是团队的安全基线，应写死在规则里，不能每次问模型要答案；把判断标准变成规则，把规则交给本地，把解释和润色交给模型，各归其位，插件才既稳又聪明。</p>
+<h3>提示四 · 验收清单把大的不确定切成小的可确认</h3>
+<p>八项里七项过、只挂一项，就只修一项；一上来就说整个插件都坏，AI 只能从头猜。清单的真正用途是把交付风险切成可逐条确认的小块，也是给协作方留下的接力棒。</p>
+<h2>九、审查清单</h2>
+<ol>
+<li>项目用官方生成器创建，调试窗口能打开，默认通知已见。</li>
+<li>命令验收覆盖打开文件与未打开文件两种状态。</li>
+<li>三条规则各有清楚命中条件、位置与修改建议。</li>
+<li>测试文件每种问题一处，增删改后命中同步变化。</li>
+<li>侧边栏四种状态齐全，空状态有下一步指引。</li>
+<li>右键菜单按选中条件显隐，资源管理器跳过无关文件。</li>
+<li>状态栏只显示摘要，不闪烁不弹通知。</li>
+<li>每条结果能回答哪里有问题、为什么有风险、下一步做什么。</li>
+<li>模型入口可选，禁用后本地检查完整可用。</li>
+<li>发送代码前告知内容范围，遵守仓库权限与数据边界。</li>
+<li>八项验收逐条跑过，失败项单独修复。</li>
+<li>元数据齐全后才打包，安装包在另一环境重跑通过。</li>
+</ol>
+<h2>十、约束说明</h2>
+<ol>
+<li>本篇素材取自 <code>stage-3/cross-platform/vscode-extension/index.md</code> 对应切片，范围自「Container Tools」一节起，至篇末参考资料止；切片尾部「什么是带后端的微信小程序开发」起属下一篇目（微信小程序后端页）内容，已整体排除，未在本篇使用。</li>
+<li>该页开篇「真实产品把哪些工作搬进了 VS Code」中代码托管、开发容器、企业平台扩展、自动化脚本四节未出现在本篇切片内，本篇不予涉及，留待上游按页重切时归位。</li>
+<li>篇中插件功能描述、十关操作原话、验收八项、三种规则名称、侧边栏四状态等均照录切片原文，未作改动。</li>
+<li>「插件是接力的不是重做的」「本地能力是底盘模型是选配」「入口贴着手边不塞进眼前」「验收清单把大的不确定切成小的可确认」等为二次演绎添加的记忆框架，源文档只给出操作与原则，未给出这些口诀式总结。</li>
+<li>三条规则的风险解释（硬编码密钥等于把钥匙留在公共场合等）为面向零基础听众的通俗转述，源文档只给出规则名称。</li>
+<li>口播稿中快捷键按口播习惯转述为 F 键加数字五，工具名保留原术语；本内容为二次演绎配音版，若与源文档表述有出入，以源文档为准。</li>
+</ol>
+<h2>十一、常见误区与纠正</h2>
+<table>
+<tr><th>误区</th><th>表现</th><th>纠正</th></tr>
+<tr><td>重做平台功能</td><td>插件与后端行为不一致</td><td>插件只连接，复杂能力留后端</td></tr>
+<tr><td>一次加几十条规则</td><td>全都报等于全不报</td><td>先少而准，每条可验证</td></tr>
+<tr><td>规则三要素不全</td><td>误报无法判断，跳不过去</td><td>命中条件、位置、建议齐备</td></tr>
+<tr><td>自建复杂页面展示</td><td>成本花在刀背上</td><td>复用问题面板与树视图</td></tr>
+<tr><td>空状态留白板</td><td>用户不知道下一步</td><td>空状态也给指引</td></tr>
+<tr><td>状态栏闪烁弹通知</td><td>用户烦躁后卸载</td><td>只显示摘要，安静待命</td></tr>
+<tr><td>先接模型再写规则</td><td>模型一抖全插件瘫痪</td><td>本地底盘优先，模型选配</td></tr>
+<tr><td>默认上传整个项目</td><td>触碰数据边界</td><td>发送前告知内容与范围</td></tr>
+<tr><td>只看最终页面验收</td><td>中间步骤坏掉没发现</td><td>八项清单逐条跑</td></tr>
+<tr><td>停在开发宿主窗口</td><td>用户环境装不上</td><td>换环境从安装文件重装验证</td></tr>
+</table>
+<h2>十二、时间不够时怎么砍</h2>
+<p>只有半天预算时，按这张表砍，砍完仍是一条能演示的链路。</p>
+<table>
+<tr><th>优先级</th><th>保留</th><th>砍掉</th><th>理由</th></tr>
+<tr><td>必须保留</td><td>创建调试、一条命令、三条规则、问题面板跳转</td><td>无</td><td>这四关是插件脊柱，缺一环演示就断</td></tr>
+<tr><td>尽量保留</td><td>侧边栏四种状态、右键菜单</td><td>资源管理器多选、状态栏</td><td>入口先保命令面板与右键两级</td></tr>
+<tr><td>可以后补</td><td>模型解释入口</td><td>模型权限与数据边界细节</td><td>第一版本就不依赖模型</td></tr>
+<tr><td>可以简化</td><td>验收只跑前四项</td><td>后四项合并抽检</td><td>核心链路先守住</td></tr>
+<tr><td>不要跳过</td><td>打包并在另一环境安装</td><td>公开发布流程</td><td>离开开发窗口才算成品</td></tr>
+</table>
+<h2>十三、能力自测</h2>
+<ol>
+<li>为什么说插件是接力的，不是重做的？</li>
+<li>扩展宿主进程的划分，解决了什么问题？</li>
+<li>为什么规则不要一次加几十条？</li>
+<li>侧边栏为什么必须处理四种状态？</li>
+<li>状态栏入口的设计分寸是什么？</li>
+<li>模型能力为什么必须放到最后？</li>
+<li>八项验收清单各自在防什么？</li>
+<li>为什么必须把安装包装进另一个编辑器才算完成？</li>
+</ol>
+<p>参考答案：一，平台功能重做会导致两边行为不一致、维护翻倍，插件只做连接最稳。二，插件出错只挂自身，不拖死编辑器主界面。三，全都报等于全不报，用户会学会忽略，规则先少而准。四，空状态不告诉下一步，用户就以为插件坏了。五，贴着用户动作出现，但不闪烁不弹通知，放进手边而不是塞进眼前。六，本地规则是不依赖外部的底盘，模型抖动不应让检查能力消失。七，逐项防住命令找不到、假通过、规则漏 hit、跳转错、入口残、修复不消、模型依赖、重载丢失八类回归。八，开发宿主有特殊环境，只有干净安装才能证明元数据、依赖与打包无误。</p>
+<h2>十四、一页纸总结</h2>
+<table>
+<tr><th>主题</th><th>一句话要点</th></tr>
+<tr><td>总方法论</td><td>插件是接力的，不是重做的</td></tr>
+<tr><td>两个案例</td><td>Container Tools 不重做 Docker，ESLint 靠一致性</td></tr>
+<tr><td>五条做法</td><td>沿用原位、后端运行、上下文相关、错误可操作、权限说清</td></tr>
+<tr><td>进程模型</td><td>插件跑在扩展宿主，出错不拖死编辑器</td></tr>
+<tr><td>十关主线</td><td>创建调试、命令、规则、展示、入口、可读、模型、验收、打包、安装</td></tr>
+<tr><td>三条规则</td><td>硬编码密钥、无超时请求、拼接查询</td></tr>
+<tr><td>展示</td><td>复用问题面板与树视图，空状态给指引</td></tr>
+<tr><td>模型</td><td>本地底盘优先，模型选配，禁用仍可用</td></tr>
+<tr><td>验收</td><td>八项清单，失败只修一项</td></tr>
+<tr><td>交付</td><td>元数据齐才打包，换环境安装重跑</td></tr>
+<tr><td>一句话</td><td>克制地把最常用的几步接进来</td></tr>
+</table>
+<hr>
+<p>*配套文件：口播稿 <code>script.txt</code>、音频 <code>stage-3-cross-platform-vscode-extension-83-播客.mp3</code>、字幕 <code>stage-3-cross-platform-vscode-extension-83-播客.srt</code>。*</p>
+<p>**来源：Easy-Vibe（datawhalechina/easy-vibe）docs/zh-cn/stage-3/cross-platform/vscode-extension/index.md，本篇为二次演绎配音版，若与源文档表述有出入，以源文档为准。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
