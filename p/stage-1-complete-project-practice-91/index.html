@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>打磨并交付完整作品</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 6 · EP 91</span>
+<h1>打磨并交付完整作品</h1>
+<p class="sub">第 6 章 · 第 91 讲 · 15:19</p>
+<div class="meta"><span>时长 <b>15:19</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>6</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-1-complete-project-practice-91-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-1-complete-project-practice-91-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-1-complete-project-practice-91/stage-1-complete-project-practice-91-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-1-complete-project-practice-91/stage-1-complete-project-practice-91-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-6.html">← 第 6 章目录</a>
+<a href="/p/stage-1-clone-your-favorite-app-90/">← 上一讲</a>
+<a href="/p/stage-2-ai-capabilities-dify-knowledge-base-18/">下一讲 →</a>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:21</span></div>
+<div class="ch" data-t="81.024"><span class="t">1:21</span><span class="n">从头到尾用一次</span><span class="d">2:43</span></div>
+<div class="ch" data-t="244.104"><span class="t">4:04</span><span class="n">四个容易卡住的地方</span><span class="d">2:45</span></div>
+<div class="ch" data-t="409.92"><span class="t">6:49</span><span class="n">请别人来用一次</span><span class="d">2:10</span></div>
+<div class="ch" data-t="540.072"><span class="t">9:00</span><span class="n">改的顺序与再试</span><span class="d">2:15</span></div>
+<div class="ch" data-t="675.192"><span class="t">11:15</span><span class="n">整理作品与分享</span><span class="d">2:37</span></div>
+<div class="ch" data-t="832.368"><span class="t">13:52</span><span class="n">作业与下一步</span><span class="d">1:26</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe · 完整项目实战：从能跑到能用，把作品交给一个真实的人 — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-1/complete-project-practice/index.md</code>），为<strong>二次演绎配音版</strong>。本文在原文基础上做了口语化改写、结构重组与实践补充，观点与例子由演绎方添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>stage-1-complete-project-practice-91</code></li>
+<li>所属章节：第 6 章</li>
+<li>原文覆盖小节：章节导读、1 从头到尾用一次你的产品（1.1 按真实使用顺序走一遍、1.2 换到一个空白页面再试）、2 把几个容易卡住的地方补好（2.1 第一次打开、2.2 点了按钮有没有回应、2.3 结果出来以后、2.4 出错以后）、3 请别人来用一次（3.1 只告诉他要完成什么、3.2 用完以后再聊一聊）、4 看看哪里卡住再改一遍（4.1 把具体问题告诉 AI IDE、4.2 改完以后再从头试一次）、5 把作品整理好（5.1 用一分钟介绍清楚、5.2 准备好别人需要的内容、5.3 继续做还是换一个、发出去之前）、6 本章作业、下一步</li>
+<li>对应音频：<code>stage-1-complete-project-practice-91-播客.mp3</code></li>
+<li>字幕：<code>stage-1-complete-project-practice-91-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>原型做完、AI 接通之后，多数人会掉进同一个坑，自己用得顺，别人打开就懵。这一章不加任何新功能，只做一件事，把产品从头到尾用一遍，把卡点补好，请别人来试，再根据真实问题改一轮。产出标准只有一句话，一个别人不需要指导也能使用的产品。</p>
+<p>音频稿按七段展开：</p>
+<ol>
+<li><strong>开场</strong> —— 从能跑到能用的分水岭；</li>
+<li><strong>从头到尾用一次</strong> —— 电商内容工作台完整链路、五次真实操作、空白页面三试；</li>
+<li><strong>四个容易卡住的地方</strong> —— 刚打开、等待中、出结果、请求失败；</li>
+<li><strong>请别人来用一次</strong> —— 只给目标不教操作、观察四现象、聊三个问题、真实素材警告；</li>
+<li><strong>改的顺序与再试</strong> —— 五级优先级、现象级提示词、改完回归四况；</li>
+<li><strong>整理作品与分享</strong> —— 一分钟介绍五步、分享三件套、继续做还是换一个；</li>
+<li><strong>作业与下一步</strong> —— 三件作业与第一阶段的真正完成标准。</li>
+</ol>
+<hr>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>能力项</th><th>原文怎么说的</th><th>演绎方的解读</th><th>所属环节</th></tr>
+<tr><td>本章目标</td><td>别人不需要指导也能使用</td><td>不需要指导不等于功能多</td><td>总纲</td></tr>
+<tr><td>使用案例</td><td>电商运营上传图片生成图文草稿</td><td>链条短到刚好讲清试用</td><td>总纲</td></tr>
+<tr><td>走查方法</td><td>像用户一样从第一页用到结果</td><td>哪步要解释哪步就要改</td><td>自己用</td></tr>
+<tr><td>五次操作</td><td>打开、上传、生成、检查、保存</td><td>照着用户行为不走代码</td><td>自己用</td></tr>
+<tr><td>空白三试</td><td>空白打开、正常生成、模拟出错</td><td>第一次打开其实什么都没有</td><td>自己用</td></tr>
+<tr><td>让 AI 预检</td><td>先不要修改代码，列出可能中断点</td><td>工具看代码，看不看用户迷茫</td><td>自己用</td></tr>
+<tr><td>卡点一时</td><td>刚打开页面时</td><td>说明、示例、格式大小标注</td><td>补卡点</td></tr>
+<tr><td>卡点二待</td><td>等待 AI 时</td><td>生成中加防重复，内容不消失</td><td>补卡点</td></tr>
+<tr><td>卡点三果</td><td>拿到结果以后</td><td>编辑、复制、下载、重新生成</td><td>补卡点</td></tr>
+<tr><td>卡点四败</td><td>请求失败时</td><td>说明没完成加重试入口</td><td>补卡点</td></tr>
+<tr><td>进度诚实</td><td>不编造精确百分比</td><td>除非接口真提供进度</td><td>补卡点</td></tr>
+<tr><td>结果保留原图</td><td>对照原图检查而非只接受一次回答</td><td>符合真实工作过程</td><td>补卡点</td></tr>
+<tr><td>草稿保存</td><td>LocalStorage 暂存表单草稿</td><td>普通数据可存，密钥资料不存</td><td>补卡点</td></tr>
+<tr><td>找测试者</td><td>找真正可能使用它的人</td><td>找不到就用没看过的朋友</td><td>请人试</td></tr>
+<tr><td>只给目标</td><td>说明要完成什么，不教操作</td><td>一开口解释问题就被掩盖</td><td>请人试</td></tr>
+<tr><td>观察四现象</td><td>停顿、返回、重复点击、提问</td><td>停留处就是产品欠账处</td><td>请人试</td></tr>
+<tr><td>现象对修改</td><td>不动补说明、反复点显示生成中</td><td>每条观察对应一个改法</td><td>请人试</td></tr>
+<tr><td>聊三个问题</td><td>最不确定、直接用还是要改、愿不愿再用</td><td>别问好不好用</td><td>请人试</td></tr>
+<tr><td>素材警告</td><td>真实业务信息要说明并清理</td><td>不用未授权客户资料</td><td>请人试</td></tr>
+<tr><td>五级优先级</td><td>不能完成、不可信、易误解、成本高、样式愿望</td><td>先挑一到三个</td><td>修改</td></tr>
+<tr><td>现象级提示词</td><td>用户任务、观察现象、要改什么、怎么验证</td><td>精准制导对地毯轰炸</td><td>修改</td></tr>
+<tr><td>回归四况</td><td>正常、缺必填、失败超时、结果后续操作</td><td>改一处可能坏一处</td><td>修改</td></tr>
+<tr><td>草稿回归</td><td>刷新页面后再测</td><td>草稿功能单独验</td><td>修改</td></tr>
+<tr><td>一分钟介绍</td><td>谁的问题、怎么帮、AI 能力、怎么完成、改了什么</td><td>先听懂再谈技术</td><td>整理</td></tr>
+<tr><td>分享三件套</td><td>可运行应用、演示视频、一页说明</td><td>缺一样被问一路</td><td>整理</td></tr>
+<tr><td>视频要求</td><td>三十到六十秒完整核心任务</td><td>不要只快速切页面</td><td>整理</td></tr>
+<tr><td>选题自由</td><td>继续做完或换自己场景</td><td>来自真实生活的问题更可信</td><td>整理</td></tr>
+<tr><td>发布前检查</td><td>打开链接走一遍、无密钥、素材授权</td><td>分享是成人礼</td><td>整理</td></tr>
+<tr><td>作业</td><td>完整用一次、请一人试、把作品发出去</td><td>别人能独立完成才算完</td><td>收尾</td></tr>
+</table>
+<hr>
+<h2>三、逐节解读</h2>
+<h3>3.1 从能跑到能用：本章的真正分界</h3>
+<p>前面几章解决的是把东西做出来，这一章解决的是把东西交出去。判断标准只有一把尺子，别人不问人就能走完。你自己会不会用不重要，那是开发者视角，用户视角才是产品的尺。很多 demo 死在功能多，活下来的产品赢在不用教，这一章就是那道分水岭，动作只有一个字，用，而不是做。</p>
+<p>课程用电商内容工作台贯穿全章，一次完整的使用是这样，一位运营上传商品图片，补充必要信息，生成一版图文草稿，检查结果后复制或保存，用于后续修改和上架。这个案例的好处是链条极短，短到刚好能讲清楚试用这件事本身。先把这一小段做好就够了，登录、团队权限和正式发布，等产品真的需要时再加。加法谁都会做，减法才是这一章的功夫。</p>
+<h3>3.2 自己用一遍：五次操作与空白三试</h3>
+<p>走查的规矩是照着用户会做的事情一步步往下走，不看代码和组件。打开页面，知道这个工具能帮自己做什么。上传一张商品图片，填写名称、材质等必要信息。点击生成文案，看见页面正在处理。检查 AI 返回的标题和卖点，有问题时修改或重新生成。复制、下载或暂时保存结果，完成这次任务。走完问自己一句话，如果我不在旁边，对方会不会卡住。团队成员管理、复杂数据看板这些不影响本次使用的功能，先记下来，不必现在做，范围纪律和前面几章一样，先把眼前这一小段做透再谈版图。</p>
+<p>还有一个容易忘的动作，换到空白页面再试。开发久了，页面里往往已经填好了数据，也留着上一次的结果，我们很容易忘记第一次打开时其实什么都没有。开一个无痕窗口，或者清空本地数据，从头再试，只试三次。空白打开一次，不填内容直接点，看页面会不会提示需要填什么。正常生成一次，确认等待时有提示，结果出来后也有清楚的下一步。模拟出错一次，上传不支持的文件，或者让请求失败，确认填过的内容还在，也可以重新尝试。遇到卡住的地方记下来，下一节逐个补好。</p>
+<p>可以让 AI 编辑器帮你预检代码，但不要让它替代实际操作。原文给了一段示范提示词，先不要修改代码，按照用户任务检查当前项目，列出这条流程涉及哪些页面和文件、目前可能中断流程的地方。AI 能找到可能有问题的代码，但页面好不好用，还是要自己点过才知道。工具能看代码，看不出来用户眼里的迷茫。</p>
+<h3>3.3 四个卡点：打开、等待、结果、失败</h3>
+<p>自己从头用一遍后，问题通常出现在四个地方，不需要复杂设计，只要让人知道发生了什么、接下来还能做什么。</p>
+<p>第一个，第一次打开，知道该做什么吗。空白页面不应该只放一个输入框，可以准备一句简短说明、一组示例内容，或者在上传区域标明支持的图片格式和大小。表单字段很多时，先保留生成结果真正需要的部分，商品名称、图片和核心特点可能是必填，品牌、参考链接和更多风格参数放到更多设置里。用户第一次使用，不应该先完成一份很长的登记表。</p>
+<p>第二个，点了按钮，页面有没有回应。AI 请求往往需要几秒甚至更久，点击以后按钮应该显示生成中，并暂时避免重复提交，已经填写的内容不要突然消失，页面也不要立刻跳到空白结果区。等待状态不需要复杂动画，让用户看见任务已经开始、输入和页面位置还在，就解决了大部分困惑。需要排队时可以显示正在排队、正在生成等阶段。注意不要编造一个看似精确的百分比，除非接口真的提供了进度，诚实比热闹重要。</p>
+<p>第三个，结果出来以后，下一步是什么。AI 返回内容不是流程的终点，用户通常还要检查事实、修改措辞，把结果带到下一步。结果区至少要有一种能继续操作的方式，编辑、复制、下载或重新生成。好的结果页会保留用户上传的原图，把识别和生成结果放在下方，让用户对照原图检查，而不是只能接受模型的一次回答。如果结果里有模型无法确认的信息，直接标出来让用户补充或删除，这比把一段话包装成最终答案更符合真实工作。</p>
+<p>第四个，出错以后还能不能继续。网络中断、额度不足、文件格式错误都会导致失败。页面不必展示整段技术报错，但要说明这次操作没完成，并提供重试或返回修改的入口。格式不支持，说明支持的格式并允许重新选。必填缺失，在字段附近提示，不要只弹一句参数错误。服务暂时不可用，保留已填内容并提供重新生成。结果不符合预期，允许改输入再试，而不是让用户从头开始。如果刷新页面会让用户丢一大段输入，可以用浏览器本地存储暂存表单草稿，但只保存继续任务所需的普通数据，不要把密钥、真实客户资料或敏感文件写进浏览器存储。</p>
+<h3>3.4 请别人来用：忍住不教</h3>
+<p>自己做的页面用久了怎么看都顺，找一个没参与开发的人来用，往往几分钟就能发现你一直没注意到的问题。最好找真正可能使用它的人，电商内容工具就请做过运营、开过网店或经常做商品内容的人，暂时找不到，找一位没看过这个页面的朋友也可以。</p>
+<p>测试开始时只说明目标，比如，请用这个工具，根据这张商品图片生成一版标题和卖点，检查以后把可以继续修改的版本复制出来。接下来先观察，不要马上告诉对方该点哪里，记录他停顿、返回、重复点击和向你提问的位置。你一开口解释，本该由页面回答的问题就有了人肉拐杖，产品永远学不会自己走路。忍住不教，是测试阶段最难也最值钱的一条纪律。哪怕只找一两个人，也能发现不少明显问题，不用写正式报告，记住他在哪里停住就行。用户停留的地方，就是产品欠账的地方，一找一个准。</p>
+<p>观察到的现象直接对应修改。他打开页面后一直不动，就补一句用途说明。反复点击生成，就让按钮清楚地显示生成中。拿到结果后不知道干什么，就加编辑或复制。出错后又要重新填，就保留原来的内容，再给一个重试按钮。</p>
+<p>用完以后再聊一聊，问三个问题。刚才哪一步最不确定。生成结果里哪些会直接用、哪些一定要改。下次还要完成同样的工作，愿不愿意再用一次、为什么。不要只问你觉得好不好用，礼貌性的挺好的很难指导下一步，具体行为和具体例子才有价值。测试者的每一声犹豫，都是在替未来的用户投票，这个票不花钱，但最准。还有一个警告，测试者上传的商品、录音或文档可能包含真实业务信息，开始前要说明内容会发给哪类 AI 服务，避免用没授权的客户资料，测试后删掉不再需要的文件。</p>
+<h3>3.5 修改的顺序与回归</h3>
+<p>试用以后你可能一下记下很多问题，不用全部都改，先解决让人没法继续、或者让结果不可信的问题。课程给了一个五级处理顺序。第一级，无法完成任务，按钮无效、请求失败、结果无法带走。第二级，结果明显不可信，编造信息、无法核对、缺少必要来源。第三级，操作容易误解，不知道从哪里开始、不清楚当前状态。第四级，使用成本过高，步骤重复、内容丢失、等待没反馈。第五级，样式和新增功能，不影响核心任务的美化与愿望清单。先挑最重要的一到三个，改完自己再试一次，条件允许也请刚才的人回来看看，只有原来的卡点真的消失，这次修改才算有用。修改的价值不由工作量决定，由卡点是否消失决定。</p>
+<p>把问题告诉 AI 时，不要只说帮我优化一下，要写清楚用户任务、你看到的现象、要改什么、怎么验证。原文的示范是，两位测试者点生成后连续点击，因为页面没显示请求已经开始，最后产生了重复任务，请修改当前页面，请求开始后禁用生成按钮并显示正在生成，请求结束或失败后恢复，不要清空已填内容，修改后告诉我怎么测试重复点击和失败情况。这样写，改动不容易跑偏，你也知道稍后怎么检查。会写观察报告的人，用 AI 改东西是精准制导；只会说帮我优化的人，得到的是地毯式轰炸。</p>
+<p>改完以后，一个地方修好了也可能影响另一个地方。准备分享前再试四种情况，一组信息完整的正常输入，缺少一个必填字段，请求失败或超时，得到结果后进行编辑、复制或重新生成。如果产品会保存草稿，再补一次刷新页面后的测试。确认新功能正常以后，也要检查原来的核心流程没被破坏。回归测试这四个字听着专业，动作就是再把主流程走一遍，别嫌烦，这里是事故高发区。</p>
+<h3>3.6 整理与分享：让作品带齐行李出门</h3>
+<p>现在这个作品已经不只是在你的电脑上能跑了，别人用过，你也根据真实问题改过一次。接下来把入口和说明整理好，就可以发给更多人看。</p>
+<p>用一分钟介绍清楚，按五步走。谁遇到了什么问题，比如电商运营准备首版图文时要反复整理图片和卖点。产品怎样帮助他，上传商品图片和资料，生成一版可以继续修改的内容。接入了什么 AI 能力，图片理解与文本生成。用户怎样完成任务，上传、生成、检查、修改、复制。试用后改了什么，比如补充等待状态、失败后保留输入。先让别人听懂你做了什么，再补充框架和模型，这比一上来罗列技术名词更容易看懂。介绍的顺序就是用户看懂的顺序，用户思维永远是第一语言。</p>
+<p>分享之前准备好三样东西。第一，可以运行的应用，提供访问链接，没部署就写清启动命令和访问地址。第二，三十到六十秒演示视频，从输入开始完整展示一次核心任务，不要只快速切页面。第三，一页项目说明，写明目标用户、核心问题、主要流程、AI 能力、一次用户反馈，以及根据反馈完成的修改。暂时没法让别人远程访问，本地运行加演示视频也可以作为第一阶段成果，重点是别人能看懂你做了什么，并看到核心流程确实能完成。三样东西凑齐，作品才算带齐了出门的行李，缺一样，别人就得问你一路。</p>
+<p>至于继续做这个作品还是换一个，都可以。继续完成电商内容工作台，或者把同一套方法用到自己的场景，会议整理、有声内容、学习辅助、行业小工具。不必为了显得原创重新做一个陌生题目，一个来自自己学习、工作或生活的问题，即使范围很小，只要经过真实试用和修改，也比功能很多但没人用过的页面更有说服力。说服力不来自功能清单，来自一个陌生人真的用完了一次。</p>
+<p>发出去之前，最后再打开一次分享链接，从头用一遍，确认别人能正常打开、AI 能返回结果，页面和截图里没有密钥，就可以把作品发出去了。用了别人的图片、声音或文档，也记得先确认可以使用。分享是产品的成人礼，礼数做全，别让作品出门第一天就惹上麻烦。</p>
+<hr>
+<h2>四、审查清单</h2>
+<ul>
+<li>没有为这一章添加任何新功能</li>
+<li>像用户一样从第一页走到拿到结果，全程没看代码</li>
+<li>记录了哪几步需要你在旁边解释</li>
+<li>开无痕窗口或清空数据后空白试过一次</li>
+<li>空白打开、正常生成、模拟出错三次都试过</li>
+<li>第一次打开的页面有说明、示例或格式大小提示</li>
+<li>表单只保留必填项，其余收进更多设置</li>
+<li>点击后有生成中状态，且不能重复提交</li>
+<li>等待时已填内容不消失，页面不跳空白</li>
+<li>没有编造精确的进度百分比</li>
+<li>结果区有编辑、复制、下载或重新生成入口</li>
+<li>模型无法确认的信息有标注，可补充可删除</li>
+<li>失败时有说明和重试入口，已填内容保留</li>
+<li>草稿用的浏览器本地存储里没有密钥和敏感资料</li>
+<li>找到了一个没参与开发的人来试，且没教他操作</li>
+<li>记录了他停顿、返回、重复点击和提问的位置</li>
+<li>用三个问题聊过，没有只问好不好用</li>
+<li>测试素材不含未授权的真实客户资料，测后已清理</li>
+<li>问题按五级优先级排过，先改了一到三个</li>
+<li>给 AI 的提示词写了用户任务、观察现象、改法和验证</li>
+<li>改完用四种情况回归过，主流程没有被破坏</li>
+<li>一分钟介绍按五步写过，先讲人话再讲技术</li>
+<li>分享三件套齐了，应用、演示视频、一页说明</li>
+<li>发出前检查过链接可打开、无密钥、素材有授权</li>
+</ul>
+<hr>
+<h2>五、实践提示</h2>
+<h3>提示1 · 尺子只有一把，别人不问人走完才算数</h3>
+<p>自己用得顺是开发者视角，用户视角才是产品的尺。哪一步需要你在旁边解释，哪一步就是要改的地方。这一章的所有动作都围着这把尺子转，别用功能清单自我感动。</p>
+<h3>提示2 · 忍住不教，是测试阶段最值钱的纪律</h3>
+<p>一开口解释，本该由页面回答的问题就有了人肉拐杖。只给目标，然后观察他停顿、返回、重复点击和提问的位置。用户停留的地方，就是产品欠账的地方，一找一个准。</p>
+<h3>提示3 · 四个时刻做好，信任就建起来了</h3>
+<p>刚打开时知道做什么，等待时知道在转，出结果时有下一步，失败时能重来。这四个时刻不需要复杂设计，只需要让人知道发生了什么、接下来还能做什么。</p>
+<h3>提示4 · 给 AI 写观察报告，别写许愿</h3>
+<p>用户任务、观察现象、要改什么、怎么验证，四样写全，改动就不容易跑偏。会写观察报告的人是精准制导，只会说帮我优化的人得到地毯式轰炸。</p>
+<h3>提示5 · 修改的价值由卡点是否消失决定</h3>
+<p>按五级优先级排，先挑一到三个。改完自己回归，最好请刚才的人回来看看。只有原来的卡点真的消失，这次修改才算有用，工作量不值钱，消失才值钱。</p>
+<hr>
+<h2>六、约束说明</h2>
+<ol>
+<li><strong>本集内容全部来自原文 <code>stage-1/complete-project-practice/index.md</code>，未跨文件取材。</strong> 各小节内容均按原文转述，未虚构工具、数据、案例或结论；电商内容工作台的使用链路、四个卡点的补法、测试观察方法、五级优先级、分享三件套等均为原文明确写到的内容。</li>
+<li><strong>原文以代码块给出的提示词做了口语化转述。</strong> 包括让 AI 预检流程的提示词、围绕四时刻修复的提示词、现象级修改提示词等，音频与本文保留其结构与要点，具体文本以原文档为准。</li>
+<li><strong>原文中的图片未在音频中描述细节。</strong> 等待状态截图、结果页截图等，音频只转述其所说明的设计要点，具体画面以原文档为准。</li>
+<li><strong>原文以引用或卡片形式给出的内容做了合并转述。</strong> 包括本章作业卡片、阶段完成组件、相关文章推荐等，音频保留其要求与结论，具体排版以原文档为准。</li>
+<li><strong>演绎方添加的内容限于四类</strong>：判断口诀（尺子只有一把、忍住不教、加法谁都会做减法才是功夫、精准制导对地毯轰炸、说服力来自陌生人用完一次）、类比延伸（人肉拐杖、替用户投票、产品欠账、带齐行李、成人礼）、批注性解释（为什么工具看不出来用户迷茫、为什么进度要诚实、为什么这里是事故高发区）以及结构重组（七段音频结构、四个时刻归纳、五级优先级编号）。这些内容属于实践补充，不等同于原文观点。</li>
+<li><strong>安全声明。</strong> 本集不涉及任何真实密钥、客户资料或可执行配置；文中提到的本地存储、素材授权等均为管理要求陈述，未出现任何真实值。</li>
+</ol>
+<hr>
+<h2>七、这一集在整条链路上的位置</h2>
+<p>在新手第一阶段的主线上，本集处在<strong>收口位置</strong>：</p>
+<ul>
+<li>前面的篇目解决了从想法到原型、从原型到接入 AI；</li>
+<li>本集解决交出去之前的最后一关，自己用、补卡点、别人用、按优先级改、整理分享；</li>
+<li>下一阶段会学数据库、用户系统、支付、部署和更完整的工程，但出发点仍然是这一阶段学会的事，先把一条有价值的用户任务做完整。</li>
+</ul>
+<p>送给读者的完整地图只有一个动作，<strong>用，而不是做。</strong> 自己用一遍，请一个人不教操作地用一遍，把看到的卡点按优先级改掉，再带齐三件套把作品发出去。当别人能打开作品并独立完成一次使用，第一阶段就真正完成了。功能会越加越多，规矩只有一条，别人不问人就能用，才算做完。</p>
+<hr>
+<p><strong>来源</strong>：Easy-Vibe（datawhalechina/easy-vibe）<code>docs/zh-cn/stage-1/complete-project-practice/index.md</code>。本音频与本文为二次演绎配音版，非原文照读。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
