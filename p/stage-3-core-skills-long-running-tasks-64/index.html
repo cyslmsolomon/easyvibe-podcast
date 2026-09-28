@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>如何让 Claude Code 长时间工作 · Prompt 编写最佳实践</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 8 · EP 64</span>
+<h1>如何让 Claude Code 长时间工作 · Prompt 编写最佳实践</h1>
+<p class="sub">第 8 章 · 第 64 讲 · 16:29</p>
+<div class="meta"><span>时长 <b>16:29</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>8</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-core-skills-long-running-tasks-64-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-core-skills-long-running-tasks-64-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-3-core-skills-long-running-tasks-64/stage-3-core-skills-long-running-tasks-64-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-3-core-skills-long-running-tasks-64/stage-3-core-skills-long-running-tasks-64-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-8.html">← 第 8 章目录</a>
+<a href="/p/stage-3-core-skills-github-iterative-development-63/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场 · 别指望它一次做完</span><span class="d">1:42</span></div>
+<div class="ch" data-t="102.744"><span class="t">1:42</span><span class="n">第一件事 · 任务描述怎么写才算数</span><span class="d">2:01</span></div>
+<div class="ch" data-t="224.568"><span class="t">3:44</span><span class="n">第二件事 · 几个真实的案例</span><span class="d">2:22</span></div>
+<div class="ch" data-t="367.104"><span class="t">6:07</span><span class="n">三条哲学 · 迭代、失败、死磕</span><span class="d">1:52</span></div>
+<div class="ch" data-t="479.952"><span class="t">7:59</span><span class="n">第三件事 · 什么活适合，什么活别碰</span><span class="d">2:13</span></div>
+<div class="ch" data-t="612.96"><span class="t">10:12</span><span class="n">第四件事 · 怎么防止账单失控</span><span class="d">2:06</span></div>
+<div class="ch" data-t="739.656"><span class="t">12:19</span><span class="n">后台任务 · 不用等的那点事</span><span class="d">1:59</span></div>
+<div class="ch" data-t="859.032"><span class="t">14:19</span><span class="n">收尾 · 四种方法怎么选，以及五个提醒</span><span class="d">2:09</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>让智能体持续工作到真正完成 · 任务描述、循环机制、适用边界与成本控制</h1>
+<blockquote>本内容改编自开源项目 Easy-Vibe，为二次演绎配音版。配套音频由文本转语音生成，本文是音频的图文解读稿，可独立阅读。</blockquote>
+<h2>一、这一集讲了什么</h2>
+<p>你有没有遇到过：让它重构一个项目，它改了几个文件就说做完了；让它修一个错误，它跑一次就停下来，其实根本没修好。</p>
+<p><strong>这不是它偷懒，而是工作方式决定的</strong>：做完一轮就输出一个结果然后停下。它判断有没有做完，靠的是「感觉」而非客观标准——可能觉得差不多了就停，可能觉得输出够多了就停，也可能不知道接下来干什么而停。</p>
+<p>人类的完成标准是客观的（测试全过、功能完整、质量达标），它的标准是模糊的。<strong>所以需要一个外部系统来判断任务是否真的完成。</strong></p>
+<p>本集四件事：<strong>任务描述怎么写</strong> → <strong>真实案例</strong> → <strong>什么活适合/不适合</strong> → <strong>怎么盯着、怎么防账单失控</strong>。</p>
+<h2>二、核心概念拆解</h2>
+<h3>概念一 · 任务描述的三段式</h3>
+<table>
+<tr><th></th><th>不好的写法</th><th>好的写法</th></tr>
+<tr><td>结构</td><td>一句话：「写一个待办事项接口」</td><td>分阶段 + 验收标准 + 完成标记</td></tr>
+<tr><td>结果</td><td>写完基础框架就说完成，没有测试、没有验证、没有文档</td><td>明确知道做什么、何时算完成</td></tr>
+</table>
+<p><strong>三段式模板</strong>：</p>
+<ol>
+<li><strong>分阶段描述任务</strong>（示例）</li>
+</ol>
+<ul>
+<li>阶段 1 基础功能：列出所有增删改查接口（创建 / 获取列表 / 获取单个 / 更新 / 删除）</li>
+<li>阶段 2 输入校验：标题不能为空，完成状态必须是布尔值</li>
+<li>阶段 3 测试：为每个接口写测试，覆盖率大于 80%</li>
+</ul>
+<ol>
+<li><strong>列出验收标准</strong>：所有测试通过、代码通过检查工具、说明文档包含接口说明</li>
+<li><strong>指定唯一完成标记</strong>：一串足够特别的文字</li>
+</ol>
+<p><strong>关键细节</strong>：验收标准要用<strong>客观可判定</strong>的话（「所有测试通过」），而不是「代码质量良好」这种没法衡量的说法；完成标记要<strong>足够特别</strong>，避免它在别处也输出同样内容造成误判。</p>
+<p><strong>五个现成模板</strong>：测试迁移、界面体验优化、批量添加类型、测试驱动的功能开发、代码风格统一——结构都遵循三段式。</p>
+<h3>概念二 · 停止钩子：把判断权交给外部</h3>
+<p>核心机制叫<strong>停止钩子</strong>：</p>
+<ol>
+<li>它想退出时，钩子拦截退出信号；</li>
+<li>检查：输出了那个特定的完成标记吗？</li>
+<li>没找到 → 重新注入原始任务，开始下一轮；</li>
+<li>找到了 → 才允许退出。</li>
+</ol>
+<p><strong>这个朴素设计解决的是根本问题</strong>：把「完成」的判断权，从它自己的感觉，转移到客观的外部检查上。也解释了为什么完成标记如此重要——<strong>它是整个判定机制的唯一依据</strong>。</p>
+<h3>概念三 · 三个真实案例</h3>
+<table>
+<tr><th>案例</th><th>规模</th><th>成本</th><th>关键前提</th></tr>
+<tr><td>黑客松一夜</td><td>6 个产品需求 → 6 个可演示项目，设 200 次迭代</td><td>约 $297</td><td>每完成一个输出特定标记</td></tr>
+<tr><td>负责人 30 天</td><td>259 个合并请求、497 次提交，新增 4 万行、删除 3.8 万行，100% 由 AI 完成</td><td>—</td><td>有明确可验证的流程</td></tr>
+<tr><td>一门编程语言</td><td>3 个月自主构建，含编译器实现、标准库、部分编辑器支持</td><td>—</td><td>目标清晰且长期稳定</td></tr>
+<tr><td>遗留项目重构</td><td>一整个周末，47 次提交，覆盖率 75%，文档齐全</td><td>约 $12</td><td>测试通过即标准</td></tr>
+</table>
+<p><strong>三点解读</strong>：</p>
+<ol>
+<li>成本可以非常低（$12 / $297 与人力成本不在一个数量级）；</li>
+<li>规模可以非常大（3 个月一门语言）；</li>
+<li><strong>共同前提是清晰的完成标准</strong>——没有这个前提，跑再多轮也只是原地打转。</li>
+</ol>
+<blockquote>提醒：这些是极端案例。第一次用不要按这个规模期待，从一两个小时能跑完的小任务开始。</blockquote>
+<h3>概念四 · 三条哲学</h3>
+<table>
+<tr><th>哲学</th><th>含义</th><th>关键转变</th></tr>
+<tr><td>迭代大于完美</td><td>第一次写框架，第二次修错误，第三次优化，第四次补测试</td><td>把「完美」从<strong>前提</strong>变成<strong>结果</strong></td></tr>
+<tr><td>失败是数据</td><td>每次测试失败都是改进机会</td><td>失败不是终点，是<strong>输入</strong></td></tr>
+<tr><td>持续尝试</td><td>一直试到跑通为止</td><td>一次性交付 → 可自我修正的过程</td></tr>
+</table>
+<h3>概念五 · 适用与不适用场景</h3>
+<p><strong>✅ 适合（8 类）</strong>：测试迁移、大规模重构、框架迁移、批量添加类型、测试覆盖率提升、文档生成、界面体验统一改进、带复现步骤的错误修复。</p>
+<p><strong>❌ 不适合（6 类）</strong>：架构设计决策、安全相关代码、需求模糊的任务、探索性工作、创意性设计、简单一次性任务。</p>
+<p><strong>三个判断问题</strong>：</p>
+<ol>
+<li><strong>我能定义明确的完成标准吗？</strong>——关键在「明确」，不是大概。代码写得好不好不算，测试通过才算。</li>
+<li><strong>有客观的验证方法吗？</strong>——客观 = 不需要人来判断结果。测试、构建、类型检查给的是/否答案；「代码是否优雅」不算。</li>
+<li><strong>这个任务需要我持续反馈吗？</strong>——需要你在旁边不断给意见，说明还没收敛到可自动执行的程度。</li>
+</ol>
+<p><strong>三个都是否定 → 放手让它去做。</strong></p>
+<blockquote><strong>误用的典型后果不是做错，而是空转</strong>：一直跑一直跑，每轮改一点，却始终达不到那个根本不存在的完成标准。</blockquote>
+<h3>概念六 · 四种方法对比</h3>
+<table>
+<tr><th>方法</th><th>特点</th><th>适用</th></tr>
+<tr><td>简单循环</td><td>5 行代码就能跑，功能有限，无完成检测，只能靠迭代次数限制</td><td>快速实验、原型验证</td></tr>
+<tr><td>通用循环插件</td><td>完整停止钩子，支持完成标记检测，有官方支持</td><td>大部分场景（通用推荐）</td></tr>
+<tr><td>增强版</td><td>双重退出条件、速率限制、智能熔断器、实时仪表盘</td><td>生产环境</td></tr>
+<tr><td>后台任务</td><td>按一个键推送后台，非阻塞，但无循环机制</td><td>不想干等的一次性任务</td></tr>
+</table>
+<p>任务大到单个实例不够用时，还有<strong>多代理并行</strong>这条路。</p>
+<h2>三、术语速查</h2>
+<table>
+<tr><th>术语</th><th>本文中的含义</th></tr>
+<tr><td>停止钩子</td><td>拦截退出信号并检查完成标记的机制，是循环的核心</td></tr>
+<tr><td>完成标记</td><td>一段唯一文本，是整个判定机制的唯一依据</td></tr>
+<tr><td>迭代</td><td>循环中的一轮；未检测到标记则重新注入任务再跑一轮</td></tr>
+<tr><td>最大迭代次数</td><td>必设的底线保护，达到即停，防无限循环</td></tr>
+<tr><td>熔断器</td><td>连续多次检测到完成标记时强制退出，防边缘情况</td></tr>
+<tr><td>后台任务</td><td>推送到后台非阻塞执行的任务，无循环机制</td></tr>
+<tr><td>测试驱动</td><td>先写测试再实现，可大幅减少调试时间</td></tr>
+</table>
+<h2>四、能力地图</h2>
+<table>
+<tr><th>能力项</th><th>具体要求</th><th>自评</th></tr>
+<tr><td>任务描述</td><td>能用三段式写出含客观验收标准的任务</td><td>☐</td></tr>
+<tr><td>机制理解</td><td>能说清停止钩子如何把判断权交给外部</td><td>☐</td></tr>
+<tr><td>场景判断</td><td>能用三个问题判断一个活该不该自动跑</td><td>☐</td></tr>
+<tr><td>成本控制</td><td>会按「迭代 → 时间 → 预算」顺序装保险</td><td>☐</td></tr>
+<tr><td>后台运用</td><td>会用后台任务并行处理零散事务</td><td>☐</td></tr>
+<tr><td>方法选型</td><td>能在四种方法中按场景选出合适的一种</td><td>☐</td></tr>
+</table>
+<h2>五、审查清单（放手之前逐条过）</h2>
+<ol>
+<li>任务描述是否包含<strong>分阶段 + 验收标准 + 完成标记</strong>三部分？</li>
+<li>验收标准是否都是<strong>客观可判定</strong>的（而非「质量良好」）？</li>
+<li>完成标记是否<strong>足够唯一</strong>，不会在别处误触发？</li>
+<li>三个判断问题是否都是「否」？</li>
+<li><strong>最大迭代次数</strong>设了吗？（必设底线）</li>
+<li><strong>时间限制</strong>设了吗？（双保险）</li>
+<li><strong>预算警告</strong>设了吗？（10 / 50 / 100 美元等阈值）</li>
+<li>第一轮跑完是否看过方向对不对？</li>
+<li>后台任务是否会修改你正在改的文件？</li>
+<li>完成后是否安排了<strong>人工验收</strong>（尤其安全相关功能）？</li>
+</ol>
+<h3>提示1 · 装保险的顺序不能乱</h3>
+<p>先设<strong>最大迭代次数</strong>（底线）→ 再设<strong>时间限制</strong>（双保险）→ 然后设<strong>预算警告</strong>（事态恶化前收到通知）→ 最后养成<strong>看仪表盘</strong>的习惯。</p>
+<p><strong>尤其第一轮跑完时要看方向对不对</strong>，方向不对立刻停，别等它跑完一百轮。</p>
+<h3>提示2 · 完成标记要够特别</h3>
+<p>完成标记是判定机制的唯一依据。如果它是一句普通的话（比如「完成了」），很可能出现在正常输出里，导致循环提前退出、任务其实没做完。<strong>用一串明确唯一的标识</strong>。</p>
+<h3>提示3 · 五条实战提醒</h3>
+<ol>
+<li>任务描述越详细结果越好——模糊的描述需要更多轮次来修正；</li>
+<li>设置合理的迭代次数——复杂项目建议至少 100 次；</li>
+<li>推荐测试驱动——先写测试可大幅减少调试时间；</li>
+<li><strong>最终仍需人工验证</strong>——它可能遗漏边界情况，特别是安全相关功能；</li>
+<li>数据库设计要仔细——它可能需要几轮才能设计出合理结构。</li>
+</ol>
+<h3>提示4 · 后台任务的正确配合方式</h3>
+<p>把重头戏交给循环，同时用后台任务处理零散的一次性事务（跑一次完整测试、做一次批量格式化）。这样主线程始终空闲，可随时处理新想法。</p>
+<p><strong>注意</strong>：推送前确认该任务不会修改你正在改的文件，否则两边同时改容易冲突。</p>
+<h3>提示5 · 循环的四种安全增强</h3>
+<table>
+<tr><th>特性</th><th>作用</th></tr>
+<tr><td>双重退出条件</td><td>需同时满足完成标记与显式退出信号才真正停止</td></tr>
+<tr><td>速率限制</td><td>默认每小时 100 次，防故障时账单爆炸</td></tr>
+<tr><td>智能熔断器</td><td>连续 5 次检测到完成标记则强制退出</td></tr>
+<tr><td>实时仪表盘</td><td>显示迭代次数、任务进度、预估成本</td></tr>
+</table>
+<p>配置项可写入配置文件：最大迭代次数、每小时速率限制、完成标记文本、退出信号、成本预警阈值。</p>
+<h2>六、常见误区与纠正</h2>
+<table>
+<tr><th>误区</th><th>实际情况</th><th>纠正办法</th></tr>
+<tr><td>它说做完了就是做完了</td><td>它的判断靠感觉，不可靠</td><td>用外部停止钩子与完成标记判定</td></tr>
+<tr><td>任务描述差不多就行</td><td>模糊描述导致大量无效迭代</td><td>三段式 + 客观验收标准</td></tr>
+<tr><td>完成标记随便写一句</td><td>可能在正常输出中误触发</td><td>用唯一且明确的标识</td></tr>
+<tr><td>先看成本再看迭代次数</td><td>失控时才看已经晚了</td><td>按迭代 → 时间 → 预算顺序装保险</td></tr>
+<tr><td>跑起来就不用管了</td><td>方向错了跑一百轮也是白跑</td><td>第一轮跑完就看方向</td></tr>
+<tr><td>它全做了就不用验收</td><td>安全相关功能尤其可能遗漏</td><td>保留最后一次人工验收</td></tr>
+</table>
+<h2>七、能力自测（五问）</h2>
+<ol>
+<li>它为什么会中途就停下来说做完了？</li>
+<li>好的任务描述由哪三部分组成？</li>
+<li>停止钩子检查的是什么？</li>
+<li>判断一个活该不该自动跑，要问自己哪三个问题？</li>
+<li>装保险的正确顺序是什么？</li>
+</ol>
+<p><strong>参考答案</strong>：1）它靠感觉判断，可能觉得差不多了、输出够多了或不知道接下来干什么。2）分阶段描述、验收标准、完成标记。3）是否输出了指定的完成标记；没有就重新注入任务。4）能定义明确完成标准吗；有客观验证方法吗；需要我持续反馈吗。5）最大迭代次数 → 时间限制 → 预算警告 → 看仪表盘。</p>
+<h2>八、常见疑问三问</h2>
+<p><strong>疑问一：最大迭代次数设多少合适？</strong></p>
+<p>没有通用值，取决于任务复杂度和单轮耗时。文档给出的参考是复杂项目至少 100 次。实操建议是：先按你手动做这件事的步骤数乘几倍来估，跑一轮看看单轮耗时与推进速度，再回头调整。<strong>宁可先设小一点，跑不完再加，也不要一上来就设个很大的数字。</strong></p>
+<p><strong>疑问二：为什么重构这种「没标准答案」的活也适合？</strong></p>
+<p>关键在于你要把标准显式定义出来。重构本身确实没有标准答案，但「为现有代码补充测试」「每次重构后确保测试通过」「更新文档」这三条是可判定的。所以不是重构适合，而是<strong>被你定义清楚标准之后的那个重构任务</strong>适合。这也印证了三个判断问题的第一问有多重要。</p>
+<p><strong>疑问三：成本真的可控吗？</strong></p>
+<p>可控，但前提是装好保险。文档里低成本的案例（$12、$297）都是任务清晰、验证客观的情况；真正烧钱的通常是任务模糊、标准不存在的空转。换句话说，<strong>成本失控往往不是循环的问题，是任务定义的问题</strong>。把任务描述写清楚，是最有效也最便宜的成本控制手段。</p>
+<h2>九、三十分钟上手练习</h2>
+<ol>
+<li><strong>（5 分钟）</strong> 挑一个你手头的小任务，先用一句话写下它（这是「不好的写法」）。</li>
+<li><strong>（10 分钟）</strong> 把它改写成三段式：分阶段、验收标准、完成标记。</li>
+<li><strong>（5 分钟）</strong> 用三个判断问题自测：能定义明确标准吗？有客观验证方法吗？需要持续反馈吗？</li>
+<li><strong>（5 分钟）</strong> 按「迭代次数 → 时间限制 → 预算警告」的顺序，把三个保护值写下来。</li>
+<li><strong>（5 分钟）</strong> 跑第一轮，只看方向对不对，不追求跑完。</li>
+</ol>
+<p>走完这五步，你就完整体验了一次「把完成标准说清楚」的过程——这也是整套方法真正的门槛所在。</p>
+<h2>十、三个典型场景的推荐选型</h2>
+<table>
+<tr><th>场景</th><th>推荐方法</th><th>理由</th></tr>
+<tr><td>想验证一个想法能否跑通</td><td>简单循环</td><td>五行代码，验证成本最低</td></tr>
+<tr><td>日常的项目重构、类型补全</td><td>通用循环插件</td><td>有完成标记检测，官方支持</td></tr>
+<tr><td>要在生产环境长期跑</td><td>增强版</td><td>双重退出、速率限制、熔断器</td></tr>
+</table>
+<h2>十一、时间不够时怎么砍</h2>
+<table>
+<tr><th>保留项</th><th>可砍项</th><th>说明</th></tr>
+<tr><td>完成标记与验收标准</td><td>分阶段的精细程度</td><td>前者是判定依据，后者可粗</td></tr>
+<tr><td>最大迭代次数</td><td>预算警告</td><td>底线保护必须先有</td></tr>
+<tr><td>第一轮后看方向</td><td>仪表盘持续监控</td><td>早看一次胜过一直盯</td></tr>
+<tr><td>人工验收</td><td>多轮自动迭代</td><td>安全相关不能只靠自动</td></tr>
+</table>
+<h2>十二、一页纸总结</h2>
+<p><strong>核心思想</strong>：不要让它一次完成，而是让它<strong>持续尝试，直到真正完成</strong>。</p>
+<p><strong>所有方法本质相同</strong>：给任务 → 让它工作 → 检查是否真完成 → 没完成就下一轮。</p>
+<p><strong>任务描述三段式</strong>：分阶段 + 客观验收标准 + 唯一完成标记。</p>
+<p><strong>三个判断问题</strong>：能定义明确标准吗？有客观验证方法吗？需要我持续反馈吗？三个都否 → 放手。</p>
+<p><strong>保险顺序</strong>：最大迭代次数 → 时间限制 → 预算警告 → 看仪表盘。</p>
+<p><strong>分工</strong>：它负责持续尝试与自我修正；<strong>你负责定义目标、设定边界、以及最后那一次人工验收</strong>。</p>
+<p><strong>一句话记牢</strong>：让智能体长时间干活，靠的不是更好的模型，而是一套<strong>把完成标准说清楚的工程方法</strong>。</p>
+<h2>十三、约束说明</h2>
+<ol>
+<li>本文为配套音频的图文解读稿，内容基于源文档进行口语化二次演绎，未引入源文档之外的案例、数据或引文。</li>
+<li>文中案例数字（$297、259 个合并请求、497 次提交、4 万/3.8 万行、47 次提交、75% 覆盖率、$12）均来自源文档给出的<strong>特定案例结果</strong>，属极端或个案，<strong>不代表通用指标</strong>，实际效果随任务、模型与配置而变。</li>
+<li>相关命令名、配置项与快捷键以源文档描述为准，<strong>不同版本间可能存在差异</strong>，请以你所用版本的官方文档为准；本文在口播中以中文描述替代了具体命令名。</li>
+<li>源切片为整册语料滑窗切分的产物，本集取材已按归属原则核对，仅采用与本集主题相符的部分；源文档提及的延伸阅读与社区项目列表未纳入口播。</li>
+<li>本集为二次演绎配音版，不代表原始项目官方立场。</li>
+</ol>
+<hr>
+<p><strong>来源</strong>：Easy-Vibe（datawhalechina/easy-vibe）docs/zh-cn/stage-3/core-skills/long-running-tasks/index.md</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
