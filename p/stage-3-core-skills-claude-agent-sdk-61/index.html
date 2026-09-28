@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Agent SDK 完全指南 · 什么时候该用 Agent SDK？</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 8 · EP 61</span>
+<h1>Claude Agent SDK 完全指南 · 什么时候该用 Agent SDK？</h1>
+<p class="sub">第 8 章 · 第 61 讲 · 15:43</p>
+<div class="meta"><span>时长 <b>15:43</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>8</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-core-skills-claude-agent-sdk-61-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-core-skills-claude-agent-sdk-61-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-3-core-skills-claude-agent-sdk-61/stage-3-core-skills-claude-agent-sdk-61-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-3-core-skills-claude-agent-sdk-61/stage-3-core-skills-claude-agent-sdk-61-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-8.html">← 第 8 章目录</a>
+<a href="/p/stage-3-core-skills-basics-60/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场 · 不是所有活都要上智能体</span><span class="d">1:39</span></div>
+<div class="ch" data-t="99.864"><span class="t">1:39</span><span class="n">选型表 · 三种工具分清楚</span><span class="d">2:02</span></div>
+<div class="ch" data-t="222.624"><span class="t">3:42</span><span class="n">一句话判据 · 动手还是动嘴</span><span class="d">2:21</span></div>
+<div class="ch" data-t="364.392"><span class="t">6:04</span><span class="n">企业级实战 · 一条流水线长什么样</span><span class="d">1:57</span></div>
+<div class="ch" data-t="481.752"><span class="t">8:01</span><span class="n">原则一和二 · 权限最小化与可审计</span><span class="d">2:01</span></div>
+<div class="ch" data-t="603.648"><span class="t">10:03</span><span class="n">原则三和四 · 结果串联与成本可控</span><span class="d">1:48</span></div>
+<div class="ch" data-t="712.368"><span class="t">11:52</span><span class="n">原则五 · 可扩展，以及落地在哪</span><span class="d">1:44</span></div>
+<div class="ch" data-t="817.344"><span class="t">13:37</span><span class="n">总结 · 从会说，到可控地做</span><span class="d">2:06</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>什么时候该用智能体开发工具包 · 选型判断与企业级流水线的五条设计原则</h1>
+<blockquote>本内容改编自开源项目 Easy-Vibe，为二次演绎配音版。配套音频由文本转语音生成，本文是音频的图文解读稿，可独立阅读。</blockquote>
+<h2>一、这一集讲了什么</h2>
+<p>前面把智能体从原理讲到用法、从单个讲到团队，这一集拐个弯，讲一个更前置的问题：<strong>什么时候根本不该用它</strong>。</p>
+<p>这不是扫兴，而是真话——工具越强，选错的代价越大。用一套能自主干活的系统去做「问一句答一句」的事，不但没变快，还多出配置、权限、审计一大堆开销。</p>
+<p>本集做两件事：</p>
+<ol>
+<li>给出一张<strong>选型表</strong>，一眼看清手里的活该交给谁；</li>
+<li>如果确实该上智能体、且要在公司里长期跑，讲清<strong>企业级流水线的五条设计原则</strong>。</li>
+</ol>
+<p>一句话概括：<strong>让智能体干活不难，难的是让它干活的同时你还能睡得着觉。</strong></p>
+<h2>二、核心概念拆解</h2>
+<h3>概念一 · 三种工具的分工</h3>
+<table>
+<tr><th>你想做的事</th><th>该用什么</th></tr>
+<tr><td>简单对话、文本生成、翻译</td><td>基础开发工具包</td></tr>
+<tr><td>单次工具调用（查天气、算数）</td><td>基础开发工具包</td></tr>
+<tr><td>自主完成多步骤开发任务</td><td>智能体开发工具包</td></tr>
+<tr><td>嵌入持续集成流水线</td><td>智能体开发工具包</td></tr>
+<tr><td>构建能操作文件系统的应用</td><td>智能体开发工具包</td></tr>
+<tr><td>日常交互式开发</td><td>命令行工具</td></tr>
+<tr><td>一次性快速任务</td><td>命令行工具</td></tr>
+</table>
+<p><strong>背后的两个维度</strong>：</p>
+<ul>
+<li>维度一：这个活是<strong>一问一答</strong>，还是要<strong>多步推进</strong>？</li>
+<li>维度二：这个活是<strong>你在旁边参与</strong>，还是<strong>丢给机器自己跑</strong>？</li>
+</ul>
+<p>交叉出三块地盘：你参与 + 问答 → 基础工具包；你参与 + 动手 → 命令行工具；机器自己跑 + 动手 → 智能体开发工具包。</p>
+<p><strong>记住这两个维度，以后遇到新工具也能自己归类，不用等别人整理对照表。</strong></p>
+<h3>概念二 · 一句话判据与深度细分</h3>
+<p><strong>判据</strong>：需要它「自己动手干活」（读文件、改代码、跑命令）→ 智能体开发工具包；只是问答 → 基础开发工具包。</p>
+<p><strong>再看动手的深度</strong>：</p>
+<table>
+<tr><th>深度</th><th>表现</th><th>选型</th></tr>
+<tr><td>浅层动手</td><td>读一个文件然后回答</td><td>基础工具包 + 文件读取即可</td></tr>
+<tr><td>深层动手</td><td>改文件、跑命令、根据结果决定下一步</td><td>必须用智能体开发工具包</td></tr>
+</table>
+<p><strong>判断方法</strong>：这件事能不能在一次交互里做完？能 → 浅；要来回好几回合、中途看结果调整 → 深。</p>
+<h3>概念三 · 企业级实战：代码质量守护流水线</h3>
+<p>每次提交合并请求后自动触发的五个环节：</p>
+<p><strong>代码审查 → 安全扫描 → 自动修复 → 测试验证 → 生成报告</strong></p>
+<p>关键点不是某个环节有多聪明，而是<strong>多个智能体串联协作，每个环节有明确的输入输出，出问题有审计、有回滚、有通知</strong>。</p>
+<p><strong>为什么非得是流水线</strong>：人工审查的问题出在规模和一致性——团队一大就成了瓶颈，且每个人松紧不一。流水线把标准固化成代码，每次执行一模一样，还不会累。但它守的是机械的、有明确标准的底线；涉及业务判断、架构取舍的地方仍需人来看。</p>
+<h3>概念四 · 五条设计原则</h3>
+<table>
+<tr><th>原则</th><th>要义</th><th>回答的问题</th></tr>
+<tr><td>权限最小化</td><td>审查/扫描只有只读权限；只有修复环节有写权限且限定模式</td><td>它能闯多大的祸</td></tr>
+<tr><td>可审计</td><td>每一步通过钩子记入审计日志，可分环节存储</td><td>出事之后能不能查清楚</td></tr>
+<tr><td>结果串联</td><td>上一环节输出即下一环节输入，有明确输入输出契约</td><td>环节之间会不会断链</td></tr>
+<tr><td>成本可控</td><td>设置最大轮次限制，生产环境再加预算上限</td><td>会不会烧掉预算</td></tr>
+<tr><td>可扩展</td><td>加新环节只需写一个新函数插入流水线</td><td>以后改起来痛不痛苦</td></tr>
+</table>
+<h3>概念五 · 设计哲学</h3>
+<p>官方表述：<strong>给智能体一台电脑，让它像人一样工作</strong>。重点在后半句——像人一样工作，意味着它有权限、有工具、有边界，<strong>也会犯错</strong>，所以必须给它设规则。</p>
+<p><strong>好的智能体应用 = 清晰的工具设计 + 明确的任务边界 + 适当的人工监督</strong></p>
+<ul>
+<li>工具给了它<strong>能力</strong></li>
+<li>边界给了它<strong>约束</strong></li>
+<li>监督给了你<strong>信心</strong></li>
+</ul>
+<p>三者缺一不可：少了工具干不了活，少了边界容易跑偏，少了监督不敢上线。</p>
+<h2>三、术语速查</h2>
+<table>
+<tr><th>术语</th><th>本文中的含义</th></tr>
+<tr><td>基础开发工具包</td><td>输入一段、输出一段的朴素调用方式，中间过程不开放</td></tr>
+<tr><td>智能体开发工具包</td><td>给目标后自主规划、调用工具、检查结果，可无人值守</td></tr>
+<tr><td>命令行工具</td><td>在终端里交互式使用的助手，为人在场参与的场景设计</td></tr>
+<tr><td>持续集成流水线</td><td>每次提交自动触发的一串检查与处理环节</td></tr>
+<tr><td>契约</td><td>环节之间约定好的固定输入输出格式，是自动串联的前提</td></tr>
+<tr><td>最大轮次限制</td><td>单环节允许执行的最大回合数，用于防止失控空转</td></tr>
+<tr><td>钩子</td><td>在关键节点自动触发的记录机制，用于沉淀审计日志</td></tr>
+</table>
+<h2>四、能力地图</h2>
+<table>
+<tr><th>能力项</th><th>具体要求</th><th>自评</th></tr>
+<tr><td>工具选型</td><td>能用两个维度判断一个活该交给哪种工具</td><td>☐</td></tr>
+<tr><td>深度判断</td><td>能区分浅层动手与深层动手，避免小题大做</td><td>☐</td></tr>
+<tr><td>流水线设计</td><td>能设计多环节串联，并定义每环的输入输出</td><td>☐</td></tr>
+<tr><td>权限治理</td><td>会做权限最小化的三步收敛</td><td>☐</td></tr>
+<tr><td>成本控制</td><td>会设最大轮次与预算上限，按单次运行限定损失</td><td>☐</td></tr>
+<tr><td>可审计性</td><td>能把关键操作记录下来，出事可回溯</td><td>☐</td></tr>
+</table>
+<h2>五、审查清单（动手前逐条过）</h2>
+<ol>
+<li>这个活到底需不需要它<strong>动手</strong>？只是问答就用基础的。</li>
+<li>动手是浅层还是深层？一次交互能做完吗？</li>
+<li>是你在旁边参与，还是丢给机器自己跑？</li>
+<li>各环节的权限是否按<strong>最小必要</strong>逐个收敛过？</li>
+<li>只读能完成的环节，是否全部降成了只读？</li>
+<li>每一步操作是否都有审计记录，且按环节分开存？</li>
+<li>环节之间的输入输出是否定成了<strong>固定格式</strong>而非自由文字？</li>
+<li>最大轮次是否按「手动步骤数 × 1–2 倍」设定？</li>
+<li>预算上限是否<strong>按单次运行</strong>而非按天设置？</li>
+<li>加一个新环节，是否只需新增一个函数而不改其他代码？</li>
+<li>流水线是否有<strong>超时设置</strong>与<strong>一键关闭</strong>开关？</li>
+<li>自动修复的输出，是否必须经过测试验证才能合并？</li>
+</ol>
+<h3>提示1 · 权限最小化的三步收敛法</h3>
+<ol>
+<li>列出这个环节要完成事情<strong>必须碰</strong>的所有东西；</li>
+<li>把清单里所有<strong>能只读完成</strong>的，全部降成只读；</li>
+<li>剩下确实要写的，限定它只能在<strong>某个目录</strong>里写，或只能以<strong>某种模式</strong>写。</li>
+</ol>
+<p>做完这三步，你会发现原以为需要全权限的环节，大部分都能收敛。</p>
+<h3>提示2 · 权限要分环节配，不要全局配</h3>
+<p>给流水线五个环节配<strong>五套不同权限</strong>，比给整套系统配一个统一的松权限安全得多，也麻烦不了多少。全局统一权限的最大问题是：为了迁就最需要权限的那一环，其他四环都被迫拿到了本不需要的权限。</p>
+<h3>提示3 · 契约必须是固定格式</h3>
+<p>不要把环节输出写成自由文字——看着友好，机器读起来全是坑。最省事的做法是规定成一份<strong>结构化清单</strong>，后面每一环都按这个格式读，换掉其中一环也不用改别的。</p>
+<h3>提示4 · 最大轮次这样设</h3>
+<p>按你自己手动做这件事需要的步骤数，<strong>乘上一到两倍</strong>。超过这个轮次还没做完，多半不是慢，是卡住了，继续跑没有意义，不如停下来报错让人看。</p>
+<h3>提示5 · 别为「以后可能会复杂」提前铺架构</h3>
+<p>早期你根本不知道以后会复杂成什么样，提前铺的架构很可能跟真实需求对不上，最后还是要重写。更划算的是先用最简单的方案跑通，等复杂度真的来了，再按那时的真实情况选型。</p>
+<h2>六、常见误区与纠正</h2>
+<table>
+<tr><th>误区</th><th>实际情况</th><th>纠正办法</th></tr>
+<tr><td>工具越强越好，一律上最全的</td><td>用复杂模式干简单活，配置开销盖过收益</td><td>先问需不需要它动手</td></tr>
+<tr><td>为了以后可能变复杂，提前铺架构</td><td>早期铺的架构常与真实需求对不上</td><td>先跑通，复杂度来了再选型</td></tr>
+<tr><td>整套系统配一个统一权限</td><td>为迁就一环，其他环被迫拿到多余权限</td><td>按环节配五套权限</td></tr>
+<tr><td>环节输出用自由文字更灵活</td><td>机器读起来全是坑，容易断链</td><td>定成固定格式的结构化清单</td></tr>
+<tr><td>只想着怎么让它跑起来</td><td>没想过跑起来之后怎么管，往往上线三天就关掉</td><td>五条原则逐条落实再上线</td></tr>
+<tr><td>自动修复的结果可以直接合并</td><td>它真的会改代码</td><td>必须经过测试验证那一环</td></tr>
+</table>
+<h2>七、能力自测（五问）</h2>
+<ol>
+<li>一个只需要读文件后回答的小工具，该选哪种工具？</li>
+<li>判断「浅层动手」和「深层动手」的最简单方法是什么？</li>
+<li>五个环节里，哪些应该只有只读权限？</li>
+<li>最大轮次和预算上限分别该怎么设？</li>
+<li>好的智能体应用等于哪三样东西相加？</li>
+</ol>
+<p><strong>参考答案</strong>：1）基础开发工具包加文件读取即可。2）看能不能在一次交互里做完。3）审查与扫描环节；只有修复环节需要写权限且限定模式。4）轮次按手动步骤数乘一到两倍；预算按单次运行设。5）清晰的工具设计 + 明确的任务边界 + 适当的人工监督。</p>
+<h2>八、常见疑问三问</h2>
+<p><strong>疑问一：流水线跑一次要好几分钟，会不会拖慢交付？</strong></p>
+<p>会占用时间，但要看跟什么比。跟人工审查排队等待相比，流水线的几分钟通常是更短的；而且它是并行的，人不用守着。真正需要注意的是设置合理超时，避免任务挂死在半路；同时给流水线留一个开关，出问题能一键回到人工模式。</p>
+<p><strong>疑问二：自动修复出问题怎么办？</strong></p>
+<p>关键是不要让它「直接合并」。正确的顺序是：修复 → 测试验证 → 出报告 → 人工确认。自动修复的价值在于把机械的修复建议先做出来，省掉人的重复劳动，但最后一步仍然应该由人拍板。这也是「适当的人工监督」这条原则的具体落地。</p>
+<p><strong>疑问三：小团队有必要上这套吗？</strong></p>
+<p>取决于你卡在哪。如果瓶颈是审查排队、标准不统一，那即使团队小也值得先把其中一两个环节自动化（通常从代码审查或安全扫描开始）。如果瓶颈根本不在这里，比如需求本身就天天变，那上流水线只是把混乱自动化。<strong>先定位瓶颈，再决定上哪一环</strong>，比整套照搬更实际。</p>
+<h2>九、三十分钟上手练习</h2>
+<p>不需要一次搭完整条流水线，按下面五步走一遍即可：</p>
+<ol>
+<li><strong>（5 分钟）</strong> 列出你手头最近三个用 AI 做的任务，逐个判断：它需要动手吗？是浅层还是深层？你在旁边参与还是丢给机器？</li>
+<li><strong>（5 分钟）</strong> 对其中判断为「机器自己跑 + 深层动手」的那个任务，写下它至少需要哪几步、每步产出什么。</li>
+<li><strong>（10 分钟）</strong> 把这几个步骤画成一条链，标注每一步的输入格式，把它们统一成同一种结构。</li>
+<li><strong>（5 分钟）</strong> 给每一步标注最小权限：只读还是读写？能读写的限定在哪个目录？</li>
+<li><strong>（5 分钟）</strong> 给每一步设一个最大轮次，按手动步骤数乘一到两倍估算。</li>
+</ol>
+<p>走完这五步，你会得到一份可直接落地的流水线草图，比空想五条原则有用得多。</p>
+<h2>十、三个典型场景的推荐组合</h2>
+<table>
+<tr><th>场景</th><th>推荐</th><th>回避</th><th>理由</th></tr>
+<tr><td>个人脚本 / 一次性的活</td><td>基础工具包或命令行工具</td><td>上流水线</td><td>配置成本远大于收益</td></tr>
+<tr><td>团队日常的合并请求检查</td><td>先自动化审查 + 扫描两个只读环节</td><td>一开始就上自动修复</td><td>只读环节风险最低，先积累信任</td></tr>
+<tr><td>长期运行的生产流水线</td><td>五条原则全部落实</td><td>全局统一权限、自由文字契约</td><td>跑得久的系统，治理成本才是大头</td></tr>
+</table>
+<h2>十一、时间不够时怎么砍</h2>
+<table>
+<tr><th>保留项</th><th>可砍项</th><th>说明</th></tr>
+<tr><td>权限最小化</td><td>审计日志分环节存储</td><td>前者直接决定破坏面，后者是优化项</td></tr>
+<tr><td>输入输出契约</td><td>可扩展性的完美设计</td><td>契约是能不能跑起来的前提</td></tr>
+<tr><td>最大轮次限制</td><td>预算上限</td><td>轮次先防住空转，预算可后置</td></tr>
+<tr><td>一键关闭开关</td><td>报告的可读性打磨</td><td>出问题时先能停，再谈好看</td></tr>
+</table>
+<h2>十二、一页纸总结</h2>
+<p><strong>一句话判据</strong>：需要它自己动手 → 智能体开发工具包；只是问答 → 基础开发工具包。</p>
+<p><strong>两个维度</strong>：一问一答 vs 多步推进；你在旁边 vs 机器自己跑。</p>
+<p><strong>一条流水线</strong>：代码审查 → 安全扫描 → 自动修复 → 测试验证 → 生成报告。</p>
+<p><strong>五条原则</strong>：权限最小化、可审计、结果串联、成本可控、可扩展。</p>
+<p><strong>一个公式</strong>：好的智能体应用 = 清晰的工具设计 + 明确的任务边界 + 适当的人工监督。</p>
+<p><strong>核心升级</strong>：把<strong>模型推理</strong>升级为<strong>可控执行</strong>——难的不是「做」，是「可控」。一个不可控的执行系统，比一个不会执行的系统更危险，因为它会悄悄把事情做错。</p>
+<p><strong>一句话记牢</strong>：想清楚该不该用，比想清楚怎么用更重要。</p>
+<h2>十二点五 · 一分钟复盘</h2>
+<p>如果把这一集压缩成三句话，那就是：<strong>先判断该不该用，再判断怎么用</strong>；<strong>动手的活才需要智能体，问答的活用基础的就够</strong>；<strong>一旦要长期跑，五条原则一条都不能省</strong>。</p>
+<p>很多人把顺序搞反了，先搭一套复杂的系统，再去找能用它的场景，结果系统成了负担。正确的顺序始终是从问题出发：这个活是什么形态、有没有必要自动化、自动化的哪一环最痛，想清楚这三点再动手，你会发现真正需要的东西往往比你以为的少得多。</p>
+<h2>十三、约束说明</h2>
+<ol>
+<li>本文为配套音频的图文解读稿，内容基于源文档进行口语化二次演绎，未引入源文档之外的案例、数据或引文。</li>
+<li>源切片为整册语料滑窗切分的产物，本集切片尾部混入了另一页面（Spec 驱动开发教程）的内容，<strong>已按来源页归属原则排除</strong>，不在本集取材范围内；原始素材有效正文约 1500 字，本集在内核（选型框架与五条设计原则）基础上做了约三倍的口语化展开，属正当二次演绎。</li>
+<li>文中工具名称、配置项（如最大轮次、编辑模式）与适用边界均来自源文档描述，<strong>不同版本间可能存在差异</strong>，请以你所用版本的官方文档为准。</li>
+<li>流水线示例（代码审查 → 安全扫描 → 自动修复 → 测试验证 → 生成报告）为源文档给出的企业级场景示例，<strong>落地效果随团队规模、项目结构与技术栈而变</strong>，需结合自身情况调整。</li>
+<li>本集为二次演绎配音版，不代表原始项目官方立场。</li>
+</ol>
+<hr>
+<p><strong>来源</strong>：Easy-Vibe（datawhalechina/easy-vibe）docs/zh-cn/stage-3/core-skills/claude-agent-sdk/index.md</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
