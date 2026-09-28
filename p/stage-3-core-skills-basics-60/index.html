@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Code 快速上手核心指南 · Slash 命令速查</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 8 · EP 60</span>
+<h1>Claude Code 快速上手核心指南 · Slash 命令速查</h1>
+<p class="sub">第 8 章 · 第 60 讲 · 15:40</p>
+<div class="meta"><span>时长 <b>15:40</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>8</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-core-skills-basics-60-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-core-skills-basics-60-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-3-core-skills-basics-60/stage-3-core-skills-basics-60-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-3-core-skills-basics-60/stage-3-core-skills-basics-60-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-8.html">← 第 8 章目录</a>
+<a href="/p/stage-3-core-skills-basics-59/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:37</span></div>
+<div class="ch" data-t="97.656"><span class="t">1:37</span><span class="n">斜杠命令速查</span><span class="d">2:03</span></div>
+<div class="ch" data-t="221.04"><span class="t">3:41</span><span class="n">四个符号，四种触发</span><span class="d">1:52</span></div>
+<div class="ch" data-t="333.912"><span class="t">5:33</span><span class="n">Token 为什么烧得快</span><span class="d">2:11</span></div>
+<div class="ch" data-t="464.952"><span class="t">7:44</span><span class="n">它不理解你的项目，先写说明书</span><span class="d">1:45</span></div>
+<div class="ch" data-t="570.504"><span class="t">9:30</span><span class="n">改错了，怎么退</span><span class="d">1:18</span></div>
+<div class="ch" data-t="649.296"><span class="t">10:49</span><span class="n">权限提示太多，怎么管</span><span class="d">1:30</span></div>
+<div class="ch" data-t="739.872"><span class="t">12:19</span><span class="n">国内怎么用，以及替代方案</span><span class="d">1:58</span></div>
+<div class="ch" data-t="858.0"><span class="t">14:18</span><span class="n">收尾</span><span class="d">1:21</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe · Claude Code 快速上手核心指南：斜杠命令、符号系统与七个高频问题 — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-3/core-skills/basics/index.md</code>），为<strong>二次演绎配音版</strong>。本文在原文基础上做了口语化改写、结构重组与实践补充，观点与例子由演绎方添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>stage-3-core-skills-basics-60</code></li>
+<li>所属章节：第 8 章</li>
+<li>原文覆盖小节：Slash 命令速查、符号系统、Token 消耗太快、Claude 不理解项目、如何回退操作、权限提示太多、国内如何使用</li>
+<li>对应音频：<code>stage-3-core-skills-basics-60-播客.mp3</code></li>
+<li>字幕：<code>stage-3-core-skills-basics-60-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>这一篇是 Claude Code 的「快速上手核心指南」，原文的写法是典型的 FAQ 结构：不追求体系完整，而是把新手进门后最先撞上的七堵墙，逐堵拆掉。</p>
+<ol>
+<li><strong>命令太多记不住</strong> —— 一组斜杠命令加四个符号，就是全部日常操作；</li>
+<li><strong>Token 烧得太快</strong> —— 仪表盘怎么看、忽略文件怎么配、压缩怎么用；</li>
+<li><strong>它不懂我的项目</strong> —— 用 <code>/init</code> 生成项目配置文件，再逐项校对；</li>
+<li><strong>改错了怎么办</strong> —— 三条退路分清适用场景，别用错；</li>
+<li><strong>权限弹窗太烦</strong> —— 三级权限加渐进式配置；</li>
+<li><strong>国内网络怎么用</strong> —— 四条路线加一组排错口诀。</li>
+</ol>
+<p>音频稿按「认识工具 → 斜杠命令 → 符号系统 → Token 优化 → 项目背景文件 → 回退机制 → 权限管理 → 国内使用 → 收尾」重排，把原文的速查表改成了带类别的讲解，零基础听众可以只听不记，用到再查。</p>
+<hr>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>能力项</th><th>原文怎么说的</th><th>演绎方的解读</th><th>所属环节</th></tr>
+<tr><td>斜杠命令</td><td>以 <code>/</code> 开头的内置功能，提供标准化操作</td><td>一排快捷键，按一下走固定流程</td><td>日常操作</td></tr>
+<tr><td><code>/init</code></td><td>初始化项目，生成 CLAUDE.md</td><td>新项目第一步，生成后必须人工校对</td><td>项目配置</td></tr>
+<tr><td><code>/plan</code></td><td>进入规划模式</td><td>先审图纸再动工，把返工挡在前面</td><td>复杂任务</td></tr>
+<tr><td><code>/compact</code></td><td>压缩上下文</td><td>长对话的定期清理，配合轮次使用</td><td>Token 管理</td></tr>
+<tr><td><code>/context</code></td><td>查看上下文使用</td><td>Token 管理的仪表盘，先诊断再优化</td><td>Token 管理</td></tr>
+<tr><td><code>/cost</code></td><td>查看本次会话费用</td><td>成本体感要靠它建立</td><td>成本控制</td></tr>
+<tr><td>符号 <code>/</code></td><td>执行内置操作</td><td>与斜杠命令同一套</td><td>日常操作</td></tr>
+<tr><td>符号 <code>@</code></td><td>引用文件或目录</td><td>引用要精准，目录级引用是 Token 大户</td><td>Token 管理</td></tr>
+<tr><td>符号 <code>!</code></td><td>执行终端命令（Bang 模式）</td><td>不切窗口跑命令，节奏不断</td><td>日常操作</td></tr>
+<tr><td>符号 <code>&amp;</code></td><td>后台运行任务</td><td>前台聊天与后台服务互不耽误</td><td>日常操作</td></tr>
+<tr><td><code>.claudeignore</code></td><td>排除不需要的文件</td><td>回报率最高的一次性配置</td><td>Token 管理</td></tr>
+<tr><td>CLAUDE.md</td><td><code>/init</code> 生成，可手动完善</td><td>写给新人也能看懂的项目说明书</td><td>项目配置</td></tr>
+<tr><td>Rules 目录</td><td>大型项目用目录组织规范</td><td>按主题拆分，改哪里动哪里</td><td>项目配置</td></tr>
+<tr><td>回退对话</td><td>只退对话，不动文件</td><td>最容易踩的坑，无数人在这里误判</td><td>安全网</td></tr>
+<tr><td>Git 预防</td><td>动手前先提交</td><td>真正的安全绳，回滚一次还原</td><td>安全网</td></tr>
+<tr><td>权限三级</td><td>allow / ask / deny</td><td>读的放宽，写的收紧</td><td>安全网</td></tr>
+<tr><td>渐进式权限</td><td>学习 → 熟悉 → 高效三阶段</td><td>别指望一步到位，按观察结果收紧</td><td>安全网</td></tr>
+<tr><td>国内路线一</td><td>API 代理服务</td><td>改动最小，优先尝试</td><td>网络环境</td></tr>
+<tr><td>国内路线二</td><td>第三方兼容工具</td><td>安装即用，适合不想折腾的人</td><td>网络环境</td></tr>
+<tr><td>国内路线三</td><td>换用其他 AI 编程工具</td><td>Cursor / Copilot / 通灵码 / Codeium 按需选</td><td>网络环境</td></tr>
+<tr><td>国内路线四</td><td>让 AI Agent 帮你配置</td><td>把报错完整丢给它，比翻帖子高效</td><td>网络环境</td></tr>
+</table>
+<hr>
+<h2>三、逐节解读</h2>
+<h3>3.1 斜杠命令：先分类，再记忆</h3>
+<p>原文列了十二条命令，死记硬背效率很低。按用途分四类，记四组比记十二条容易：</p>
+<table>
+<tr><th>类别</th><th>命令</th><th>一句话作用</th></tr>
+<tr><td>查询类</td><td><code>/help</code> <code>/context</code> <code>/cost</code></td><td>看有什么、看占用、看花费</td></tr>
+<tr><td>会话类</td><td><code>/clear</code> <code>/compact</code></td><td>清空重来、压缩续命</td></tr>
+<tr><td>任务类</td><td><code>/init</code> <code>/plan</code> <code>/diff</code></td><td>建配置、先规划、看改动</td></tr>
+<tr><td>设置类</td><td><code>/config</code> <code>/permissions</code> <code>/model</code> <code>/plugin</code></td><td>改配置、管权限、换模型、装插件</td></tr>
+</table>
+<p>演绎方补一个使用节奏建议：<strong>开工先 <code>/plan</code>，长对话中盯 <code>/context</code>，每五到六轮 <code>/compact</code>，收工前 <code>/diff</code> 加 <code>/cost</code>。</strong> 四个节点一挂，日常管理就闭环了。</p>
+<h3>3.2 符号系统：混用才是完整形态</h3>
+<p>四个符号各自独立用都有用，但原文真正想传达的是组合价值。典型组合是「<code>@</code> 文件 + <code>!</code> 命令」：先让它读代码，再让它跑验证，它自己看到运行结果，自己判断下一步。</p>
+<p>这里有一个认知转折：<strong>新手的用法是「你看图传话」，高手的用法是「工具自己看、自己跑、自己验」。</strong> 符号组合就是从传话筒过渡到放手的过程。</p>
+<p>原文对 <code>&amp;</code> 的说明是后台运行任务。演绎方提醒：后台任务不等于不用管，该看的日志还是要看，否则任务失败了都不知道。</p>
+<h3>3.3 Token 优化：先诊断，再动手</h3>
+<p>原文给的是完整策略，演绎方把它整理成「诊断 → 堵漏 → 保养」三层：</p>
+<ol>
+<li><strong>诊断</strong>：<code>/context</code> 三个指标，使用率超过百分之七十就要警惕，顺带数引用文件数量、揪出最占地方的大文件；</li>
+<li><strong>堵漏</strong>：配好 <code>.claudeignore</code>，把依赖目录、编译产物、日志、图片挡在上下文外；引用从目录级改成文件级；</li>
+<li><strong>保养</strong>：每五到六轮对话 <code>/compact</code> 一次；对大文件执行「真的需要吗、能只引一段吗、能拆模块吗」三问。</li>
+</ol>
+<p>原文特别强调的一点值得重复：<strong>优化 Token 不是不花，是花在刀刃上。</strong> 为了省把必要上下文也砍了，判断失准反而更费时间。</p>
+<h3>3.4 项目背景：CLAUDE.md 是两层体系的第一层</h3>
+<p>原文的解决方案分自动与手动两层。<code>/init</code> 负责快速起步，人工校对负责质量。校对清单就是原文那四项：项目概述、技术栈、常用命令、代码规范。</p>
+<p>演绎方的检验标准：<strong>写完之后假装自己是刚接手项目的新人，看能不能照着立刻开工。</strong> 能，这份文件就合格了。大型项目用 Rules 目录按主题拆分，本质是同一思路的规模化版本。</p>
+<p>第二层是指令里的即时补充。配置文件管长期约定，指令管单次背景，两层别混用——把一次性信息写进配置文件，文件会越滚越长；把长期约定只在指令里说，下次对话又得从头讲。</p>
+<h3>3.5 回退机制：三条退路，别用错</h3>
+<p>这是本集风险最高的一节。原文三个场景，演绎方按可靠程度排个序：</p>
+<table>
+<tr><th>场景</th><th>做法</th><th>可靠性</th><th>关键提醒</th></tr>
+<tr><td>回退对话</td><td>作废本轮对话</td><td>低（不碰文件）</td><td>只退聊天记录，文件改动原样保留</td></tr>
+<tr><td>手动撤销</td><td>逐文件还原</td><td>中（会漏）</td><td>改十个忘九个，漏的就是隐患</td></tr>
+<tr><td>Git 预防</td><td>动手前先提交，改乱就回滚</td><td>高（可整场还原）</td><td>提交越勤，回退越精准</td></tr>
+</table>
+<p>「先提交，再放权」这六个字，演绎方建议单独记住。它成本极低，却把最坏情况从「手动收拾残局」降级为「一条命令全部还原」。</p>
+<h3>3.6 权限系统：三级与三阶段</h3>
+<p>原文的权限模型只有三个词：allow 自动允许、ask 执行前询问、deny 完全禁止。演绎方的配置原则：<strong>读的放宽，写的收紧，删的和推远端的最严。</strong></p>
+<p>渐进式三阶段是原文的明确建议：学习阶段保持默认建立直觉，熟悉阶段把查看状态、跑测试这类低风险操作放进 allow，高效阶段再按项目配精细规则。跳级的风险是，你还没建立「它会动什么」的直觉，就放开了它动一切的权限。</p>
+<p>演绎方补一条工程实践：权限设置写进项目内的设置文件并随仓库提交，别只放个人全局配置，否则团队成员的边界对不上。</p>
+<h3>3.7 国内使用：四条路线与三查排错</h3>
+<p>原文按成本从低到高给了四条路。替代工具表里四款工具的定位原文说得很清楚，一句话版：</p>
+<ul>
+<li><strong>Cursor</strong> —— 基于 V S Code，功能完善，要完整 I D E 体验选它；</li>
+<li><strong>GitHub Copilot</strong> —— 代码补全能力最强，主用补全选它；</li>
+<li><strong>通义灵码</strong> —— 国产，国内访问稳定，网络省心选它；</li>
+<li><strong>Codeium</strong> —— 免费额度多，预算有限选它。</li>
+</ul>
+<p>排错三查按原文整理：连不上查地址（注意包含版本路径）、查密钥与余额、查本地代理；响应慢换近节点服务商、换编程套餐、<code>/compact</code> 减负；功能缺失先翻服务商文档，第三方兼容未必全支持。</p>
+<p>安全底线演绎方再强调一次：<strong>密钥不进代码、不进仓库。</strong> 泄露的密钥就是别人随便花的钱包。</p>
+<hr>
+<h2>四、审查清单</h2>
+<ul>
+<li>已能按四类（查询 / 会话 / 任务 / 设置）回忆主要斜杠命令</li>
+<li>已理解四个符号的用途，并试过「<code>@</code> 文件 + <code>!</code> 命令」组合</li>
+<li>已用 <code>/context</code> 看过一次上下文占用，知道三个指标分别是什么</li>
+<li>项目根目录已配置 <code>.claudeignore</code>，排除了依赖与产物目录</li>
+<li>养成习惯：长对话每五到六轮使用一次 <code>/compact</code></li>
+<li>项目已有 CLAUDE.md，且项目概述、技术栈、常用命令、代码规范四项都人工校对过</li>
+<li>一次性背景写在指令里，长期约定写在配置文件里，没有混放</li>
+<li>每次让它动手前先提交，回滚路径验证过一次</li>
+<li>权限按三级配置，低风险只读命令已进 allow，危险操作已设 deny</li>
+<li>权限配置随项目仓库提交，未只放个人全局配置</li>
+<li>已选定国内使用路线（代理 / 兼容工具 / 换工具 / 让 Agent 代配）</li>
+<li>牢记密钥不进代码、不进仓库</li>
+</ul>
+<hr>
+<h2>五、实践提示</h2>
+<h3>提示1 · 命令不用背，按「四个节奏点」挂日常</h3>
+<p>不要试图记住十二条命令。只挂四个节奏点：开工 <code>/plan</code> 先审计划，聊天中盯 <code>/context</code> 防爆，每五到六轮 <code>/compact</code> 保养，收工 <code>/diff</code> 加 <code>/cost</code> 复盘。四个点形成习惯，命令自然就用熟了。</p>
+<h3>提示2 · 先诊断再优化，别凭感觉省 Token</h3>
+<p>觉得贵之前，先用 <code>/context</code> 看一次仪表盘。多数人以为浪费在聊天上，实际大头是引用了一堆用不上的文件。先看数据再动手，<code>.claudeignore</code> 配一次，往往比压缩十次都管用。</p>
+<h3>提示3 · CLAUDE.md 按「新人能否立刻开工」验收</h3>
+<p>写完配置文件，做个测试：假装自己是刚接手项目的陌生人，只看这份文件，能不能把项目跑起来。能，合格；不能，缺哪项补哪项。这份文件最大的读者其实是三个月后的你自己。</p>
+<h3>提示4 · 权限三阶段别跳级，先观察再放权</h3>
+<p>学习阶段忍住别改配置，先看它默认会动哪些东西、哪些操作会弹窗。有了直觉再放 allow，有了项目理解再配 deny。跳级的代价是，你还没建立边界感，就已经放跑了危险操作。</p>
+<h3>提示5 · 国内路线按「改动成本」排序试，别一上来就换工具</h3>
+<p>优先试接口代理（改动最小），再试兼容工具（省配置），都不行再考虑换工具。每换一次环境，都是新的学习成本。让 AI Agent 帮你配置是兜底选项，把完整报错丢给它，比到处翻帖子高效。</p>
+<hr>
+<h2>六、约束说明</h2>
+<ol>
+<li><strong>本集内容全部来自原文 <code>stage-3/core-skills/basics/index.md</code>，未跨文件取材。</strong> 原文给出的十二条斜杠命令、四个符号、Token 优化策略、CLAUDE.md 检查项、回退三场景、权限三级与三阶段、国内四条路线及四款替代工具，均按原文转述，未添加原文不存在的工具、价格或数据。</li>
+<li><strong>切片串页污染已排除。</strong> 本篇切片文件的后半段（自「引言」起，含与基础 SDK 的区别、与其他 Agent 框架的对比、认证方式、自定义 API 地址、两种使用模式、内置工具、Hooks、子 Agent、MCP 集成、场景速查表）经核对属于另一页面（Claude Agent SDK 篇）的内容，与本篇来源页不符，<strong>已整段排除，未在音频与本文中使用</strong>。该部分内容归入后续篇目。</li>
+<li><strong>原文以代码块给出的示例未在音频中逐字朗读。</strong> 包括命令组合示例、<code>.claudeignore</code> 配置内容、CLAUDE.md 正文、回退命令、<code>.claude/settings.json</code> 示例、代理配置示例等（切片中仅保留标题与说明文字）。音频改为描述其含义与用途，具体配置以原文档为准。</li>
+<li><strong>原文中的表格做了口语化重排。</strong> 斜杠命令表与符号表改为按类别讲解，未逐格朗读；替代工具表保留四款工具的定位描述，去掉了原文的表格线。</li>
+<li><strong>演绎方添加的内容限于四类</strong>：结构性提炼（命令四分类、四个节奏点、Token 三层管理、回退可靠性排序）、类比说明（快捷键如电饭煲预约键、上下文如办公桌、提交如拍全家福、密钥泄露如别人随便花的钱包）、验收标准（CLAUDE.md 的新人测试、权限别跳级）、以及安全提醒（密钥不进仓库、团队权限随仓库提交）。这些内容属于实践补充，不等同于原文观点。</li>
+<li><strong>安全声明。</strong> 本集涉及的密钥、环境变量、代理配置均为流程说明，不包含任何真实可用的凭据。</li>
+</ol>
+<hr>
+<h2>七、这一集在整条链路上的位置</h2>
+<p>Claude Code 这条线在课程里的展开顺序是：先认识它是什么，再解决用得起、用得顺，最后才谈用得深。</p>
+<ul>
+<li>上一篇（<code>stage-3/core-skills/basics</code> 之前的篇目）解决「它是什么、和界面化工具有什么分工」；</li>
+<li><strong>本集是纯上手层</strong>：命令、符号、Token、项目文件、回退、权限、网络，全部是进门第一天就会撞上的问题；</li>
+<li>下一篇进入 SDK 与编程化使用（即本集约束说明中排除的那部分内容），从「用工具」过渡到「把能力嵌进自己的程序」。</li>
+</ul>
+<p>把本集七件事过一遍，标志着你从「听说过 Claude Code」变成「能独立开工」。而其中真正长期起作用的，是三个习惯：先提交再放权、先看仪表盘再优化、先写清项目背景再提问。工具会换代，习惯不挑工具。</p>
+<hr>
+<p><strong>来源</strong>：Easy-Vibe（datawhalechina/easy-vibe）<code>docs/zh-cn/stage-3/core-skills/basics/index.md</code>。本音频与本文为二次演绎配音版，非原文照读。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
