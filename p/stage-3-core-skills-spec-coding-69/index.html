@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>从 Vibe Coding 到 Spec Coding：先把需求写清楚，再让 AI…</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 8 · EP 69</span>
+<h1>从 Vibe Coding 到 Spec Coding：先把需求写清楚，再让 AI…</h1>
+<p class="sub">第 8 章 · 第 69 讲 · 15:14</p>
+<div class="meta"><span>时长 <b>15:14</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>8</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-core-skills-spec-coding-69-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-core-skills-spec-coding-69-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-3-core-skills-spec-coding-69/stage-3-core-skills-spec-coding-69-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-3-core-skills-spec-coding-69/stage-3-core-skills-spec-coding-69-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-8.html">← 第 8 章目录</a>
+<a href="/p/stage-3-core-skills-spec-coding-68/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:54</span></div>
+<div class="ch" data-t="114.816"><span class="t">1:54</span><span class="n">七种情况，七种组合</span><span class="d">1:47</span></div>
+<div class="ch" data-t="221.928"><span class="t">3:41</span><span class="n">需求变了，先改谁</span><span class="d">2:37</span></div>
+<div class="ch" data-t="379.728"><span class="t">6:19</span><span class="n">轻量还是完整，按风险选</span><span class="d">2:14</span></div>
+<div class="ch" data-t="514.656"><span class="t">8:34</span><span class="n">一个判断方法，换人测试</span><span class="d">1:16</span></div>
+<div class="ch" data-t="591.36"><span class="t">9:51</span><span class="n">三十分钟练习</span><span class="d">1:51</span></div>
+<div class="ch" data-t="702.792"><span class="t">11:42</span><span class="n">完整链路，五环相扣</span><span class="d">1:53</span></div>
+<div class="ch" data-t="815.832"><span class="t">13:35</span><span class="n">不丢掉氛围，组合使用</span><span class="d">1:37</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe · 从 Vibe Coding 到 Spec Coding：组合选型、变更纪律与三十分钟练习 — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-3/core-skills/spec-coding/index.md</code>），为<strong>二次演绎配音版</strong>。本文在原文基础上做了口语化改写、结构重组与实践补充，观点与例子由演绎方添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>stage-3-core-skills-spec-coding-69</code></li>
+<li>所属章节：第 8 章</li>
+<li>原文覆盖小节：推荐怎样组合、需求变化时先改 Spec 还是先改代码、什么时候用轻量版什么时候用完整流程、现在就做一次 30 分钟练习、总结、参考资料</li>
+<li>对应音频：<code>stage-3-core-skills-spec-coding-69-播客.mp3</code></li>
+<li>字幕：<code>stage-3-core-skills-spec-coding-69-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>规格驱动开发（Spec Coding）最常见的误解有两个：一是「又要写文档了，太麻烦」；二是「推倒重来，把氛围编程（Vibe Coding）全扔掉」。这一集把两个误解一次拆掉。</p>
+<p>原文的核心论点只有一句：<strong>从 Vibe Coding 到 Spec Coding，真正改变的不是 Markdown 文件数量，而是意图如何进入开发流程。</strong> 音频稿围绕这句话展开四件事：</p>
+<ol>
+<li><strong>七种情况七种组合</strong> —— 选型没有银弹，且只能有一个主流程；</li>
+<li><strong>需求变化纪律</strong> —— 先改 Spec 再改代码的四步顺序；</li>
+<li><strong>轻量与完整</strong> —— 按风险选力度，附一个「换人测试」判断法；</li>
+<li><strong>三十分钟练习</strong> —— 今天就能做的四步入门。</li>
+</ol>
+<hr>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>能力项</th><th>原文怎么说的</th><th>演绎方的解读</th><th>所属环节</th></tr>
+<tr><td>核心论点</td><td>改变的不是文件数量，是意图如何进入流程</td><td>文件是载体，意图是主角</td><td>总纲</td></tr>
+<tr><td>快速试验</td><td>Vibe 原型 + 3–5 条验收标准</td><td>轻到极简，但验收标准不能省</td><td>组合选型</td></tr>
+<tr><td>中小功能</td><td>OpenSpec + Given/When/Then + 自动化测试</td><td>在现有项目里最稳的渐进路线</td><td>组合选型</td></tr>
+<tr><td>Agent 连续开发</td><td>Matt Pocock Skills + ADR + Code Review</td><td>任务流与质量关配套</td><td>组合选型</td></tr>
+<tr><td>新项目完整工件</td><td>GitHub Spec Kit + Analyze + 人工阶段确认</td><td>可审查性优先</td><td>组合选型</td></tr>
+<tr><td>IDE 内工作流</td><td>Kiro Specs + EARS</td><td>需求设计任务三合一视图</td><td>组合选型</td></tr>
+<tr><td>跳过测试问题</td><td>Superpowers 的 TDD 与 Verification Skills</td><td>用纪律补执行缺口</td><td>组合选型</td></tr>
+<tr><td>大型多模块产品</td><td>BMAD Method + 每 Story 轻量 Spec</td><td>重框架轻文档的分层</td><td>组合选型</td></tr>
+<tr><td>主流程唯一</td><td>多工具各维护 spec/tasks 会制造冲突</td><td>一个主流程，其余当零件</td><td>组合选型</td></tr>
+<tr><td>变更四步</td><td>改 Spec → 查 plan/tasks → 改代码测试 → 对照验证</td><td>顺序倒了会出「旧规格回滚新逻辑」</td><td>变更纪律</td></tr>
+<tr><td>过时 Spec</td><td>比没有文档更危险</td><td>错文档让 AI 坚定地做错</td><td>变更纪律</td></tr>
+<tr><td>风险分级</td><td>原型 / 局部 / 跨模块 / 支付权限隐私 / 多人多 Agent</td><td>力度跟风险走，不跟仪式感走</td><td>轻重取舍</td></tr>
+<tr><td>换人测试</td><td>陌生人只读仓库文档能否继续开发并判断完成</td><td>规格好坏的可执行实验</td><td>轻重取舍</td></tr>
+<tr><td>30 分钟练习</td><td>澄清八问 → 一页 Spec 删假设 → 虚词改标准 → 新会话复述</td><td>用陌生会话的复述验收规格</td><td>入门练习</td></tr>
+<tr><td>五环链路</td><td>Vibe 探索 → Spec 标准 → Plan/Tasks 顺序 → 代码测试证据 → Verify 回查</td><td>人的位置随环节后移</td><td>总结</td></tr>
+</table>
+<hr>
+<h2>三、逐节解读</h2>
+<h3>3.1 七种组合与「主流程唯一」原则</h3>
+<p>原文的组合表覆盖七类处境，音频中逐个讲过。演绎方把七行压缩成三条记忆线：</p>
+<ul>
+<li><strong>探索线</strong>：快速试验 = 氛围原型 + 3 到 5 条验收标准（轻到极简，但标准不能省）；</li>
+<li><strong>落地线</strong>：中小功能 = OpenSpec + Given/When/Then + 自动化测试；新项目完整工件 = GitHub Spec Kit + Analyze + 人工确认；</li>
+<li><strong>规模化线</strong>：Agent 连续开发 = Matt Pocock Skills + ADR + Code Review；大型产品 = BMAD + 轻量 Spec 分层。</li>
+</ul>
+<p>比表格本身更重要的是紧随其后的一条原则：<strong>不要同时让多个工具各自维护 spec.md、tasks.md 和完成状态。</strong> 演绎方把原因说得更直白——多份规格 = 多份互相矛盾的真相，AI 这次读这份、下次读那份，行为飘忽不是它随机发挥，是它在矛盾文档之间迷路。正确姿势是选一个主流程，其他方法降级为零件库（EARS 写法、ADR、TDD、审查关卡随取随用）。</p>
+<h3>3.2 需求变化：四步顺序与「过时 Spec 更危险」</h3>
+<p>原文的通知中心案例给出了标准四步：</p>
+<ol>
+<li>在 <code>spec.md</code> 中增加安全提醒的保留规则和验收标准；</li>
+<li>检查 <code>plan.md</code> 和 <code>tasks.md</code> 是否需要新增任务；</li>
+<li>修改代码和测试；</li>
+<li>再次对照完整 Spec 验证旧行为没有被破坏。</li>
+</ol>
+<p>演绎方补两点。其一，顺序本身就是纪律：先改规格再改代码，每次代码变动才有据可查；反过来先改代码、规格滞后，下次 AI 读着旧规格，可能把你新加的逻辑当 bug 改回去——真实项目里这类事故的根子都是顺序倒了。其二，原文那句「过时的 Spec 比没有文档更危险」值得放大：没有文档，AI 至少会问你；拿着错文档，它会坚定不移地做错。所以每次发现需求与实现不一致，都要明确判断一次：<strong>是实现偏离了规格（改代码），还是规格落后于真实需求（改规格）</strong>，别搞反，更别两头都将就。</p>
+<h3>3.3 轻重取舍：按风险选力度</h3>
+<p>原文的五档表（一次性原型 / 小型局部功能 / 跨模块功能 / 支付权限隐私 / 多人或多 Agent）传达的规律是：<strong>力度跟风险走，不跟仪式感走。</strong></p>
+<p>演绎方在两个位置加了批注。第一，小型功能的「3 到 5 条验收标准」是全份规格的脊柱——有它，AI 自己知道写到什么程度算完；没它，一个改按钮颜色的小活它能重构半个项目。验收标准写没写，直接决定你是监工还是甩手掌柜。第二，支付、权限、隐私三场景的共同点不是「重要」，而是<strong>出错代价是事故不是返工</strong>，所以这三档要的不是文档齐全，是审查留痕：威胁场景想过、失败场景列过、审计要求写明、验证证据留下，且要指定谁来审——自己审自己，多半看成习惯性通过。</p>
+<h3>3.4 换人测试：规格好坏的可执行实验</h3>
+<p>原文给了一个极其漂亮的判断方法：<strong>如果换一个完全没看过当前聊天的人，只读仓库里的文档，能不能继续开发并判断完成？</strong></p>
+<p>答案肯定，规格到位；答案否定，关键意图还锁在聊天记录里。演绎方认为这个方法的价值在于它把「规格写得好不好」这个虚问题，变成了一个马上能做的实验，且不看字数只看一件事：离开你和当前聊天，项目还能不能被第三个人接走。场景化一点说——你出差一周，同事打开仓库就能上手，这就是通过；他每做一步都来问你，你就成了项目里不可替代的人肉接口。<strong>规格编程本质上是在把知识从人脑搬到仓库。</strong></p>
+<h3>3.5 三十分钟练习：四步与两个实操经验</h3>
+<p>原文设计的练习选一个「一天内可实现」的小功能，走四步：澄清提示词让 AI 问不超过 8 个问题 → 生成一页 spec.md 并亲自删除所有未经确认的假设 → 把「好用、快速、安全」改成可观察或可测试的标准 → 开新会话只读 Spec 复述实现范围。</p>
+<p>演绎方补两个实操经验：</p>
+<ul>
+<li><strong>八问的边界</strong>：低于八个通常没问透，高于八个说明需求没想清或范围选大了，八是个有用的压强值；</li>
+<li><strong>删假设的常见对象</strong>：AI 默认脑补技术栈、界面风格、数据量级，每删一条规格干净一分；「虚词改标准」的公式是<strong>虚词加数字</strong>——「快」不行，「两秒内响应」才行。</li>
+</ul>
+<p>验收标准只有一条：新会话的复述与你的想法一致，规格才算开始发挥作用；还有偏差，别写代码，回去修规格。</p>
+<hr>
+<h2>四、审查清单</h2>
+<ul>
+<li>能复述核心论点：变的不是文件数量，是意图如何进入开发流程</li>
+<li>已按自己的情况，从七种组合里选定一个主流程工具</li>
+<li>其他方法只作零件借用，没有多工具各自维护规格与任务文件</li>
+<li>遇到需求变化，走完四步：改 Spec → 查 plan/tasks → 改代码测试 → 对照验证</li>
+<li>每次发现需求与实现不一致，明确判断过「谁对听谁的」</li>
+<li>规格文件保持更新，没有留着已知过时的版本</li>
+<li>已按五档风险表为当前任务选定轻量或完整力度</li>
+<li>小型功能也写了 3 到 5 条验收标准</li>
+<li>高风险场景（支付/权限/隐私）有审查留痕与指定审查人</li>
+<li>用「换人测试」验证过一次规格质量</li>
+<li>完成了三十分钟练习，包括删假设与虚词改标准两步</li>
+<li>新会话复述与想法一致后才进入编码</li>
+</ul>
+<hr>
+<h2>五、实践提示</h2>
+<h3>提示1 · 主流程只能有一个，其余降级为零件</h3>
+<p>多工具各写各的规格，必然出现多份矛盾的真相，AI 的行为飘忽八成源于此。选一个主流程焊死，EARS、ADR、TDD、审查关卡当零件随取随用。工具是拿来用的，不是拿来供的。</p>
+<h3>提示2 · 变更四步的顺序就是纪律</h3>
+<p>先改规格再改代码，每次变动才有据可查。顺序倒过来的典型事故是：代码改了、规格没改，下次 AI 拿着旧规格把你新加的逻辑当 bug 回滚。改之前先问自己，规格这一笔落了没有。</p>
+<h3>提示3 · 用换人测试验收规格，别看字数</h3>
+<p>「陌生人只读仓库文档能不能继续开发并判断完成」——这一个问题顶十份规格规范。它把虚的「写得好不好」变成可执行实验，且直指要害：规格是写给下一个人的，不是写给自己的。</p>
+<h3>提示4 · 验收标准是脊柱，宁可短不可无</h3>
+<p>小型功能的三到五条验收标准，是全份规格里性价比最高的部分。有了它，AI 知道什么算完，你知道怎么验收，双方都不用猜。虚词一律加数字，快就是两秒，安全就是未登录不可见。</p>
+<h3>提示5 · 方法升级一级级来，从下一条验收标准开始</h3>
+<p>不要推倒重来。从下一个功能开始，先写三到五条验收标准再动手，就这一步已经超过大多数用户。等这成了习惯，再往上加规格文件、计划文件。一步到位的方法，通常一步也到不了位。</p>
+<hr>
+<h2>六、约束说明</h2>
+<ol>
+<li><strong>本集内容全部来自原文 <code>stage-3/core-skills/spec-coding/index.md</code>，未跨文件取材。</strong> 七种推荐组合、变更四步、五档风险表、换人测试判断法、三十分钟练习四步、五环链路总结、参考资料中的工具清单（GitHub Spec Kit、Matt Pocock Skills、OpenSpec、Kiro、Superpowers、BMAD、Cucumber、ADR 等），均按原文转述，未虚构工具、数据或结论。</li>
+<li><strong>切片串页污染已排除。</strong> 本篇切片文件自「Superpowers 简介」起的大段内容（Superpowers 框架介绍、brainstorming 苏格拉底式提问、技能触发机制、test-driven-development 红绿重构、systematic-debugging 四阶段、executing-plans 检查点、技能速查表、触发关键词表等）经核对属于 Superpowers 篇（另一来源页），与本篇来源页不符，<strong>已整段排除，未在音频与本文中使用</strong>。该部分内容归入 Superpowers 对应篇目。</li>
+<li><strong>原文以代码块或对话形式给出的内容未逐字朗读。</strong> 包括澄清提示词原文、spec.md 与 plan.md 的具体条目、苏格拉底式提问示例等，音频改为描述其作用与做法，具体文本以原文档为准。</li>
+<li><strong>原文的表格做了结构化重排。</strong> 七种组合表改为三条记忆线讲解，五档风险表保留原始分档并补「为什么」的解释，未逐格朗读。</li>
+<li><strong>演绎方添加的内容限于四类</strong>：结构性提炼（三条记忆线、五环链路图）、类比说明（口述与立字据、规格是基线不是预言、人肉接口）、判断口诀（谁对听谁的、虚词加数字、八问是压强值）、以及实践提醒（主流程唯一、顺序倒置的事故、审查不能自己审自己、方法升级一级级来）。这些内容属于实践补充，不等同于原文观点。</li>
+<li><strong>安全声明。</strong> 本集为方法论说明，不涉及任何真实凭据、仓库地址或可执行配置。</li>
+</ol>
+<hr>
+<h2>七、这一集在整条链路上的位置</h2>
+<p>在「从想法到软件」的技能线上，本集处在<strong>方法论的收口位置</strong>：</p>
+<ul>
+<li>前面的篇目解决了「AI 能写代码」和「怎么把任务管起来」（GitHub Issues 驱动开发讲工程落地）；</li>
+<li>本集解决「动手之前的那段功夫」——规格从哪来、怎么演进、力度怎么分；</li>
+<li>后面的篇目（Superpowers 等）则把规格与纪律进一步产品化成技能包。</li>
+</ul>
+<p>五环链路（Vibe 探索 → Spec 标准 → Plan/Tasks 顺序 → 代码测试证据 → Verify 回查）是本篇送给读者的完整地图。人的位置随环节后移：探索时在场，确认后退到规格后面，执行时看证据，验证时回来。<strong>规格编程不是把人从开发里拿走，是把人放到最值钱的位置上。</strong></p>
+<hr>
+<p><strong>来源</strong>：Easy-Vibe（datawhalechina/easy-vibe）<code>docs/zh-cn/stage-3/core-skills/spec-coding/index.md</code>。本音频与本文为二次演绎配音版，非原文照读。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
