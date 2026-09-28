@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>如何开发企业 Qt 设备客户端 · 大家通常用 Qt 做什么工业软件</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 8 · EP 80</span>
+<h1>如何开发企业 Qt 设备客户端 · 大家通常用 Qt 做什么工业软件</h1>
+<p class="sub">第 8 章 · 第 80 讲 · 14:48</p>
+<div class="meta"><span>时长 <b>14:48</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>8</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-cross-platform-qt-industrial-hmi-80-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-cross-platform-qt-industrial-hmi-80-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-3-cross-platform-qt-industrial-hmi-80/stage-3-cross-platform-qt-industrial-hmi-80-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-3-cross-platform-qt-industrial-hmi-80/stage-3-cross-platform-qt-industrial-hmi-80-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-8.html">← 第 8 章目录</a>
+<a href="/p/stage-3-cross-platform-nft-minting-78/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:28</span></div>
+<div class="ch" data-t="88.104"><span class="t">1:28</span><span class="n">五个真实案例</span><span class="d">2:16</span></div>
+<div class="ch" data-t="224.4"><span class="t">3:44</span><span class="n">看案例的正确姿势</span><span class="d">1:25</span></div>
+<div class="ch" data-t="309.744"><span class="t">5:09</span><span class="n">上位机与下位机</span><span class="d">2:02</span></div>
+<div class="ch" data-t="432.6"><span class="t">7:12</span><span class="n">两者怎么配合</span><span class="d">1:31</span></div>
+<div class="ch" data-t="524.592"><span class="t">8:44</span><span class="n">数据从哪里来</span><span class="d">2:06</span></div>
+<div class="ch" data-t="651.528"><span class="t">10:51</span><span class="n">用什么语言写</span><span class="d">1:42</span></div>
+<div class="ch" data-t="753.648"><span class="t">12:33</span><span class="n">企业怎样保证它一直能用</span><span class="d">2:14</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>如何开发企业 Qt 设备客户端 · 案例、上下位机与现场稳定性</h1>
+<h2>一、这篇在讲什么</h2>
+<p>这一节出自 Easy-Vibe 第三阶段「高级开发：多平台与 AI 进阶」的跨平台章节，主题是企业 Qt 设备客户端。全篇先给出 Qt 在工业界的真实产品版图，再看五个官方案例，然后讲清上位机与下位机这对核心概念，最后落到语言选型和现场稳定性两件工程实事。</p>
+<p>核心结论：<strong>Qt 只是工具，工业软件的门槛在控制边界、故障演练和现场验证。</strong></p>
+<table>
+<tr><th>模块</th><th>内容</th><th>回答的问题</th></tr>
+<tr><td>产品版图</td><td>六类常见成品与官方案例</td><td>企业用 Qt 做什么</td></tr>
+<tr><td>五个案例</td><td>BOMAG、Agile Robots、Parker、Blue Ctrl、Precision Planting</td><td>真实产品长什么样</td></tr>
+<tr><td>上下位机</td><td>定义、相对性、配合方式</td><td>工业控制链路怎么分工</td></tr>
+<tr><td>数据来源</td><td>五类接法与三要素</td><td>上位机的数字从哪来</td></tr>
+<tr><td>语言选型</td><td>四种组合与 PySide6 定位</td><td>企业项目用什么写</td></tr>
+<tr><td>稳定性</td><td>控制边界、故障测试、干净电脑验证</td><td>怎样保证一直能用</td></tr>
+</table>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>能力域</th><th>具体内容</th></tr>
+<tr><td>产品认知</td><td>Qt 是开发工具而非成品软件，六类工业成品形态</td></tr>
+<tr><td>案例阅读</td><td>平台化思路、信息层级、现场约束</td></tr>
+<tr><td>概念模型</td><td>上位机、下位机、相对性、控制边界</td></tr>
+<tr><td>通信认知</td><td>串口、网络、总线、Modbus、统一架构协议</td></tr>
+<tr><td>数据治理</td><td>数值、采集时间、数据可信三要素</td></tr>
+<tr><td>技术选型</td><td>C 加加、界面描述语言、传统控件、Python 绑定分工</td></tr>
+<tr><td>稳定性工程</td><td>控制边界、故障演练、版本固定、日志与回退</td></tr>
+</table>
+<h2>三、Qt 在工业界做什么</h2>
+<p>Qt 不是买来就能用的 SCADA 或 PLC 软件，而是企业拿来开发这些软件的工具。常见成品：机床、产线和包装设备的 HMI 操作面板；控制室的 SCADA 监控、趋势和报警客户端；CNC 控制面板和机器人示教器；工程机械、农业机械和船舶的驾驶室显示终端；设备配置、诊断、维护和远程运营工具；数字孪生、产线仿真和设备群管理平台。</p>
+<p>官方案例可见 Siemens SIMATIC Unified Comfort Panels、DMG MORI 的 CELOS 机床操作系统、BOMAG 的 myCOCKPIT、Parker Application Designer 等真实产品。共同点：把复杂状态变成操作员能迅速看懂的界面。</p>
+<h2>四、五个案例的要点</h2>
+<ul>
+<li><strong>BOMAG myCOCKPIT</strong>：压路机等工程机械的驾驶室界面。驾驶员要快速看到作业参数、车速、温度和设备状态，常用操作要足够大，戴手套仍易点击。显示屏只是整机一部分，需与控制器、摄像头、传感器和车辆总线协同。使用 Qt 超过十年，同一套思路适应不同尺寸与设备。</li>
+<li><strong>Agile Robots 示教器</strong>：操作员配置动作、查看程序和排查问题的手持终端。一套 Qt 代码同时服务 Windows 和 Linux，研发测试界面与生产现场保持一致。</li>
+<li><strong>Parker Application Designer</strong>：给设备制造商的 HMI 设计工具，让厂商自组按钮、仪表和应用再部署到显示终端。看点不是图标而是平台化——同一块终端装不同应用，不必为每款机器重做整套界面；案例亦介绍 QML 的作用。</li>
+<li><strong>Blue Ctrl X-CONNECT</strong>：船舶自动化平台，把电力、推进、压载水和报警收进一套界面。适合观察信息层级：总览页只放最重要状态，报警页强调异常，详细参数进下一层。</li>
+<li><strong>Precision Planting 20|20</strong>：农机实时监视器，持续显示多行作业数据、速度、覆盖和异常位置。与普通数据大屏的区别：驾驶员正在操作机器，不能停下来读长段文字，颜色、位置和报警必须一眼看懂。</li>
+</ul>
+<p><strong>看案例的正确姿势</strong>：不照抄深色背景或仪表盘，学四件事——最重要的状态放在哪里、异常怎样被看见、操作是否需要二次确认、设备离线后页面怎样告诉用户。抄得走配色，抄不走信息层级。</p>
+<h3>提示一 · 用四个问题审查任何工业界面</h3>
+<p>拿到一个工业界面设计，先用四问过一遍：总览页能否三秒看出设备状态；异常是否用颜色、位置和层级突出；危险操作是否有确认但不泛滥；断线时是否明确提示且过期数据不冒充实时值。四问全过，再谈视觉风格。</p>
+<h2>五、上位机与下位机</h2>
+<p><strong>定义</strong>：上位机是人观察和管理设备的入口，运行在工业电脑、工程师站、控制室工作站或设备触摸屏上，Qt 最常出现在这一层；下位机直接靠近生产设备和现场信号，如 PLC、MCU、运动控制器、机器人控制器、数据采集板和远程 I/O，按固定周期读输入、控输出，负责运行顺序、速度控制、条件判断、安全联锁和故障保护。</p>
+<p><strong>相对性</strong>：上与下指控制链路中的位置，不是电脑大小或高级程度。同一台 PLC 面对控制室 SCADA 时是下位机，管理伺服驱动器和远程模块时又在上层。判断依据是它在当前系统负责哪一层，不是外形。</p>
+<p><strong>易混淆点</strong>：下位机不等于低配置电脑——性能很强的机器人控制器仍是下位机；很小的触摸屏也可能是上位机。</p>
+<p><strong>配合方式</strong>：通过串口、TCP、CAN、Modbus、OPC UA 或厂商协议通信。典型流程：操作员点击「启动水泵」→ 上位机发请求给 PLC → PLC 检查急停、阀门、液位 → 条件满足才启动，不满足则拒绝并回传原因。<strong>下位机负责把设备控制正确，上位机负责让人看得懂、管得住、查得到。</strong></p>
+<p><strong>教程映射</strong>：本地 TCP 模拟器扮演简化下位机（持续发压力、温度、振动），PySide6 客户端是上位机（连接、显示趋势、触发报警、保存记录）。模拟器仅用于学习通信与断线处理，不具备真实 PLC 的实时控制与安全联锁；接入真实项目时换成 Modbus TCP、OPC UA 或企业接口，界面与数据处理思路不变。</p>
+<h3>提示二 · 安全逻辑永远放在离设备最近的一层</h3>
+<p>新手最常见的错误是在上位机里写安全逻辑。界面再漂亮也挡不住程序崩溃；急停、安全联锁、电机保护必须留在 PLC、MCU 或机器人控制器，上位机只发请求。这样界面退出或网络断开时，设备仍能自行进入安全状态。</p>
+<h2>六、上位机的数据从哪里来</h2>
+<p>Qt 只负责把数据接进来、处理好、显示给人看。温度、压力、转速通常不是 Qt 生成，也很少让上位机直连每个传感器；常见来源是 PLC、机器人控制器、仪表和数据采集模块。</p>
+<table>
+<tr><th>来源</th><th>常见接法</th><th>拿到什么</th></tr>
+<tr><td>PLC、仪表、运动控制器</td><td>Modbus TCP、Modbus RTU、厂商协议</td><td>温度、压力、开关状态、转速、故障码</td></tr>
+<tr><td>机器人、CNC、专用设备</td><td>厂商 SDK 或网络接口</td><td>当前程序、坐标、运行阶段、报警</td></tr>
+<tr><td>OPC UA 服务器或边缘网关</td><td>OPC UA、MQTT</td><td>多台设备整理后的实时数据与连接状态</td></tr>
+<tr><td>MES、工单、企业后端</td><td>HTTP API、WebSocket</td><td>工单、配方、权限、维护任务</td></tr>
+<tr><td>历史数据库</td><td>SQLite、SQL 或企业查询接口</td><td>报警历史、趋势、操作记录、生产统计</td></tr>
+</table>
+<p><strong>三要素</strong>：企业项目特别关心数值、采集时间和数据是否可信。显示 0℃ 可能是真零度，也可能是刚断线；只传数字无法区分，必须同时记录时间、连接状态和数据质量，过期数据明确显示「离线」或「数据已过期」，不能冒充实时值。</p>
+<p><strong>简单分工</strong>：设备状态从控制器或网关来，工单和配方从企业后端来，历史记录从数据库来。第一次接真实设备不必学遍所有协议——设备开放什么就先按说明书读什么，Qt 负责连接和展示。</p>
+<h3>提示三 · 给每个数字配一个新鲜度</h3>
+<p>设计上位机数据流时，为每个数值附带采集时间与质量标记，界面按新鲜度渲染：实时值正常显示，过期值置灰并标注，断线值明确提示。这一个机制能避免「界面显示正常、现场早已停机」的事故。</p>
+<h2>七、用什么语言写</h2>
+<table>
+<tr><th>语言和工具</th><th>通常负责什么</th></tr>
+<tr><td>C++</td><td>设备通信、数据处理、业务逻辑，性能与内存敏感部分</td></tr>
+<tr><td>QML / Qt Quick</td><td>触摸屏、仪表盘、动画、随屏幕尺寸变化的现代界面</td></tr>
+<tr><td>Qt Widgets + C++</td><td>工程师工具、诊断软件、需长期维护的传统桌面客户端</td></tr>
+<tr><td>Python + PySide6</td><td>内部工具、测试诊断、数据处理较多的客户端、快速第一版</td></tr>
+</table>
+<p>新嵌入式 HMI 的常见做法是 QML 负责界面、C++ 负责业务与设备通信，设计师调页面、底层协议与控制逻辑保持清晰。本篇选 PySide6（Qt 官方 Python 绑定，非仿制框架），便于第一次跟随做并快速验证界面、TCP 通信、报警和 SQLite。进入企业项目后不必因「工业软件」四字立刻全改 C++——先按刷新频率、数据量、启动速度和团队维护能力测试，再决定哪些部分迁移。企业后端也不一定用 Qt，可通过 OPC UA、MQTT、HTTP 等接口连接 Java、Go、C#、Python 服务。</p>
+<h3>提示四 · 选型跟着测量数据走</h3>
+<p>语言选型的依据是测量而非标签：统计界面刷新频率、单次数据量、启动耗时和团队维护成本，再决定哪些模块需要 C++。很多内部工具用 Python 完全够用，把工程师时间花在协议和报警逻辑上回报更高。</p>
+<h2>八、企业怎样保证它一直能用</h2>
+<ol>
+<li><strong>守住控制边界</strong>：急停、安全联锁、电机保护放在 PLC/MCU/机器人控制器；Qt 上位机只发操作请求，不作为设备安全的唯一保障。</li>
+<li><strong>专门测试故障</strong>：拔网线、关模拟器、发错误数据、写满数据库，看界面是否卡死、能否重连、报警是否留记录；通信与耗时任务不能堵住界面线程，每次请求都要有超时、错误提示和恢复办法。</li>
+<li><strong>干净电脑验证</strong>：固定 Qt 与依赖版本，生成可安装包，放到无开发环境的电脑上连续运行。检查项：重启后能否恢复；断网断电后数据是否损坏；日志是否无限占满磁盘；新版本失败能否回退；安装包是否完成签名；商业版/开源版是否按许可证要求发布。</li>
+<li><strong>现场可维护</strong>：保留日志、崩溃信息和版本号，问题可回答「哪台设备、哪个版本、什么时间、发生了什么」，而非一句「软件打不开」。</li>
+</ol>
+<p>这才是企业项目所说的「稳定」——不是演示十分钟没有报错。</p>
+<h3>提示五 · 把「拔网线」列进验收清单</h3>
+<p>任何上位机交付前，验收清单必须包含故障注入：拔网线、关服务器、发错误数据、写满磁盘。只在正常页面点一遍的验收，等于把第一次故障留给生产现场。</p>
+<h2>九、审查清单</h2>
+<ul>
+<li>已明确 Qt 是开发工具而非成品软件，能说出六类常见成品</li>
+<li>看案例时关注信息层级、异常可见性、二次确认、离线提示四件事</li>
+<li>能解释上位机与下位机的定义及其相对性</li>
+<li>安全联锁与急停留在下位机，未在上位机写安全逻辑</li>
+<li>数据流包含数值、采集时间、数据可信三要素</li>
+<li>过期与断线数据有明确标识，不冒充实时值</li>
+<li>语言选型有测量依据（刷新频率、数据量、启动速度、维护成本）</li>
+<li>已评估官方绑定与 C++ 的迁移边界</li>
+<li>故障测试覆盖拔网线、错误数据、数据库写满</li>
+<li>请求有超时、错误提示和恢复办法，界面线程未被堵</li>
+<li>干净电脑连续运行验证通过，含重启与断网断电</li>
+<li>日志有上限，版本可回退，安装包已签名</li>
+<li>现场问题可按设备、版本、时间、现象四要素定位</li>
+</ul>
+<h2>十、约束说明</h2>
+<ol>
+<li>本篇素材取自 <code>stage-3/cross-platform/qt-industrial-hmi/index.md</code> 对应切片，范围自「大家通常用 Qt 做什么工业软件」起，至篇末「PySide6 定位」止；该页开篇「为什么工业软件经常选择 Qt」一节位于上一篇目切片尾部，未纳入本篇。</li>
+<li>篇中所有案例、数据与表述均照录切片原文：BOMAG 使用 Qt 超过十年、Agile Robots 一套代码服务 Windows 与 Linux、Parker 平台化与 QML、Blue Ctrl 信息层级、Precision Planting 一眼看懂、五类数据来源接法、四种语言组合、六项企业检查，未作改动。</li>
+<li>「四问审查工业界面」「给每个数字配一个新鲜度」「选型跟着测量数据走」「把拔网线列进验收清单」等为演绎添加的操作性方法，源文档只给出原则与检查项，未给出这些自检框架。</li>
+<li>教程中的协议名、工具名与命令在口播稿中以功能描述转述（如工业协议、厂商开发包），解读稿保留原文术语（Modbus TCP、OPC UA、PySide6 等）供对照。</li>
+<li>本内容为二次演绎配音版，若与源文档表述有出入，以源文档为准。</li>
+</ol>
+<h2>十一、常见误区与纠正</h2>
+<table>
+<tr><th>误区</th><th>表现</th><th>纠正</th></tr>
+<tr><td>把 Qt 当成品软件</td><td>以为买来就能监控产线</td><td>Qt 是开发工具，成品要自己造</td></tr>
+<tr><td>照抄深色仪表盘</td><td>信息层级混乱</td><td>学四件事，不抄配色</td></tr>
+<tr><td>以上位机代替 PLC</td><td>在界面里写控制逻辑</td><td>控制与安全逻辑留在下位机</td></tr>
+<tr><td>按外形判断上下位</td><td>把强控制器当上位机</td><td>看它在当前链路负责哪一层</td></tr>
+<tr><td>只显示数值不带时间</td><td>过期数据冒充实时</td><td>三要素齐备，过期明确标注</td></tr>
+<tr><td>工业软件必须全用 C++</td><td>内部工具过度工程化</td><td>按测量数据决定迁移边界</td></tr>
+<tr><td>只测正常页面</td><td>第一次故障留在现场</td><td>故障注入列入验收</td></tr>
+<tr><td>演示不报错即稳定</td><td>忽视重启断网与日志</td><td>干净电脑连续运行加四要素定位</td></tr>
+</table>
+<h2>十二、一页纸总结</h2>
+<table>
+<tr><th>主题</th><th>一句话要点</th></tr>
+<tr><td>核心结论</td><td>Qt 是工具，门槛在控制边界、故障演练、现场验证</td></tr>
+<tr><td>产品版图</td><td>六类工业成品，共同点是把复杂状态变得可快速看懂</td></tr>
+<tr><td>BOMAG</td><td>驾驶室界面，手套可点，与整车系统协同</td></tr>
+<tr><td>Agile Robots</td><td>一套代码服务两系统，研发与现场一致</td></tr>
+<tr><td>Parker</td><td>平台化，同一终端装不同应用</td></tr>
+<tr><td>Blue Ctrl</td><td>信息层级，总览、报警、明细分层</td></tr>
+<tr><td>Precision Planting</td><td>一眼看懂，不为阅读长文字设计</td></tr>
+<tr><td>看案例</td><td>学状态位置、异常可见、二次确认、离线提示</td></tr>
+<tr><td>上位机</td><td>人观察管理设备的入口，Qt 常在这一层</td></tr>
+<tr><td>下位机</td><td>靠近现场信号，负责控制与安全联锁</td></tr>
+<tr><td>相对性</td><td>看链路位置，不看外形与配置</td></tr>
+<tr><td>配合</td><td>上位机发请求，下位机检查条件后执行</td></tr>
+<tr><td>数据来源</td><td>控制器、厂商接口、网关、后端、历史库五类</td></tr>
+<tr><td>三要素</td><td>数值、采集时间、数据是否可信</td></tr>
+<tr><td>语言选型</td><td>四种组合，PySide6 适合第一版</td></tr>
+<tr><td>稳定性</td><td>边界、故障测试、干净电脑、日志版本</td></tr>
+</table>
+<hr>
+<p>*配套文件：口播稿 <code>script.txt</code>、音频 <code>stage-3-cross-platform-qt-industrial-hmi-80-播客.mp3</code>、字幕 <code>stage-3-cross-platform-qt-industrial-hmi-80-播客.srt</code>。*</p>
+<p><strong>来源：Easy-Vibe（datawhalechina/easy-vibe）docs/zh-cn/stage-3/cross-platform/qt-industrial-hmi/index.md</strong></p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
