@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>从 Vibe Coding 到 Spec Coding：先把需求写清楚，再让 AI…</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 8 · EP 68</span>
+<h1>从 Vibe Coding 到 Spec Coding：先把需求写清楚，再让 AI…</h1>
+<p class="sub">第 8 章 · 第 68 讲 · 15:17</p>
+<div class="meta"><span>时长 <b>15:17</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>8</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-core-skills-spec-coding-68-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-core-skills-spec-coding-68-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-3-core-skills-spec-coding-68/stage-3-core-skills-spec-coding-68-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-3-core-skills-spec-coding-68/stage-3-core-skills-spec-coding-68-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-8.html">← 第 8 章目录</a>
+<a href="/p/stage-3-core-skills-skills-67/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场：从凭感觉写代码到先把需求写清楚</span><span class="d">1:27</span></div>
+<div class="ch" data-t="87.408"><span class="t">1:27</span><span class="n">第一段：规格到底是什么</span><span class="d">1:35</span></div>
+<div class="ch" data-t="183.0"><span class="t">3:03</span><span class="n">第二段：一份实用规格的四层结构</span><span class="d">1:39</span></div>
+<div class="ch" data-t="282.288"><span class="t">4:42</span><span class="n">第三段：规格、方案、任务不是同一个东西</span><span class="d">1:33</span></div>
+<div class="ch" data-t="375.984"><span class="t">6:15</span><span class="n">第四段：第一步先让人工智能提问</span><span class="d">1:38</span></div>
+<div class="ch" data-t="474.264"><span class="t">7:54</span><span class="n">第五段：第二步把形容词改成验收标准</span><span class="d">2:28</span></div>
+<div class="ch" data-t="622.608"><span class="t">10:22</span><span class="n">第七段：仓库结构和五段式工作流</span><span class="d">1:28</span></div>
+<div class="ch" data-t="710.616"><span class="t">11:50</span><span class="n">第八段：工具怎么选</span><span class="d">1:39</span></div>
+<div class="ch" data-t="810.0"><span class="t">13:30</span><span class="n">收尾：六种不依赖工具的方法</span><span class="d">1:46</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>从凭感觉写代码到规格先行：一页纸把需求说清楚</h1>
+<blockquote>本集对应 Easy-Vibe 教程 <code>stage-3/core-skills/spec-coding/index.md</code>，是一次面向零基础听众的二次演绎配音版。音频里不出现代码，只讲“为什么”和“怎么做判断”。</blockquote>
+<h2>本集定位</h2>
+<p>这一集解决的是一个非常普遍、但很少被说破的问题：同样是让人工智能写代码，为什么有的人三轮就收敛，有的人三十轮还在原地打转。差别不在模型，也不在提示词技巧，而在于动手之前有没有一份关于“预期行为”的书面约定。这一集把教程里分散在四处的知识——规格的定义、四层结构、三份文档的分工、四步写法、五段式工作流、工具选型、六种可迁移方法——串成一条从零到一的主线。</p>
+<p>听完之后，你应该能独立完成三件事：给一个小功能写出一页可用的规格；判断自己现在缺的是澄清、模板、任务拆解还是工程纪律；以及在六种主流工具里选出一个当下真正需要的。</p>
+<h2>能力地图</h2>
+<table>
+<tr><th>能力</th><th>听完你能做到什么</th><th>对应章节</th></tr>
+<tr><td>定义规格</td><td>用三句话说明一份规格要回答哪三个问题</td><td>第 2 节</td></tr>
+<tr><td>搭出骨架</td><td>按产品目标、用户行为、规则边界、验收证据四层写出初稿</td><td>第 2.2 节</td></tr>
+<tr><td>分清文档</td><td>说清规格、方案、任务三份文档的寿命差异</td><td>第 2.3 节</td></tr>
+<tr><td>逼出决策</td><td>用“先提问、每次最多四个”的句式把模糊需求问实</td><td>第 3.1 节</td></tr>
+<tr><td>转译标准</td><td>把“实时、友好、安全”这类形容词改成可观察的结果</td><td>第 3.3 节</td></tr>
+<tr><td>补齐边界</td><td>系统检查空状态、失败状态、权限、重复操作四类</td><td>第 3.4 节</td></tr>
+<tr><td>组织推进</td><td>用五段式流程逐段验收，不越段推进</td><td>第 5.2 节</td></tr>
+<tr><td>选型判断</td><td>先识别自己缺什么，再决定要不要上工具</td><td>第 6 节</td></tr>
+<tr><td>迁移方法</td><td>脱离任何工具，用六种方法长期复用</td><td>第 6.7 节</td></tr>
+</table>
+<h2>核心概念速查</h2>
+<ul>
+<li><strong>规格</strong>：一份关于预期行为的共同约定，写给人和机器一起看。</li>
+<li><strong>三个必须回答的问题</strong>：要做什么、边界在哪里、怎样证明完成。</li>
+<li><strong>四层结构</strong>：产品目标 → 用户行为 → 规则与边界 → 验收证据。</li>
+<li><strong>三份文档</strong>：规格文档锚定价值，方案文档锚定手段，任务文档锚定顺序。</li>
+<li><strong>五段式工作流</strong>：写规格 → 做方案 → 拆任务 → 实现 → 验证。</li>
+<li><strong>三种生命周期</strong>：快照式、持续锚定式、以规格为唯一源头。</li>
+</ul>
+<h2>分节讲解</h2>
+<h3>一、凭感觉写代码的边界在哪里</h3>
+<p>凭感觉写代码并不是错的，它在探索期非常高效。它的失效点在于“记忆不可靠”和“假设不可见”：你说过的需求散落在十几轮对话里，你和模型各自补了一部分假设，谁也没写下来。等到功能变多，两处假设冲突，就表现为“越改越乱”。规格的作用是外化这些假设，让冲突在写代码的阶段之前就暴露。</p>
+<h3>二、规格是预期行为的共同约定</h3>
+<p>注意定义里的两个词。第一是“预期行为”，它描述系统应该表现出什么，而不是代码长什么样；第二是“共同”，意味着读者既包括人，也包括后面接手的模型。三个必须回答的问题里，第三个“怎样证明完成”最常被跳过，而它恰恰决定了这个功能能不能被验收。</p>
+<h3>三、四层结构与通知中心示例</h3>
+<p>以通知中心为例：产品目标是让用户在一个地方处理重要消息；用户行为是查看、筛选、标记单条或全部已读；规则与边界是只能读自己的、失败可重试；验收证据是未读数正确变化、权限测试通过。这四层的顺序有意义，越往下越接近机器可检查的东西，因此写的时候建议自上而下，不要跳层。</p>
+<h3>四、规格、方案、任务不是同一个东西</h3>
+<p>这是本集最容易被忽视、却最省钱的一节。规格文档写“用户可以将单条通知标记为已读”，方案文档写“用某个接口更新状态”，任务文档写“先做列表，再做单条已读”。技术栈换了，方案重写；但只要用户还需要标记已读，规格里的行为就不该变。把三者混写，技术一换就会连需求一起丢掉。</p>
+<h3>五、四步写法</h3>
+<p>第一步先让人工智能提问，不要马上写代码，并明确限定“每次最多问四个、给出你的推荐”。第二步把形容词改成验收标准，判据是“能不能被看到或被测试”。第三步补齐四类边界：空状态、失败状态、权限边界、重复操作。第四步承认未知，把没答案的问题写进“未解决问题”，而不是让模型自行猜测。</p>
+<h3>六、仓库结构与五段式工作流</h3>
+<p>长期有效的项目规则放进总规则文件（例如如何跑测试、哪些目录不能改、金额怎么存），具体功能的需求放进独立的规格目录，一个功能一个文件夹。推进按五段走：写规格、做方案、拆任务、实现、验证。每一段都有明确的检查项，前一段的产物是后一段的输入，一段没过不要往下走。</p>
+<h3>七、工具怎么选</h3>
+<p>六套方案解决的问题并不相同：有的把对话与任务系统连成线，适合持续在协作平台上干活；有的提供模板与一致性分析，适合新项目和需要治理的团队；有的以“一次变更”为单位维护增量规格，适合已有代码库的小团队；有的把规格内置进编辑器，适合喜欢图形界面的人；有的用强制技能与验证关卡约束实现质量；有的走多角色流程，适合从零规划的大产品。选型的正确问法是“我缺的是需求澄清、规格文件、任务管理，还是实现质量”。</p>
+<h3>八、六种不依赖工具的方法</h3>
+<p>固定句式减少歧义；给定前提、当操作发生、那么结果如何，把业务规则写成可执行场景；决策记录保存重要技术选择的原因；纵向切片让每张任务都交付一小段完整价值；验证关卡防止只靠勾选任务宣布完成；提前决定规格生命周期。工具会过时，这六种方法不会。</p>
+<h2>审查清单</h2>
+<p>拿到一份规格，逐条打勾：</p>
+<ol>
+<li>三个问题（要做什么、边界在哪里、怎样证明完成）都有明确答案。</li>
+<li>四层结构齐全，没有直接跳到技术方案。</li>
+<li>每一条验收标准都能被观察到，不含“优雅”“最佳实践”这类主观描述。</li>
+<li>空状态、失败状态、权限边界、重复操作四类边界至少各有一条。</li>
+<li>非目标写清楚了，明确说明这一版不做什么。</li>
+<li>未解决问题单独成栏，没有让模型自行猜测的空白。</li>
+<li>规格、方案、任务三份文档分开存放，职责不混。</li>
+<li>生命周期已经选定：快照、持续锚定，还是以规格为唯一源头。</li>
+</ol>
+<h2>约束说明</h2>
+<ul>
+<li>本集音频只讲“为什么”和“怎么判断”，不涉及具体命令、安装步骤与代码。</li>
+<li>教程原始页面中出现的对话示例、最小规格模板、仓库结构示例、各工具的安装与初始化命令，均为需要在屏幕上阅读的形态，音频已全部转译为口头描述，未逐字朗读。</li>
+<li>工具选型部分依据原始页面核对的、截至二零二六年八月的官方文档与官方仓库信息；工具迭代很快，动手前请以官方最新说明为准。</li>
+<li>本切片内容与 <code>stage-3/core-skills/spec-coding/index.md</code> 完全对应，未混入相邻页面的内容。</li>
+<li>数字在音频中一律用中文读法表述，未出现英文缩写直读。</li>
+</ul>
+<h2>实践提示</h2>
+<h3>提示1 · 二十分钟写一页的最小练习</h3>
+<p>挑一个你最近想做的小功能，只写四段：为什么做、用户能做什么、边界是什么、怎样算完成。写完先别动手，把它丢给模型，看它的理解跟你想的差多少。那个差距就是你原先凭感觉付出的代价。</p>
+<h3>提示2 · 用“最多问四个”逼出决策</h3>
+<p>不要问“你有什么问题”，要问“请找出会影响范围、数据结构和验收方式的问题，每次最多问四个，并给出你的推荐”。限定数量是为了让人愿意认真回答，要求给推荐是为了避免它把选择题原样丢回来。</p>
+<h3>提示3 · 形容词转译模板</h3>
+<p>遇到“实时”“安全”“友好”，统一追问一句：发生什么操作之后，用户应该看到什么结果。例如把“未读数实时变化”改写成“标记已读后，列表状态与顶部未读数在同一次操作完成后更新，不要求跨设备同步”。</p>
+<h3>提示4 · 边界四问</h3>
+<p>空状态显示什么、失败能不能重试、能不能读到别人的数据、重复操作会怎样。这四问每次开工前过一遍，成本极低，收益极高。</p>
+<h3>提示5 · 先定生命周期再谈维护</h3>
+<p>交付后丢掉的快照、持续维护的锚点、以规格为唯一源头，三种模式没有唯一正确答案，但团队必须明确选一个。最糟的情况不是选错，而是没选，于是文档看起来一直有效，实际上早就落后了。</p>
+<h2>常见误区与纠正</h2>
+<table>
+<tr><th>误区</th><th>为什么会犯</th><th>怎么纠正</th></tr>
+<tr><td>规格越长越好</td><td>把文档厚度当成严谨程度</td><td>小功能一页就够，判据是可验证而不是篇幅</td></tr>
+<tr><td>一上来写技术方案</td><td>技术人员习惯从实现出发</td><td>先写用户行为，再谈数据结构与接口</td></tr>
+<tr><td>验收标准写“代码优雅”</td><td>主观判断无法执行</td><td>只写能被看到或被测试跑出来的结果</td></tr>
+<tr><td>让模型自己补未知</td><td>不想承认还没想清楚</td><td>单设“未解决问题”一栏，明确禁止猜测</td></tr>
+<tr><td>为了流程完整硬造规格</td><td>把工具当作业</td><td>一个来回能完成的工作，直接做</td></tr>
+<tr><td>规格与方案混在一份文件</td><td>图省事</td><td>分开存，规格锚定价值，方案锚定手段</td></tr>
+</table>
+<h2>时间不够时怎么砍</h2>
+<p>先保住“三个问题”和“四类边界”，这两块决定成败；工具对比可以整段跳过，它只影响效率不影响正确性；六种可迁移方法里，优先留下“形容词转译”和“边界四问”，这两条立刻能用。</p>
+<h2>一页纸总结</h2>
+<p>规格是一份关于预期行为的共同约定，回答要做什么、边界在哪里、怎样证明完成。用四层结构搭骨架，用三份文档分开价值、手段和顺序，用四步写法把形容词换成可验证的结果、把边界补齐、把未知单列。推进走五段式，一段不过不往下走。工具按“我缺的是什么”来选，而真正值得长期掌握的是六种不依赖工具的方法。最后一件事别忘了，提前决定规格的生命周期。</p>
+<h2>来源标注</h2>
+<p>本集内容改编自开源项目 <strong>Easy-Vibe（datawhalechina/easy-vibe）</strong> <code>docs/zh-cn/stage-3/core-skills/spec-coding/index.md</code>，为二次演绎配音版，非原文朗读。</p>
+<h2>六套工具的六选一速查</h2>
+<table>
+<tr><th>如果你现在的状态</th><th>更适合的方向</th><th>判断理由</th></tr>
+<tr><td>需求还没聊清楚，一问三不知</td><td>先补澄清，暂不上工具</td><td>工具解决不了没想清楚的问题</td></tr>
+<tr><td>想要正式产物和人工检查点</td><td>模板与检查清单型流程</td><td>每阶段都有可审阅的文档</td></tr>
+<tr><td>已有代码库，只想小步迭代</td><td>以变更为单位的增量规格</td><td>不必先写一份巨大的产品文档</td></tr>
+<tr><td>喜欢在界面里逐份审阅</td><td>编辑器内置的规格工作流</td><td>三份文件可直接切换查看</td></tr>
+<tr><td>规格已有，实现老跑偏</td><td>强制技能加验证关卡</td><td>约束的是工程纪律而非格式</td></tr>
+<tr><td>从零规划，模块多、角色多</td><td>多角色规划流程</td><td>需要产品简报、架构与故事线</td></tr>
+</table>
+<p>这张表不是排名，只是把“我缺什么”翻译成“该看哪一类”。同一个团队在不同阶段换工具是完全正常的，真正不变的是六种可迁移方法。</p>
+<h2>三个典型场景演练</h2>
+<p><strong>场景一，给博客加一个搜索框。</strong> 目标写“让读者三秒内找到文章”，用户行为写“输入关键词、看到结果列表、点进详情”，边界写“空结果给出引导、请求失败可重试、只搜已发布文章”，验收写“输入存在的标题能在结果首位看到”。</p>
+<p><strong>场景二，给后台加导出功能。</strong> 目标写“运营每天手工整理数据太慢”，用户行为写“选择时间范围、点导出、拿到文件”，边界写“超过一万行改异步、无数据时不生成空文件、只能导出本部门数据”，验收写“导出的行数与页面统计一致”。</p>
+<p><strong>场景三，给表单加校验。</strong> 目标写“减少无效提交”，用户行为写“输入时即时提示、提交失败时定位到错误项”，边界写“网络断开保留草稿、重复点击只提交一次、前后端规则一致”，验收写“每条错误都能被一条测试用例覆盖”。</p>
+<h2>常见疑问三问</h2>
+<p><strong>问，小功能也要写规格吗？</strong> 要，但可以只写一页。判断标准不是功能大小，而是这件事会不会跨越多个会话、会不会有人接手。会，就值得写。</p>
+<p><strong>问，规格写完就过时了怎么办？</strong> 这正是要提前决定生命周期的原因。快照式就明确交付后作废，持续锚定式就把更新纳入日常，选一个并执行，比纠结哪个更好重要。</p>
+<p><strong>问，让模型提问它问不到点上怎么办？</strong> 限定问题范围。与其让它自由发挥，不如指定“只问会影响范围、数据结构和验收方式的问题”，并要求给推荐，回答成本立刻下降。</p>
+<h2>三十分钟上手练习</h2>
+<p>第一步，五分钟，挑一个小功能，写下为什么做。第二步，十分钟，列出用户能做的三到五个动作，用动词开头。第三步，八分钟，补齐四类边界各一条。第四步，五分钟，把每条验收标准改成“做了什么之后，能看到什么”。第五步，两分钟，把还没想清楚的写进未解决问题。走完这五步，你就拥有一份可以交给任何模型的规格。</p>
+<h2>逐节要点回顾</h2>
+<p>第一节提醒我们，凭感觉的失效点是记忆不可靠与假设不可见。第二节给出规格的定义与三个必答问题。第三节用四层结构把抽象目标落成可检查的证据。第四节区分了规格、方案与任务的寿命。第五节是四步写法，核心是把形容词换成可观察结果。第六节给出仓库结构与五段式推进节奏。第七节把工具选型翻译成“我缺什么”。第八节留下六种不依赖工具的方法，并强调提前决定规格的生命周期。八节串起来只有一句话，先把话说清楚，再让机器动手。</p>
+<h2>一张对照表：写规格前与写规格后</h2>
+<table>
+<tr><th>维度</th><th>凭感觉写代码</th><th>规格先行</th></tr>
+<tr><td>需求来源</td><td>散落在十几轮对话里</td><td>集中在一页纸上</td></tr>
+<tr><td>假设</td><td>双方各补一半，不可见</td><td>显式写下，未解决的单独列</td></tr>
+<tr><td>边界</td><td>用到才想起</td><td>开工前过一遍四问</td></tr>
+<tr><td>验收</td><td>跑通就算完</td><td>逐条对照可观察结果</td></tr>
+<tr><td>返工</td><td>集中在实现后期</td><td>前移到写规格阶段</td></tr>
+<tr><td>交接</td><td>靠口头复述</td><td>三分钟读完规格</td></tr>
+</table>
+<p>这张表最值得看的是最后两行。规格先行并不会让工作量变少，它只是把返工从最贵的阶段搬到了最便宜的阶段。写代码时改需求要动数据库和接口，写规格时改需求只需要划掉一句话，这两者的成本差着一个数量级，这就是规格先行全部的经济学理由。</p>
+<h2>一句话带走</h2>
+<p>写规格不是为了约束人工智能，而是为了约束我们自己的模糊。你写下的每一条验收标准，都是在替未来的自己省一次返工。</p>
+<h2>给零基础听众的三条起步建议</h2>
+<p>第一，不要追求格式完美，先把三个问题的答案写出来，格式可以在第二份、第三份规格里慢慢补齐。第二，每次只练一个动作，这一周只练把形容词改成可观察结果，下一周再练边界四问，比一次全上更容易坚持。第三，把写好的规格当成给朋友的留言来写，写完自己朗读一遍，凡是读着拗口、读着心虚的地方，通常就是还没想清楚的地方，回去补就是了。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
