@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>从设计原型到项目代码 · 2.2 常见问题与解决方案</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 7 · EP 43</span>
+<h1>从设计原型到项目代码 · 2.2 常见问题与解决方案</h1>
+<p class="sub">第 7 章 · 第 43 讲 · 15:29</p>
+<div class="meta"><span>时长 <b>15:29</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>7</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-frontend-design-to-code-43-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-frontend-design-to-code-43-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-2-frontend-design-to-code-43/stage-2-frontend-design-to-code-43-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-2-frontend-design-to-code-43/stage-2-frontend-design-to-code-43-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-7.html">← 第 7 章目录</a>
+<a href="/p/stage-2-backend-zeabur-deployment-42/">← 上一讲</a>
+<a href="/p/stage-2-frontend-figma-mastergo-44/">下一讲 →</a>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场 · 一张设计稿，怎么变成能跑的页面</span><span class="d">1:20</span></div>
+<div class="ch" data-t="80.4"><span class="t">1:20</span><span class="n">第一段 · 路径一，把图交给能读图的人工智能</span><span class="d">2:43</span></div>
+<div class="ch" data-t="244.08"><span class="t">4:04</span><span class="n">第二段 · 路径二，用设计平台自己的能力</span><span class="d">1:53</span></div>
+<div class="ch" data-t="357.816"><span class="t">5:57</span><span class="n">第三段 · 路径三，让人工智能去读设计文件本身</span><span class="d">1:44</span></div>
+<div class="ch" data-t="462.12"><span class="t">7:42</span><span class="n">第四段 · 为什么第三条路最准</span><span class="d">2:07</span></div>
+<div class="ch" data-t="589.632"><span class="t">9:49</span><span class="n">第五段 · 四张常见问题的排查入口</span><span class="d">1:31</span></div>
+<div class="ch" data-t="680.76"><span class="t">11:20</span><span class="n">第六段 · 三条路到底怎么选</span><span class="d">1:33</span></div>
+<div class="ch" data-t="774.624"><span class="t">12:54</span><span class="n">第七段 · 真实项目里，三条路是轮着用的</span><span class="d">1:07</span></div>
+<div class="ch" data-t="842.208"><span class="t">14:02</span><span class="n">第八段 · 收束，以及那条真正的主线</span><span class="d">1:26</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>从设计原型到项目代码 · 解读与音频稿件</h1>
+<blockquote>对应集目：stage-2-frontend-design-to-code-43</blockquote>
+<blockquote>来源：Easy-Vibe（datawhalechina/easy-vibe）docs/zh-cn/stage-2/frontend/design-to-code/index.md</blockquote>
+<blockquote>体裁：二次演绎配音版解读稿，配合本集音频食用</blockquote>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>设计稿画完了，然后呢？</p>
+<p>大多数教程停在设计交付这一步，而真实的坎在后面：那张画得漂漂亮亮的稿子，到底怎么变成能在浏览器里跑起来的代码。这一集把这件事拆成了三条路径，并且给出了一张完整的选型地图。</p>
+<p>但如果只把这一集当成&quot;三个工具的使用说明&quot;，就低估它了。三条路径看似是并列选项，实质是一条递进的信息链。本节真正有价值的地方，在于揭示了三者差异的根源：<strong>喂给人工智能的信息质量不同</strong>。</p>
+<ul>
+<li>路径一喂的是<strong>截图</strong>（像素），人工智能只能估算；</li>
+<li>路径二喂的是<strong>平台导出结果</strong>（经过一层转换），有损耗；</li>
+<li>路径三喂的是<strong>原始设计数据</strong>（图层树、组件定义、设计变量），精确无损。</li>
+</ul>
+<p>精度差异不是算力差异，是输入差异。这条规律具有跨场景的迁移价值。</p>
+<p>理解这一点之后，你会得到一条很实用的排查心法：<strong>当输出不满意时，先检查输入的保真度，再检查表达的措辞。</strong> 大量时间被浪费在反复打磨提示词上，而根因其实是输入本身就有损。一张模糊的截图，无论配多好的提示词，也还原不出精确的设计变量。</p>
+<p>本集还隐含了一条工程上的递进逻辑。三条路不是平级的选项，而是随项目阶段上移的台阶：<strong>先跑通，再求准，最后求自动。</strong> 验证期求快，交付期求准，流程期求自动。跳过任何一级，通常都会付出额外代价——在验证期过度工程，或在流程期持续人肉搬运。</p>
+<hr>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>层级</th><th>能力</th><th>本集覆盖</th><th>检验标准</th></tr>
+<tr><td>L0 认知</td><td>理解&quot;设计稿变代码&quot;本质是信息搬运</td><td>已覆盖</td><td>能说清三条路的输入分别是什么</td></tr>
+<tr><td>L1 操作</td><td>用多模态模型从截图还原代码</td><td>已覆盖</td><td>能独立跑通一次并拿到网页文件</td></tr>
+<tr><td>L2 排障</td><td>排布不均／显示不全／颜色不准／字体不匹配</td><td>已覆盖</td><td>四类问题各能对上一条解法</td></tr>
+<tr><td>L3 操作</td><td>用设计平台原生生成功能导出代码</td><td>已覆盖</td><td>能复述五步操作</td></tr>
+<tr><td>L4 操作</td><td>用插件导出目标框架代码</td><td>已覆盖</td><td>能说出插件用法的通用五步</td></tr>
+<tr><td>L5 配置</td><td>搭建模型上下文协议通路</td><td>已覆盖</td><td>能说出准备三步与流程四步</td></tr>
+<tr><td>L6 理解</td><td>解释协议方式精度最高的原因</td><td>已覆盖</td><td>能从五个维度对比传统与协议方式</td></tr>
+<tr><td>L7 选型</td><td>按场景选择路径</td><td>已覆盖</td><td>面对具体项目能给出路径建议</td></tr>
+<tr><td>L8 迁移</td><td>把&quot;输入质量决定输出质量&quot;迁移到其他人工智能任务</td><td>已覆盖</td><td>能判断一个新工具的精度上限</td></tr>
+</table>
+<hr>
+<h2>三、逐段要点拆解</h2>
+<h3>第一段 · 路径一：多模态人工智能</h3>
+<p>输入是<strong>一张完整截图 + 一句需求说明</strong>。优点是不挑工具、零配置；缺点是图是像素不是数据，模型只能靠猜，因此大框架常对、细节常偏。</p>
+<p>四类常见问题与解法：</p>
+<table>
+<tr><th>问题</th><th>解法</th></tr>
+<tr><td>界面排布不均</td><td>描述具体布局问题，要求调整样式表的间距与内边距</td></tr>
+<tr><td>界面显示不全</td><td>检查视口设置，要求添加响应式断点</td></tr>
+<tr><td>颜色还原不准</td><td>用取色工具取精确色值，直接提供给模型</td></tr>
+<tr><td>字体不匹配</td><td>指定具体字体名称，或改用公开字体库替代</td></tr>
+</table>
+<p>实操建议：<strong>先生成网页代码，再在本地开发工具中统一转框架</strong>。这样会得到多个独立的网页文件，可以一次性统一转换，比直接生成框架代码可控得多。</p>
+<h3>第二段 · 路径二：平台原生能力与插件</h3>
+<p>以 Figma 生成功能为例，三个特点是高精度还原、结果可转回可编辑设计文件、可直接同步到代码仓库。完整功能需专业版权限，学生可通过教育认证免费获得。</p>
+<p>五步操作：进入入口 → 上传参考图并加提示词 → 查看渲染结果（可全屏预览）→ 点编辑器图标回到编辑界面调细节 → 导出代码（可直连代码仓库）。</p>
+<p>插件路线方面，Figma 与 MasterGo 均支持。常用插件有三类取向：转多框架代码、主打高保真与交互、以人工智能驱动。用法通用五步：开面板 → 装插件 → 选元素 → 选框架与格式 → 复制或下载。</p>
+<h3>第三段 · 路径三：模型上下文协议</h3>
+<p>协议本质是一套标准接口规范，让模型安全可控地访问设计文件、插件接口与项目元数据。</p>
+<p>准备三步：安装协议服务器 → 在人工智能工具中完成配置 → 获取个人访问令牌（设置 → 个人访问令牌 → 生成并保存）。</p>
+<p>流程四步：启用连接并确认服务器已连 → 提供设计文件链接 → 自动分析生成（取图层树 → 理解组件结构与样式属性 → 生成正确命名的 React 或 Vue 组件）→ 迭代优化。</p>
+<p>工具生态：设计端有官方实现与社区适配器；开发端有原生支持的工具、编辑器插件、以及可配置启用的工具。</p>
+<h3>第四段 · 五维对比：精度从哪来</h3>
+<table>
+<tr><th>维度</th><th>传统方式</th><th>协议方式</th></tr>
+<tr><td>数据精度</td><td>依赖截图，可能丢失细节</td><td>直接读取原始设计数据</td></tr>
+<tr><td>组件识别</td><td>模型需猜测组件边界</td><td>精确获取组件定义</td></tr>
+<tr><td>样式还原</td><td>基于像素估算</td><td>获取精确的设计变量</td></tr>
+<tr><td>迭代效率</td><td>每次修改需重新截图</td><td>实时同步设计变更</td></tr>
+<tr><td>自动化程度</td><td>手动复制粘贴</td><td>可直接写入项目文件</td></tr>
+</table>
+<h3>第五段 · 四张常见问题的排查入口</h3>
+<p>布局／元素错位 → 查显示与定位属性；样式／颜色不一致 → 用浏览器开发者工具查实际生效色值；响应式／移动端异常 → 补媒体查询断点；交互／按钮无响应 → 查脚本事件绑定。</p>
+<h3>第六、七段 · 选型与主线</h3>
+<p>五维横向对比：上手难度（简单／中等／较复杂）、还原精度（中等／高／最高）、灵活性（高／中等／较高）、自动化程度（低／中等／高）、成本（低／中／低）。</p>
+<p>场景化建议：快速验证与预算有限选路径一；团队协作与高精度选路径二；追求自动化与标准化工作流选路径三。实践上建议新手从路径一起步，逐步上移，并允许混合使用。</p>
+<hr>
+<h2>四、实践提示</h2>
+<h3>提示一 · 精度不够时，先换输入，别换提示词</h3>
+<p>这是本集最核心的一条。很多人发现还原不准，第一反应是改提示词、换个说法、加更多形容词。但如果输入本身就是一张有损的截图，提示词写得再漂亮也补不回丢失的数据。正确的升级顺序是：先优化输入（给精确色值、给完整截图、给文件链接），再优化表达。</p>
+<h3>提示二 · 先出网页文件，再统一转框架</h3>
+<p>直接让模型输出框架代码，一旦结构不对，排查成本很高。先拿到多个独立的网页文件，本地验证通过后再统一转换，等于多了一道人工可介入的检查点。这个做法对新手尤其友好。</p>
+<h3>提示三 · 颜色问题永远以开发者工具为准</h3>
+<p>不要凭肉眼判断&quot;颜色不对&quot;。人眼对屏幕色彩的感知受环境光、显示器色域影响很大，而开发者工具给出的是实际生效的数值。先用工具确认事实，再谈修复，能避免大量无谓争论。</p>
+<h3>提示四 · 协议方案的门槛在配置，不在使用</h3>
+<p>模型上下文协议看起来复杂，但复杂度几乎全部集中在前三步准备上：装服务器、配工具、拿令牌。这三步一旦跑通，后面的日常使用反而是三条路里最省力的，因为设计变更可以实时同步，不需要反复截图。</p>
+<h3>提示五 · 用&quot;输入类型&quot;给新工具定位</h3>
+<p>遇到一个没见过的设计转代码工具，先问它要什么。要图的就是路径一量级，要插件装的就是路径二量级，要文件链接或令牌的就是路径三量级。这个判断只需要一分钟，却能省下几小时的试错。</p>
+<hr>
+<h2>五、常见误区</h2>
+<p><strong>误区一：以为三条路是三选一。</strong> 实际工作中更常见的是混合使用。早期用路径一验证，中期用路径二交付，稳定后用路径三固化流程。把它们当成阶梯，而不是互斥选项。</p>
+<p><strong>误区二：以为路径一最差所以不值得学。</strong> 路径一在灵活性上是最高的，且不挑工具、零配置。在快速验证阶段，它是最优解。评价一条路要看场景，不看排名。</p>
+<p><strong>误区三：拿到生成结果直接交付。</strong> 三条路都需要人工复核。本集第五段那四类问题，就是最常见的复核清单。生成只是第一步，验证才是闭环。</p>
+<p><strong>误区四：把&quot;还原精度&quot;当成唯一指标。</strong> 精度往往与上手难度、成本、配置负担正相关。为一个一次性的原型去搭一套协议环境，是明显的过度工程。</p>
+<p><strong>误区五：跳过阶段直接上最重的方案。</strong> 有些团队一上来就要建标准化的自动化流程，结果项目方向还没验证，环境先搭了两周。正确的顺序是先跑通、再求准、最后求自动，每一级都建立在前一级已经被验证的基础上。</p>
+<p><strong>误区六：把生成结果当成终点而非起点。</strong> 三条路径产出的都是初稿，不是成品。真正决定交付质量的，是拿到初稿之后那道人工复核。跳过复核直接上线，等于把风险全额转移给了用户。</p>
+<hr>
+<h2>六、术语速查</h2>
+<table>
+<tr><th>术语</th><th>一句话解释</th></tr>
+<tr><td>多模态</td><td>模型能同时理解文字与图片等多种输入</td></tr>
+<tr><td>视口</td><td>告诉浏览器按什么尺寸理解页面的设置</td></tr>
+<tr><td>响应式断点</td><td>在不同屏幕宽度下切换布局的临界值</td></tr>
+<tr><td>设计变量</td><td>设计系统中对颜色、间距等样式的标准化定义</td></tr>
+<tr><td>图层树</td><td>设计文件中各元素的层级结构</td></tr>
+<tr><td>模型上下文协议</td><td>让模型安全访问外部数据与工具的标准接口规范</td></tr>
+<tr><td>访问令牌</td><td>授权第三方读取你设计文件的凭证字符串</td></tr>
+<tr><td>媒体查询</td><td>按屏幕特征应用不同样式的机制</td></tr>
+</table>
+<hr>
+<h2>七、延伸练习</h2>
+<ol>
+<li><strong>同一张稿，三条路各走一遍。</strong> 选一张你画过的页面，分别用截图、平台生成、协议三种方式产出代码，对比还原度差异。亲手见过一次差距，比读十遍对比表管用。</li>
+<li><strong>做一次提示词无效性验证。</strong> 对着一张模糊截图反复优化提示词，记录还原度的变化幅度。你会发现天花板很快出现，这个体感会帮你建立&quot;输入优先&quot;的直觉。</li>
+<li><strong>练一次开发者工具查色。</strong> 找一个你觉得&quot;颜色不对&quot;的页面，用开发者工具查出实际生效色值，再和设计稿对比。把凭感觉改成凭数值。</li>
+<li><strong>评估一个新工具。</strong> 随便找一个没用过的设计转代码工具，用提示五的方法在一分钟内判断它属于哪条路径，再验证你的判断是否准确。</li>
+<li><strong>做一次阶段复盘。</strong> 回顾你最近做过的一个页面，判断它在做的时候处于哪个阶段（验证期、交付期还是流程期），再对照&quot;先跑通、再求准、最后求自动&quot;的顺序，看当时选的路径是否匹配。如果不匹配，写下当时的代价，作为下一次的判断依据。</li>
+<li><strong>把四类问题做成检查表。</strong> 把排布、显示、颜色、字体这四项连同各自解法抄成一张小卡片，每次拿到生成结果就逐项过一遍。把它变成肌肉记忆，而不是每次都从头回忆。</li>
+</ol>
+<hr>
+<h2>八、审查清单</h2>
+<ol>
+<li>设计稿是否已导出为<strong>完整</strong>的截图？（局部截图必然丢信息）</li>
+<li>提示词里是否包含了明确的需求描述，而不只是一张图？</li>
+<li>四类常见问题（排布、显示、颜色、字体）是否逐项复核过？</li>
+<li>颜色是否用取色工具取过精确数值，而不是让模型猜？</li>
+<li>是否为移动端补了响应式断点？</li>
+<li>采用路径二时，是否已确认账号权限（专业版或教育认证）？</li>
+<li>采用路径二时，导出前是否已在编辑界面完成细节调整？</li>
+<li>采用路径三时，访问令牌是否已生成并妥善保存？</li>
+<li>采用路径三时，是否确认服务器已连接成功？</li>
+<li>生成结果是否已在浏览器中实际打开验证，而不只是看预览图？</li>
+<li>所选路径是否与项目阶段匹配？（验证期用一，交付期用二，流程期用三）</li>
+</ol>
+<hr>
+<h2>九、约束说明</h2>
+<p><strong>约束一 · 改编与演绎边界。</strong> 本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版。所有路径划分、操作步骤、对比维度均来自源文档，未引入源文档之外的产品数据、性能数字或第三方案例。音频中使用的比喻（信息搬运、像素与数据、算力与信息质量）属表达层教学演绎，非源文档原文表述。</p>
+<p><strong>约束二 · 切片范围边界。</strong> 本篇所依据的切片文件混入了相邻页面的内容，实际取材时已严格切分。切片后半部分约三千余字为另一页面的内容（前端设计工具的演变历程，涵盖位图时代、矢量化组件化阶段、云端协作阶段与设计自动化的演进），与本集主题无关，<strong>已全部排除，未进入本集内容</strong>。本集严格只覆盖同页的&quot;常见问题与解决方案&quot;、&quot;功能特点&quot;、&quot;操作步骤&quot;、&quot;插件导出代码&quot;、&quot;环境准备&quot;、&quot;使用流程&quot;、&quot;协议优势&quot;、&quot;可用工具&quot;、&quot;常见问题处理&quot;、&quot;路径对比&quot;、&quot;选择建议&quot;与&quot;总结&quot;这些小节。需要特别说明的是，同页的&quot;从原型到代码的三种路径&quot;与&quot;操作流程&quot;两节被上游滑动窗口切分划入了相邻切片，本集未跨文件取材；因此路径一的操作描述以本切片内的属性对比与问题解法为依据，未引用相邻切片的具体模型名称。</p>
+<p><strong>约束三 · 口播表达约束。</strong> 音频正文禁用表情符号与半角标点，英文缩写一律展开为中文表述（如模型上下文协议、视口、设计变量），避免合成读音失真。</p>
+<p><strong>约束四 · 时效性。</strong> 平台功能、插件生态、协议支持范围、专业版与学生认证政策均会随厂商迭代变化。本集提供的是判断框架与选型逻辑，不构成对具体工具当前能力的承诺，实操请以官方最新说明为准。</p>
+<hr>
+<h2>十、一句话收束</h2>
+<p>三条路的差别，表面是难度和成本，实质是喂给人工智能的信息质量不同。你给它什么，它就还你什么。想提升输出，先从输入那一端动手。</p>
+<p>再往前走一步。这个道理其实不只是讲给用工具的人听的。你给别人派活也一样，交代得越具体，回来的东西越接近你要的。说&quot;感觉有点挤&quot;和说&quot;内边距改成十六&quot;，是两种完全不同的协作质量。所以这一集表面讲的是设计稿怎么变成代码，底下讲的是同一件事——<strong>信息的精度，决定了产出的精度。</strong></p>
+<hr>
+<blockquote>来源：Easy-Vibe（datawhalechina/easy-vibe）docs/zh-cn/stage-2/frontend/design-to-code/index.md</blockquote>
+<blockquote>本内容为二次演绎配音版，版权与解释权归原开源项目所有。</blockquote></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
