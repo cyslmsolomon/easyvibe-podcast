@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>本节课你将学到 · 5.3.4 评测基准</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 8 · EP 55</span>
+<h1>本节课你将学到 · 5.3.4 评测基准</h1>
+<p class="sub">第 8 章 · 第 55 讲 · 14:48</p>
+<div class="meta"><span>时长 <b>14:48</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>8</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-ai-advanced-rag-introduction-55-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-ai-advanced-rag-introduction-55-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-3-ai-advanced-rag-introduction-55/stage-3-ai-advanced-rag-introduction-55-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-3-ai-advanced-rag-introduction-55/stage-3-ai-advanced-rag-introduction-55-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-8.html">← 第 8 章目录</a>
+<a href="/p/stage-3-ai-advanced-rag-introduction-54/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:11</span></div>
+<div class="ch" data-t="71.976"><span class="t">1:11</span><span class="n">评测基准为什么被跳过</span><span class="d">1:32</span></div>
+<div class="ch" data-t="164.352"><span class="t">2:44</span><span class="n">怎么搭自己的评测集</span><span class="d">1:56</span></div>
+<div class="ch" data-t="280.416"><span class="t">4:40</span><span class="n">案例一语义缓存</span><span class="d">2:17</span></div>
+<div class="ch" data-t="417.72"><span class="t">6:57</span><span class="n">案例二企业级文档问答</span><span class="d">2:24</span></div>
+<div class="ch" data-t="562.704"><span class="t">9:22</span><span class="n">案例三多源数据融合</span><span class="d">2:23</span></div>
+<div class="ch" data-t="706.536"><span class="t">11:46</span><span class="n">另外两个案例速览</span><span class="d">1:52</span></div>
+<div class="ch" data-t="818.664"><span class="t">13:38</span><span class="n">共同原则与收尾</span><span class="d">1:09</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>检索增强生成实战篇 · 评测基准与五个生产级案例</h1>
+<h2>一、这篇在讲什么</h2>
+<p>这一节出自 Easy-Vibe 第三阶段「人工智能进阶」的检索增强生成章节，是全章的收尾实战篇。前半段讲<strong>评测基准</strong>——一套检索增强生成系统从「能跑」到「敢上线」之间最容易被跳过的一环；后半段拆解五个来自真实竞赛与开源项目的案例，覆盖语义缓存、企业级文档问答、多源数据融合、多格式文档解析、图文混合处理五个方向；最后把所有案例收敛为四条共同原则。</p>
+<p>全篇的结构可以概括为一张路线图：</p>
+<ol>
+<li>评测基准为什么总被低估，以及它的三个核心特征；</li>
+<li>从零搭建自建评测集的三步做法，与公开基准的选择三问；</li>
+<li>五个案例各自的工程绝活与可迁移的设计决策；</li>
+<li>四条共同原则，作为自检清单。</li>
+</ol>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>能力域</th><th>具体内容</th><th>在案例中的对应</th></tr>
+<tr><td>评测设计</td><td>代表性、标准化、可演化性三特征</td><td>全篇地基</td></tr>
+<tr><td>数据构建</td><td>日志取样、机器生成加人工校准、元信息标注、交叉验证</td><td>评测集三步</td></tr>
+<tr><td>成本优化</td><td>语义缓存层、缓存位置选择</td><td>案例一</td></tr>
+<tr><td>高可信解析</td><td>复杂表格、跨页表格、多栏布局解析</td><td>案例二</td></tr>
+<tr><td>答案可追溯</td><td>页码引用、结构化输出、分类型提示词</td><td>案例二</td></tr>
+<tr><td>多源协同</td><td>结构化数据优先、回退策略</td><td>案例三</td></tr>
+<tr><td>多格式统一</td><td>单一解析管线、按标题分块</td><td>案例四</td></tr>
+<tr><td>多模态索引</td><td>图中文字提取加图片描述入库</td><td>案例五</td></tr>
+<tr><td>检索增强</td><td>混合检索、重排序、父子块结构</td><td>案例二三四五</td></tr>
+</table>
+<h2>三、评测基准：三个核心特征</h2>
+<p>原文的切入点是一个扎心的观察：<strong>很多团队搭检索增强生成系统，只靠少量人工编写的测试问题就匆忙开始评估，上线后实际效果与测试表现差距显著。</strong> 根源在于缺乏有代表性、有系统性的评测数据。</p>
+<p>一套能有效支撑系统迭代的评测基准，通常具备三个核心特征：</p>
+<ol>
+<li><strong>代表性</strong>——测试数据要全面覆盖真实业务中的各种场景，高频常见问题、复杂边界情况、异常输入都要测。只测好答的，分数一定虚高。</li>
+<li><strong>标准化</strong>——问题和答案的格式、难度系数、评分标准要统一规范，确保评测结果具有可比性和可重复性。</li>
+<li><strong>可演化性</strong>——基准应随系统能力提升和业务需求变化持续更新，避免固化的「应试」数据导致评测失真。</li>
+</ol>
+<p>对大多数企业而言，由于业务场景存在独特性，最终往往需要构建自己的评测数据集。</p>
+<h3>提示一 · 把评测基准当成一个需要运营的系统，而不是一份文件</h3>
+<p>三个特征里最容易被忽视的是可演化性。基准一旦固化，团队就会不自觉地向题库优化，分数上涨但体验下降。运营动作至少要包括：定期补充线上答得不好的问题、按业务变化调整分层采样比例、每季度复审难度标注。</p>
+<h2>四、自建评测集三步与公开基准选择</h2>
+<p><strong>第一步，从业务日志提取真实用户问题</strong>，依据类型、频率和难度进行分层采样，保证数据代表性。标注采用「机器生成加人工校准」：简单问题由领域专家直接标注，复杂问题先用高质量大模型生成候选答案，再由专家审核修改，显著降低标注成本。</p>
+<p><strong>第二步，建立标注质量体系</strong>：除答案本身，标注相关文档、答案类型、难度等级等元信息；建立标注规范，进行多人交叉验证，计算标注一致性（如 Kappa 系数）。</p>
+<p><strong>第三步，持续补充新用例</strong>：定期从线上反馈中补充新的测试用例，尤其是系统回答不好的问题，让评测数据与系统能力同步演进。</p>
+<p>资源有限或想快速建基线时，可参考业界成熟的公开评测基准。选择时先明确<strong>评测目的</strong>（建能力基线，还是上线最终验证）；其次评估基准数据是否覆盖所关心的场景、问题类型和难度；最后权衡标注成本。时效性强的场景（新闻、金融）必须考察基准是否包含实时数据测试；历史知识处理，静态基准可能已足够。</p>
+<p><strong>结论：自建数据与公开基准结合使用</strong>，既贴近业务实际，又能借公共标准横向比对，是构建稳健评测体系的务实路径。</p>
+<h2>五、案例一 · 语义缓存</h2>
+<p><strong>背景</strong>：教程级系统只适合单用户测试；生产环境面对几十到几千次重复查询（如客服场景反复询问「如何退款」），每次都要执行向量数据库检索和大模型调用，响应时间明显增加，成本快速上升。</p>
+<p><strong>双层检索架构</strong>：</p>
+<ul>
+<li>基础层：Chroma 向量数据库存储原始知识库（以 MedQuad 医疗问答数据集为例），每条数据加唯一 ID 方便精确引用；</li>
+<li>缓存层：基于 FAISS 构建，选择 FlatL2 索引处理小数据集和高维向量。</li>
+</ul>
+<p><strong>最关键的设计决策</strong>：语义缓存放在<strong>用户查询与 Chroma 之间</strong>，而不是缓存大模型的最终回答。因为直接缓存回答会导致用户的个性化要求失效（如「用简单语言解释」）。缓存查询则保留原始检索材料，回答可现场生成。</p>
+<p><strong>实现细节</strong>：SentenceTransformer 的 all-mpnet-base-v2 模型生成查询向量，欧氏距离阈值 0.35 判断相似；缓存满时先进先出；缓存数据保存到 JSON 文件支持跨会话。</p>
+<p><strong>实测数据</strong>：首次查询从 Chroma 获取耗时 0.057 秒，相似查询从缓存获取仅需 0.016 秒；大规模生产环境可实现 90%–95% 的性能优化。</p>
+<h3>提示二 · 上线前先统计高频问题占比</h3>
+<p>这个优化的投入产出比取决于重复查询的比例。做法很简单：把业务日志里的用户问题按语义聚类，算出 top 问题覆盖的查询占比。占比高的业务（客服、常见操作咨询）优先上缓存；长尾占比高的业务，缓存的收益会小很多。</p>
+<h2>六、案例二 · 企业级文档问答</h2>
+<p><strong>赛制</strong>（Enterprise RAG Challenge 冠军方案）：两个半小时内解析 100 份真实企业年度报告 PDF（每份最多 1000 页，含复杂财务表格、多栏布局、图表），回答 100 个精确业务问题（是否判断、公司名称、数值指标、高管职位），<strong>必须给出答案来源的页码引用</strong>。</p>
+<p><strong>关键技术决策</strong>：</p>
+<ul>
+<li>解析：选用 IBM 开源 Docling（跨页表格、嵌套表格、多列文本表现最好），改进代码修复单元格合并、表头识别等表格结构问题；</li>
+<li>算力：租用 RTX 4090 GPU，40 分钟完成 100 份报告解析；</li>
+<li>分块：300 token 长度、重叠 50 token，递归分割保持语义完整；</li>
+<li><strong>每家公司单独构建 FAISS 向量库</strong>（IndexFlatIP 不压缩保精度），从架构上避免跨公司信息混淆；</li>
+<li>检索三步走：向量检索召回 Top 30 文本块 → 提取父页面去重 → GPT-4o-mini 重排；向量分数与重排分数按 0.3:0.7 混合；</li>
+<li>生成：按答案类型使用不同提示词模板；数字类问题设计 5 步分析流程（识别指标类型、定位表格、提取数值、验证单位一致性、交叉验证）；多公司比较问题拆分为单公司子查询；</li>
+<li>输出：结构化格式，包含分析过程与相关页码，确保可追溯。</li>
+</ul>
+<p><strong>成绩</strong>：双奖项及排行榜第一。值得注意的是小模型也能超过 80% 的参与者，Llama 3.3 70B 仅比 GPT-4o-mini 稍差——工程细节比堆模型更值钱。</p>
+<h3>提示三 · 「可追溯」要当硬需求，不要当加分项</h3>
+<p>这个赛制最值得学的是把页码引用设为必答项。落地到企业项目，可以在评测集里直接规定：凡涉及数值、结论类答案，无引用即判错。倒逼系统在架构上支持追溯，而不是上线后再补。</p>
+<h2>七、案例三 · 多源数据融合</h2>
+<p><strong>赛制</strong>（KDD Cup 2024 Meta RAG 冠军方案）：任务一基于 5 个网页做检索摘要；任务二增加 Mock API 模拟访问结构化知识图谱（电影数据库、人物关系）；任务三基于 50 个网页加 Mock API 处理复杂查询（如「哪些由某导演执导的电影票房超过 5 亿美元」），每个查询 30 秒内完成。</p>
+<p><strong>核心创新：优先使用知识图谱</strong>。规范化 API 调用机制（get_person、get_movie 等接口，支持条件过滤与排序）；执行时先调用知识图谱 API，<strong>只有图谱结果无效时才回退到 Web 检索</strong>。确定性答案直接输出不经过生成步骤，从源头减少幻觉；需要 Web 检索时通过严格文档引用和分步推理确保可验证。</p>
+<p><strong>网页数据处理</strong>：BeautifulSoup 提取文本；ParentDocumentRetriever 管理父子块关系（子块 200 token 用于检索、父块 500–2000 token 用于生成），兼顾检索准确性与生成完整性。最终三个任务均获第一。</p>
+<h3>提示四 · 先盘点企业里「已经结构化」的数据</h3>
+<p>多数企业的知识并非纯文本：产品参数表、组织架构、库存记录都是结构化数据。凡是能结构化的优先走结构化通道，把大模型生成留给真正需要语言组织的部分——这是本案例对企业场景最直接的迁移。</p>
+<h2>八、案例四与案例五速览</h2>
+<p><strong>案例四 · 多格式文档解析</strong>：企业知识分散在 PDF、PowerPoint、EPUB、HTML 等格式中，传统预处理要么只能处理单一格式，要么转换中丢失表格、标题层级等结构化内容。方案使用 Unstructured 库统一解析（ProcessorConfig 指定输出目录与并行进程数，PartitionConfig 可选 API 分区模式，SimpleLocalConfig 定义输入路径），解析结果转 JSON；chunk_by_title 分块，最大 512 字符，200 字符以下连续片段合并保持语义完整；嵌入模型采用 BAAI/bge-base-en-v1.5，配合 4bit 量化的 Llama-3-8B-Instruct 与 RetrievalQA 链构成完整系统。</p>
+<p><strong>案例五 · 图文混合数据处理</strong>（AIOps 场景）：运维文档含监控图表、架构图、性能曲线，传统系统读不懂图。方案先用 PaddleOCR 提取图中文字（标题、坐标轴标签），再调用 GLM-4V-9B 多模态模型生成图片的自然语言描述，文字与描述一起入库实现图文统一检索；索引按 1024 token 分块、重叠 200 token，为每个文本块添加知识库路径等元信息（召回率提升 2%）；检索采用 BM25 加向量双路召回；重排序选用 bge-reranker-v2-minicpm-layerwise（28 层配置效果最好）；答案生成两步走（先基于 Top 6 生成初步结果，再结合 Top 1 二次优化）；长文本场景实现基于 BM25 的句子级上下文压缩，50% 压缩率下耗时 7.7 秒、准确率 86.48%，优于 LLMLingua 等现有工具。</p>
+<h2>九、审查清单</h2>
+<ul>
+<li>上线前有用例集，且用例来自真实业务日志而非想象</li>
+<li>评测数据覆盖高频问题、边界情况、异常输入三类</li>
+<li>有统一的问题格式、难度系数与评分标准</li>
+<li>标注有多人交叉验证与一致性指标</li>
+<li>有定期从线上反馈补充新用例的机制</li>
+<li>统计过高频重复查询占比，评估是否值得上语义缓存</li>
+<li>缓存层位于「查询与向量库之间」，而非缓存最终回答</li>
+<li>数值类、结论类答案强制带来源引用，无引用判错</li>
+<li>多实体数据按实体分库，避免跨实体串答案</li>
+<li>已盘点企业内可结构化数据，优先走结构化通道</li>
+<li>检索为混合检索加重排序，而非单一向量检索</li>
+<li>长文档有上下文压缩或父子块机制</li>
+</ul>
+<h2>十、约束说明</h2>
+<ol>
+<li>本篇素材取自 <code>stage-3/ai-advanced/rag-introduction/index.md</code> 对应切片，通读核对未发现跨页污染，五个案例与评测章节同属一页，全部采用。</li>
+<li>原文中三个教程链接与两篇技术文章地址在口播稿中未逐一念出，仅在解读稿保留关键信息；引用数据（0.057 秒、0.016 秒、90%–95%、86.48%、28.4% 等）均照录切片原文，未作改动。</li>
+<li>口播稿对模型名、库名按技术名词处理，未展开英文全称；涉及专业缩写均改用中文表述（如检索增强生成、光学字符识别）。</li>
+<li>「先看高频问题占比再决定上不上缓存」等落地建议为演绎添加的操作性提示，源文档只给出方案与效果数据，未给出该方法。</li>
+<li>本内容为二次演绎配音版，若与源文档表述有出入，以源文档为准。</li>
+</ol>
+<h2>十一、常见误区与纠正</h2>
+<table>
+<tr><th>误区</th><th>表现</th><th>纠正</th></tr>
+<tr><td>少量测试题就上线</td><td>测试全绿、线上翻车</td><td>从业务日志取样，分层覆盖</td></tr>
+<tr><td>评测集写成即归档</td><td>系统变强但基准不变</td><td>定期补充答得不好的用例</td></tr>
+<tr><td>缓存最终回答</td><td>个性化要求失效</td><td>缓存放查询与向量库之间</td></tr>
+<tr><td>单一向量检索</td><td>关键词与语义两头漏</td><td>混合检索加重排序标配</td></tr>
+<tr><td>多实体混在一个库</td><td>查询 A 返回 B 的信息</td><td>按实体分库，架构级隔离</td></tr>
+<tr><td>答案不带引用</td><td>无法验证、不敢采信</td><td>引用设为硬需求，无引用判错</td></tr>
+<tr><td>一切交给大模型生成</td><td>幻觉多、不可追溯</td><td>结构化数据优先，生成做补充</td></tr>
+<tr><td>堆大模型提精度</td><td>成本涨、收益薄</td><td>工程细节的收益往往更大</td></tr>
+</table>
+<h2>十二、一页纸总结</h2>
+<table>
+<tr><th>环节</th><th>一句话要点</th></tr>
+<tr><td>评测三特征</td><td>代表性、标准化、可演化性</td></tr>
+<tr><td>评测集三步</td><td>日志取样、标注体系、持续补充</td></tr>
+<tr><td>公开基准</td><td>先定目的，再看覆盖，后算成本</td></tr>
+<tr><td>语义缓存</td><td>缓存查询不缓存回答，生产可省九成以上开销</td></tr>
+<tr><td>文档问答</td><td>页码引用设为硬需求，多实体分库防串答案</td></tr>
+<tr><td>检索三步</td><td>召回三十、父页去重、重排混合三比七</td></tr>
+<tr><td>多源融合</td><td>知识图谱优先，无效才回退网页</td></tr>
+<tr><td>父子块</td><td>子块短管检索，父块长管生成</td></tr>
+<tr><td>多格式解析</td><td>统一管线加按标题分块，小片段合并</td></tr>
+<tr><td>图文混合</td><td>提字加描述一起入库，双路召回</td></tr>
+<tr><td>长文本</td><td>句子级压缩，五成压缩率准确率八成六</td></tr>
+<tr><td>共同原则</td><td>按场景选策略、分模态解析、混合加重排、结构化输出</td></tr>
+</table>
+<hr>
+<p>*配套文件：口播稿 <code>script.txt</code>、音频 <code>stage-3-ai-advanced-rag-introduction-55-播客.mp3</code>、字幕 <code>stage-3-ai-advanced-rag-introduction-55-播客.srt</code>。*</p>
+<p><strong>来源：Easy-Vibe（datawhalechina/easy-vibe）docs/zh-cn/stage-3/ai-advanced/rag-introduction/index.md</strong></p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>

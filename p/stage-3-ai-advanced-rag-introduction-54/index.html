@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>本节课你将学到 · 5.3.1 入门示例：基于 LLM 的 RAG 效果评测</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 8 · EP 54</span>
+<h1>本节课你将学到 · 5.3.1 入门示例：基于 LLM 的 RAG 效果评测</h1>
+<p class="sub">第 8 章 · 第 54 讲 · 17:55</p>
+<div class="meta"><span>时长 <b>17:55</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>8</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-ai-advanced-rag-introduction-54-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-ai-advanced-rag-introduction-54-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-3-ai-advanced-rag-introduction-54/stage-3-ai-advanced-rag-introduction-54-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-3-ai-advanced-rag-introduction-54/stage-3-ai-advanced-rag-introduction-54-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-8.html">← 第 8 章目录</a>
+<a href="/p/stage-3-ai-advanced-rag-introduction-52/">← 上一讲</a>
+<a href="/p/stage-3-ai-advanced-rag-introduction-55/">下一讲 →</a>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场 · 你的问答机器人，到底算不算好用</span><span class="d">1:29</span></div>
+<div class="ch" data-t="89.808"><span class="t">1:29</span><span class="n">第一段 · 出题，先让大模型当出题官</span><span class="d">1:38</span></div>
+<div class="ch" data-t="188.232"><span class="t">3:08</span><span class="n">第二段 · 答题和批改，把卷子收上来判分</span><span class="d">2:33</span></div>
+<div class="ch" data-t="342.048"><span class="t">5:42</span><span class="n">第三段 · 第一关，检索到底找得准不准</span><span class="d">2:25</span></div>
+<div class="ch" data-t="488.04"><span class="t">8:08</span><span class="n">第四段 · 第二关，答案有没有瞎编</span><span class="d">2:19</span></div>
+<div class="ch" data-t="627.6"><span class="t">10:27</span><span class="n">第五段 · 让大模型当裁判，打一次综合分</span><span class="d">1:58</span></div>
+<div class="ch" data-t="745.872"><span class="t">12:25</span><span class="n">第六段 · 别贪多，从一套最小的组合开始</span><span class="d">1:45</span></div>
+<div class="ch" data-t="851.256"><span class="t">14:11</span><span class="n">第七段 · 现成的工具箱，该怎么挑</span><span class="d">2:17</span></div>
+<div class="ch" data-t="988.464"><span class="t">16:28</span><span class="n">收尾 · 把这把尺子握在手里</span><span class="d">1:26</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>RAG 效果评测怎么做 · 解读与音频稿件</h1>
+<blockquote>对应音频：stage-3-ai-advanced-rag-introduction-54-播客.mp3</blockquote>
+<blockquote>集目编号：54 · 章节：第八章 · 原始页面：stage-3/ai-advanced/rag-introduction/index.md</blockquote>
+<blockquote>原标题：5.3.1 入门示例：基于 LLM 的 RAG 效果评测</blockquote>
+<hr>
+<h2>一、这一集讲了什么</h2>
+<p>很多团队做完一个知识库问答系统之后，都会卡在同一个问题上：它到底好不好用。多数人只能回答「我试了几个问题，感觉还行」。这一集就是把「感觉」换成「数字」的完整方法。</p>
+<p>全篇围绕一条主线展开：让大模型自己当裁判，把评测做成一条可以反复运行的流水线。流水线只有三步，出题、答题、批改。跑通之后，每一次改动都能被量化验证，系统才会真正一代一代地长起来。</p>
+<p>在此基础上，本集把分数拆到两个关卡上。检索这一关回答「找得全不全、找得准不准、排得好不好」，生成这一关回答「答得对不对、有没有瞎编」。最后给出一个务实的起步组合，以及现成工具箱的挑选方法。</p>
+<h2>二、能力地图</h2>
+<p>听完这一集，你应该能建立下面这张能力地图。</p>
+<table>
+<tr><th>层级</th><th>能力</th><th>落到本集的对应内容</th></tr>
+<tr><td>流程层</td><td>搭建自动评测闭环</td><td>出题、答题、批改三步法</td></tr>
+<tr><td>流程层</td><td>合成评测集</td><td>从文档抽样，让大模型生成题目与标准答案</td></tr>
+<tr><td>流程层</td><td>过滤低质量题目</td><td>相关性检查 + 事实依据检查</td></tr>
+<tr><td>检索层</td><td>衡量召回覆盖面</td><td>召回率</td></tr>
+<tr><td>检索层</td><td>衡量结果精确度</td><td>准确率、F 一值</td></tr>
+<tr><td>检索层</td><td>衡量排序质量</td><td>平均倒数排名、归一化折损累计增益、平均准确率均值</td></tr>
+<tr><td>生成层</td><td>衡量字面一致</td><td>完全匹配</td></tr>
+<tr><td>生成层</td><td>衡量词汇重叠</td><td>最长公共子序列族、机器翻译系指标、同义词系指标</td></tr>
+<tr><td>生成层</td><td>衡量语义一致</td><td>向量语义相似度</td></tr>
+<tr><td>生成层</td><td>衡量事实可靠</td><td>幻觉率、忠实度</td></tr>
+<tr><td>综合层</td><td>整体性判断</td><td>大模型裁判的四维度评分</td></tr>
+<tr><td>工程层</td><td>选型与落地</td><td>三类框架的划分与三条挑选原则</td></tr>
+</table>
+<h2>三、逐段要点</h2>
+<p><strong>开场 · 你的问答机器人，到底算不算好用</strong></p>
+<p>指出「凭感觉」在工程上站不住脚。引出检索增强生成系统的两段式结构，先检索后生成，因此评测也要分两段打。给出全篇的核心思路：让大模型自己当裁判，走出题、答题、批改三步。</p>
+<p><strong>第一段 · 出题，先让大模型当出题官</strong></p>
+<p>以一个只有一句话的知识库为例，演示「出题官」如何生成问题与标准答案。扩展到真实场景：随机抽样文档批量出题。重点强调出题之后必须加一道过滤，检查题目与材料的相关性、答案在材料中的可依据性。</p>
+<p><strong>第二段 · 答题和批改，把卷子收上来判分</strong></p>
+<p>答题环节的两个易踩细节：必须用线上真实配置，必须把检索到的段落一并存档。批改环节说明为什么不能只做字符串比对，自然语言表达多样，需要大模型判断意思上的一致。同时强调批改老师要用人工标注样本校准。</p>
+<p><strong>第三段 · 第一关，检索到底找得准不准</strong></p>
+<p>三个基础指标，召回率、准确率、F 一值，分别看覆盖面、精确度与两者的平衡。然后是三个排序指标，平均倒数排名、归一化折损累计增益、平均准确率均值。重点给出工程上最常用的组合，以及「召回高但排名低」这一典型症状对应的优化方向：去重排序，而不是继续加召回。</p>
+<p><strong>第四段 · 第二关，答案有没有瞎编</strong></p>
+<p>从完全匹配的严苛，讲到词汇重叠指标的局限，再讲到语义相似度如何补位。最后落到检索增强生成系统最要命的问题：答案里的每一句话，在检索到的材料里到底有没有依据。给出幻觉率与忠实度的做法，以及在医疗、法律、金融领域的硬门槛意义。</p>
+<p><strong>第五段 · 让大模型当裁判，打一次综合分</strong></p>
+<p>四个评分维度：相关性、完整性、忠实性、正确性。说明裁判相比自动化指标的优势在于能抓住整体语义与逻辑，也指出裁判必须被管理：指令要精心设计，要用人工样本校准。并提醒裁判分数只适合同标准下的纵向比较。</p>
+<p><strong>第六段 · 别贪多，从一套最小的组合开始</strong></p>
+<p>给出起步组合：检索侧两个指标，生成侧一到两个指标，综合侧交给裁判。然后给出三组「症状到药方」的对应关系，并点明评测体系是迭代出来的，不是一次设计出来的。</p>
+<p><strong>第七段 · 现成的工具箱，该怎么挑</strong></p>
+<p>把框架分成研究型、基准测试型、工具型三类，并按时间线梳理了二零二三年九月到二零二四年初几款代表性框架的侧重点。最后给出三条挑选原则：看需求、看行业、看集成成本与维护状况。</p>
+<p><strong>收尾 · 把这把尺子握在手里</strong></p>
+<p>回顾全篇，并落到一句话：没有评测的优化，本质上是在瞎调。</p>
+<h2>四、关键概念速查</h2>
+<ul>
+<li><strong>合成评测集</strong>：不靠人工出题，而是让大模型从文档中批量生成「问题加标准答案」，再经过滤后形成测试集。</li>
+<li><strong>召回率</strong>：相关文档被找回的比例，回答「找得全不全」。</li>
+<li><strong>准确率</strong>：返回结果中真正相关的比例，回答「找得准不准」。</li>
+<li><strong>平均倒数排名</strong>：第一个相关文档所处位置的倒数均值，适合只需一个正确答案的场景。</li>
+<li><strong>归一化折损累计增益</strong>：同时考虑相关性分级与位置衰减，是排序质量最全面的指标之一。</li>
+<li><strong>完全匹配</strong>：要求答案与标准答案一字不差，适合形式固定的事实性问答。</li>
+<li><strong>语义相似度</strong>：用预训练模型把句子变成向量再比距离，能容忍用词差异。</li>
+<li><strong>忠实度</strong>：答案中有依据的句子占比，用来量化幻觉。</li>
+<li><strong>大模型裁判</strong>：把题目、检索段落、系统答案、标准答案一起交给独立模型，从多个维度综合打分。</li>
+</ul>
+<h2>五、审查清单</h2>
+<p>做完评测之后，用下面这份清单自查一遍。</p>
+<ul>
+<li>评测集是自动合成的，但有没有做相关性与依据性两道过滤？</li>
+<li>系统跑题时用的是不是线上真实配置，有没有遗留调试开关？</li>
+<li>每条题目的检索段落有没有完整存档，后面算忠实度要用？</li>
+<li>出题模型与判分模型是不是同一个？如果是，自评偏高的风险有没有评估？</li>
+<li>裁判的评分指令是否写清了每个维度的定义、分值范围与扣分情形？</li>
+<li>裁判有没有用人工标注样本做过校准，一致性如何？</li>
+<li>检索侧是否同时看了召回率与排序指标，而不是只看一个？</li>
+<li>是否存在「召回高但排名低」的症状？如果有，是否优先做了重排序？</li>
+<li>忠实度是否单独统计，有没有设定上线阈值？</li>
+<li>分数是否是同一套标准下的纵向比较，有没有拿去和别的系统横向对比？</li>
+<li>所选工具是否仍在维护，星标数、更新频率、问题响应速度如何？</li>
+</ul>
+<h3>提示一 · 先跑通最小闭环，再谈指标体系</h3>
+<p>很多团队一上来就想把十几个指标全接上，结果两周过去，一个数字都没跑出来。务实做法是：先让出题、答题、批改这条流水线跑通，哪怕只有一百道题、只判对错。有了第一个准确率，你才有优化的方向感。指标是后面一点点加的，不是一开始就要齐的。</p>
+<h3>提示二 · 把检索段落存档，是低成本高回报的一步</h3>
+<p>答题阶段多存一份检索结果，几乎不增加任何成本，但它是后面算忠实度的唯一输入。很多团队为了省事没存，等到要看幻觉率的时候，只能把几百道题重新跑一遍。这个教训在工程上极其常见，值得写进流程规范。</p>
+<h3>提示三 · 裁判要校准，否则分数不可比</h3>
+<p>大模型裁判不是开箱即用的标准器。它的评分倾向会随指令措辞漂移。正确做法是准备三十到五十条人工标注样本，让裁判打分，与人工分对比，不一致的地方回去改指令。校准通过之后，这一版指令要冻结，中途不要改，否则前后两次的分数没有可比性。</p>
+<h3>提示四 · 看组合，不看单值</h3>
+<p>召回率高不代表系统就好。典型的反例是前十条召回率百分之八十，但平均倒数排名只有零点三，说明相关文档全埋在后面，大模型实际读到的重点信息排在第七第八位。这类问题靠加召回永远解决不了，必须去重排序。因此读指标一定要成对读，覆盖面配排序，字面配语义，准确性配忠实度。</p>
+<h3>提示五 · 用症状反推药方，别盲目调参</h3>
+<p>评测最有价值的产出不是分数本身，而是分数指向的下一步动作。召回低就去查向量模型和切分粒度，准确率低就去查查询改写，排序差就上重排序，忠实度低就收紧提示词里的约束、允许模型说「找不到」。每一类症状都有对应的药方，这才是评测体系真正的意义。</p>
+<h2>六、约束说明</h2>
+<p><strong>约束一：范围边界</strong></p>
+<p>本集严格取材于原始页面 <code>stage-3/ai-advanced/rag-introduction/index.md</code> 中关于 RAG 效果评测的正文，包括入门示例、检索效果评估、生成质量评估、大模型裁判、实用评测组合、评测框架分类六个部分。</p>
+<p><strong>约束二：切片完整性</strong></p>
+<p>本集所用切片经标题与来源页面核对，六节内容主题一致，均围绕 RAG 评测展开，未发现混入其他页面内容的情况，因此未做排除处理。</p>
+<p><strong>约束三：表述转换</strong></p>
+<p>原始资料中的指标名与框架名多为英文缩写与专有名词。为适配中文口播，本集在首次出现时一律使用中文全称或中文释义，例如把 RAG 说成「检索增强生成」，把各类英文指标名译为对应的中文说法。框架名称因涉及专有品牌，在口播中以发布时间与特征描述代替，避免直接朗读英文缩写造成听感断裂。</p>
+<p><strong>约束四：数字与举例</strong></p>
+<p>所有数字均按中文读法转换，例如五千毫安时、二零二三年九月。文中举例（电池容量、产品重量、成立日期等）全部来自原始资料，未新增任何事实、数据或案例。</p>
+<p><strong>约束五：二次演绎边界</strong></p>
+<p>本集为配音版二次演绎，讲解中使用的类比（如出题官、批改老师、答题卷）是为便于零基础听众理解而做的表达转换，不改变原始资料的技术含义。凡原始资料未涉及的结论，本集一律未作断言。</p>
+<h2>七、常见误区</h2>
+<p><strong>误区一：评测就是找一批人手动打分。</strong></p>
+<p>人工打分当然准，但它不可重复、不可规模化的。每一次改动都要重新找人，成本极高，很快就跑不动了。自动化的价值在于让「评测、优化、再评测」这个循环真正转起来。</p>
+<p><strong>误区二：分数越高越好。</strong></p>
+<p>分数只在同标准下有比较意义。换了评测集、换了裁判指令、换了模型版本，分数就不能直接类比。真正有意义的比较是同一套标准下的前后两次。</p>
+<p><strong>误区三：只看最终答案的准确率。</strong></p>
+<p>检索错了但答案蒙对了，或者检索对了但生成时瞎编了，这两种情况在只看最终答案时都会被掩盖。分层评测就是为了把问题定位到具体环节。</p>
+<p><strong>误区四：忠实度可以靠人工抽查。</strong></p>
+<p>人工抽查能发现个别幻觉，但给不出一个可跟踪的数字。忠实度必须量化成占比，才能设阈值、才能看趋势。</p>
+<p><strong>误区五：评测集造一次就够，可以一直用。</strong></p>
+<p>很多团队造完一轮评测集就再也没更新过。但模型刷分是真实存在的，跑多了之后系统会摸到这套题的套路，分数上去了，真实效果没变。正确做法是定期补充新题，或者保留一部分不参与迭代的「盲测集」，只在关键节点拿出来跑一次。</p>
+<p><strong>误区六：把所有指标都堆上去最保险。</strong></p>
+<p>指标越多，读数的成本越高，团队反而会不知道该看哪个。更糟的是，不同指标之间会互相打架，你优化 A 就可能牺牲 B。少而清晰的指标组合，比多而混乱的仪表盘有用得多。真正需要加指标的信号是：某一类问题反复出错，而现有指标看不出来。</p>
+<p><strong>误区七：评测是上线前才做的事。</strong></p>
+<p>如果把评测当成上线前的一次验收，它就会变成一次性成本，做完即废。评测真正的价值在于它是一条流水线，从第一版系统开始就跟着跑，每一次改动都能立刻看到反馈。越早建立，越省钱。</p>
+<h2>九、从零搭一条评测流水线（七个步骤）</h2>
+<p>如果你手上一个评测体系都没有，可以按下面七步走，每一步都不复杂，但顺序不能乱。</p>
+<p><strong>第一步，锁定一份文档快照。</strong></p>
+<p>把当前知识库的文档固定成一个版本，评测期间不要再改动它。否则你今天测出来的分数，明天因为文档更新就说不清是改系统带来的还是改数据带来的。</p>
+<p><strong>第二步，抽样并合成题目。</strong></p>
+<p>从文档里随机抽一百到三百个段落，交给一个能力较强的大模型，让它为每段生成一道题和一个标准答案。段落不要太长，也不要太短，一个意思完整的自然段最合适。</p>
+<p><strong>第三步，过滤题目。</strong></p>
+<p>用规则或模型检查两件事，题目是否与对应段落相关，标准答案是否能从该段落中找到依据。两关都过才保留。这一轮通常会刷掉百分之十到二十。</p>
+<p><strong>第四步，跑系统并存档。</strong></p>
+<p>把留下的题目全部喂给你的系统，记录三样东西：系统给出的答案、系统检索到的段落、每道题的耗时。注意用线上真实配置，关掉所有调试开关。</p>
+<p><strong>第五步，自动判分。</strong></p>
+<p>先算检索侧的两个指标，召回率和平均倒数排名，这两个只需要标注哪些文档相关，成本最低。再请一个大模型裁判，从相关性、完整性、忠实性三个维度打分。忠实度这一项必须喂给它第四步存档的检索段落。</p>
+<p><strong>第六步，校准裁判。</strong></p>
+<p>抽三十到五十条题目，找人手工打分，再让裁判打分，逐条比对。不一致的地方回头改评分指令。改完之后把指令版本冻结，后面所有评测都用同一版。</p>
+<p><strong>第七步，建立基线并迭代。</strong></p>
+<p>把这一轮的所有分数记下来，这就是你的基线。之后每做一次改动，就重跑整条流水线，只比较分数变化。改一处、测一次，不要一次改三处，否则你不知道是哪一处起了作用。</p>
+<p>这七步走完，你就有了一套能用、可重复、可比较的评测体系。后面要做的只是往里加指标、加题目、加维度。</p>
+<h2>十、一页纸速记</h2>
+<ul>
+<li>评测的目的不是打分，是让每一次改动都能被验证。</li>
+<li>三步闭环：出题、答题、批改。大模型既当出题官，又当批改老师。</li>
+<li>检索看两个：召回率看全不全，平均倒数排名看排得对不对。</li>
+<li>生成看两个：跟标准答案像不像，以及有没有在材料之外的瞎编。</li>
+<li>忠实度是检索增强生成系统的生命线，专业领域要设上线阈值。</li>
+<li>裁判要校准，指令要冻结，分数只能纵向比。</li>
+<li>从最小组合起步，评测体系是迭代出来的，不是设计出来的。</li>
+</ul>
+<h2>十一、延伸思考</h2>
+<ul>
+<li>如果你的业务里，答案本来就有多种正确写法，完全匹配还适用吗？该换成什么？</li>
+<li>如果你的知识库每周都在更新，评测集要不要跟着更新？不更新会出现什么问题？</li>
+<li>如果裁判模型本身的知识与你的业务领域冲突，它会怎么判？该怎么规避？</li>
+<li>如果忠实度上去了，但答案变得过于保守、动不动就说找不到，这时候该调什么？</li>
+<li>如果评测分数提升了，但真实用户满意度没变，说明你的评测集可能出在哪里？</li>
+</ul>
+<hr>
+<blockquote>来源：Easy-Vibe（datawhalechina/easy-vibe）docs/zh-cn/stage-3/ai-advanced/rag-introduction/index.md</blockquote>
+<blockquote>本音频与文稿为基于该开源内容的二次演绎配音版，仅用于学习交流。</blockquote></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
