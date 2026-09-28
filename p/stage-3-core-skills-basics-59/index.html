@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Code 快速上手核心指南 · 技巧 3：! 执行命令 —— 终端集成</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 8 · EP 59</span>
+<h1>Claude Code 快速上手核心指南 · 技巧 3：! 执行命令 —— 终端集成</h1>
+<p class="sub">第 8 章 · 第 59 讲 · 15:53</p>
+<div class="meta"><span>时长 <b>15:53</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>8</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-core-skills-basics-59-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-core-skills-basics-59-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-3-core-skills-basics-59/stage-3-core-skills-basics-59-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-3-core-skills-basics-59/stage-3-core-skills-basics-59-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-8.html">← 第 8 章目录</a>
+<a href="/p/stage-3-core-skills-agent-teams-58/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场 · 从会用，到用得省、用得稳</span><span class="d">1:24</span></div>
+<div class="ch" data-t="84.0"><span class="t">1:24</span><span class="n">技巧一 · 在对话框里直接跑命令</span><span class="d">1:38</span></div>
+<div class="ch" data-t="182.04"><span class="t">3:02</span><span class="n">技巧二 · 先想清楚再动手</span><span class="d">1:40</span></div>
+<div class="ch" data-t="282.72"><span class="t">4:42</span><span class="n">技巧三 · 一键生成项目说明书</span><span class="d">1:26</span></div>
+<div class="ch" data-t="369.552"><span class="t">6:09</span><span class="n">技巧四 · 上下文是稀缺资源</span><span class="d">2:07</span></div>
+<div class="ch" data-t="497.04"><span class="t">8:17</span><span class="n">技巧五 · 多任务之间来回切换</span><span class="d">1:49</span></div>
+<div class="ch" data-t="606.456"><span class="t">10:06</span><span class="n">技巧六 · 一个油门，一个刹车</span><span class="d">1:53</span></div>
+<div class="ch" data-t="719.688"><span class="t">11:59</span><span class="n">技巧七 · 把权限交给你自己管</span><span class="d">1:41</span></div>
+<div class="ch" data-t="821.328"><span class="t">13:41</span><span class="n">配置分层与收尾</span><span class="d">2:11</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>命令行 AI 编程工具的九个技巧与配置体系 · 从会用，到用得省、用得稳</h1>
+<blockquote>本内容改编自开源项目 Easy-Vibe，为二次演绎配音版。配套音频由文本转语音生成，本文是音频的图文解读稿，可独立阅读。</blockquote>
+<h2>一、这一集讲了什么</h2>
+<p>很多人装上命令行版 AI 编程工具之后，用法就是把它当聊天框：问一句，它答一段，你把答案复制出来自己跑。这不是不能用，但只用了它三成的本事。</p>
+<p>这一集的主线是：<strong>上下文是一种稀缺资源</strong>。每次对话能装进多少东西是有上限的，装满了，早期交代的背景就会被挤出去——很多人觉得「它用着用着变笨了」，其实不是模型变了，是背景被忘掉了。</p>
+<p>围绕这条主线，九个技巧分成三组：</p>
+<table>
+<tr><th>分组</th><th>包含的技巧</th><th>解决什么</th></tr>
+<tr><td>省</td><td>上下文查看、压缩、忽略文件</td><td>让有限的上下文装下更多有用的东西</td></tr>
+<tr><td>稳</td><td>规划模式、自动接受、紧急制动</td><td>随时能接管、随时能刹车</td></tr>
+<tr><td>传承</td><td>初始化生成、项目记忆文件、规则目录</td><td>把习惯固化成配置，让每次协作从同一起点开始</td></tr>
+</table>
+<p>外加一套配置体系：分层配置 + 权限规则 + 规则目录。</p>
+<h2>二、核心概念拆解</h2>
+<h3>概念一 · 终端集成（感叹号命令）</h3>
+<p>在输入前加一个感叹号，后面的内容会被当作终端命令执行，结果直接回到对话里，成为它能看到的信息。</p>
+<p>三个高频场景：</p>
+<ol>
+<li><strong>跑测试并分析失败原因</strong>——不用你复制报错回来问。</li>
+<li><strong>查看改动差异</strong>——它还能解释每一处改动的含义。</li>
+<li><strong>构建项目</strong>——从长日志里挑出关键几行。</li>
+</ol>
+<p><strong>安全提示</strong>：删除目录、提权操作这类敏感命令，它会先询问确认，这是保护机制，别嫌烦。</p>
+<h3>概念二 · 规划模式</h3>
+<p>超过 30 分钟的任务，先进入规划模式。它会做四件事：分析需求 → 评估现状 → 制定计划 → 跟你确认方案。</p>
+<p>第四步最有价值：<strong>把返工点提前到动手之前</strong>。在计划上改一句话，比在代码上改一百行便宜太多。</p>
+<p>配套做法：分阶段执行，每完成一个阶段检查一次；需求变了就重新跑一次；可以把计划写进文件当路线图。</p>
+<h3>概念三 · 上下文预算（本集核心）</h3>
+<table>
+<tr><th>工具</th><th>角色</th><th>关键数值</th></tr>
+<tr><td>上下文查看命令</td><td>眼睛</td><td>使用率超过 <strong>70%</strong> 就该压缩</td></tr>
+<tr><td>压缩命令</td><td>手段</td><td>对话 <strong>5–6 轮</strong>后考虑使用</td></tr>
+<tr><td>忽略文件</td><td>预防</td><td>配置得当减少 <strong>40–60%</strong> 占用</td></tr>
+</table>
+<p>上下文窗口通常约 <strong>200K</strong> 计算单位。压缩命令的原理是：提取已做出的决策、已生成的代码、已确认的需求，生成简洁摘要，后续对话基于摘要而非完整历史。</p>
+<p>需要忽略的典型对象：依赖目录里的类型定义文件、日志文件、构建产物、存放密钥的环境文件。</p>
+<h3>概念四 · 会话切换</h3>
+<table>
+<tr><th>命令</th><th>作用</th><th>使用场景</th></tr>
+<tr><td>恢复命令</td><td>在当前对话中切回上一段会话</td><td>多任务并行，来回切换</td></tr>
+<tr><td>继续参数</td><td>退出后重新连上最近一次会话</td><td>关了窗口再回来</td></tr>
+<tr><td>恢复参数</td><td>退出后恢复到之前的状态</td><td>中断后接续</td></tr>
+<tr><td>双击退出键</td><td>回退到上一轮对话</td><td>撤销最近一轮</td></tr>
+</table>
+<p><strong>要点</strong>：切换会话 ≠ 合并会话。需要跨会话信息时，让它在切换前先写一份摘要。</p>
+<h3>概念五 · 油门与刹车</h3>
+<ul>
+<li><strong>Shift + Tab</strong>：进入/退出自动接受模式。默认模式每次询问（适合学习阶段、重要代码）；自动接受直接应用修改（适合熟悉后快速迭代）。</li>
+<li><strong>Ctrl + C</strong>：按一次取消当前操作，按两次完全退出。</li>
+<li><strong>区分</strong>：Ctrl + C 停的是<strong>正在进行的操作</strong>；双击退出键回退的是<strong>对话状态</strong>。</li>
+</ul>
+<h3>提示1 · 开自动接受前先提交一次</h3>
+<p>自动接受模式下它会直接改文件，没有二次确认。建议习惯：<strong>开启前先提交当前进度</strong>，改乱了有退路。另外，删除文件、修改配置这类敏感操作，即使开着自动接受它仍然会问——这条底线是内置的。</p>
+<h3>提示2 · 权限规则越具体越安全</h3>
+<p>权限规则写法：<code>操作类型(匹配模式)</code>。四种操作类型：终端命令执行、文件编辑、文件读取、新建文件。通配符规则：<code>*</code> 匹配任意字符但不跨目录，<code>**</code> 匹配任意路径，<code>?</code> 匹配单个字符。</p>
+<p><strong>别用一条通配符把所有终端命令放开</strong>——你想放开的其实只是那几条常用命令，宁可多列几条具体的允许项。</p>
+<h3>提示3 · 生成的项目记忆文件要人工过一遍</h3>
+<p>初始化命令会自动扫描项目并生成项目记忆文件（识别框架/语言/构建工具 → 分析配置文件 → 检查代码风格 → 生成）。<strong>自动生成的东西通常对但不够准</strong>，生成后建议人工检查并按实际情况调整，别让它一直停留在初版。</p>
+<h3>提示4 · 上下文进噪音的判据</h3>
+<p>如果发现它开始引用你从没提过的旧文件，或者回答里混入无关细节，多半是上下文里进了噪音——回头改忽略列表，而不是急着换模型。</p>
+<h3>提示5 · 规则文件按「脑子里的分组」拆</h3>
+<p>拆得太细，加载和查找都麻烦；拆得太粗，失去模块化意义。经验是按团队实际会分开讨论的主题拆：前端一套、后端一套、测试一套。用数字前缀控制加载顺序，保证基础规则先加载。</p>
+<h2>三、术语速查</h2>
+<table>
+<tr><th>术语</th><th>本文中的含义</th></tr>
+<tr><td>上下文</td><td>一次对话中能被记住的全部内容，有上限，是稀缺资源</td></tr>
+<tr><td>项目记忆文件</td><td>每次启动自动读取的项目说明书，承载背景、技术栈与规范</td></tr>
+<tr><td>忽略文件</td><td>声明哪些文件不应被读取，用于省额度、降噪音、防泄密</td></tr>
+<tr><td>规划模式</td><td>先出计划再动手的工作方式，把返工点提前</td></tr>
+<tr><td>自动接受</td><td>跳过逐次确认直接应用修改的模式，需配合版本管理</td></tr>
+<tr><td>分层配置</td><td>本地/共享/全局三级配置，按优先级覆盖与合并</td></tr>
+<tr><td>规则目录</td><td>把项目规范拆成多个独立文件的模块化管理方式</td></tr>
+</table>
+<h2>四、能力地图</h2>
+<table>
+<tr><th>能力项</th><th>具体要求</th><th>自评</th></tr>
+<tr><td>终端集成</td><td>能不切窗口跑命令并让结果进入对话</td><td>☐</td></tr>
+<tr><td>先规划</td><td>能判断哪些任务该先出计划，并分阶段验收</td><td>☐</td></tr>
+<tr><td>上下文管理</td><td>会看使用率、会压缩、会配忽略列表</td><td>☐</td></tr>
+<tr><td>会话管理</td><td>能分清恢复/继续/回退三种操作的差别</td><td>☐</td></tr>
+<tr><td>安全控制</td><td>会配权限规则，知道油门与刹车分别怎么用</td><td>☐</td></tr>
+<tr><td>配置治理</td><td>能设计三级配置的划分，并把大文件拆成规则目录</td><td>☐</td></tr>
+</table>
+<h2>五、审查清单（动手前逐条过）</h2>
+<ol>
+<li>这个任务超过 30 分钟吗？超过就先出计划。</li>
+<li>计划是否写进了文件，能否按阶段勾项验收？</li>
+<li>对话超过 5–6 轮了吗？是否需要压缩？</li>
+<li>当前上下文使用率是多少？超过 70% 立即处理。</li>
+<li>忽略列表是否覆盖了依赖目录、构建产物、日志、环境文件？</li>
+<li>要跑的命令是否写明了作用域（哪个目录、哪一类）？</li>
+<li>开自动接受之前，当前进度是否已提交？</li>
+<li>权限规则是否都是具体项，没有宽泛通配符？</li>
+<li>团队共享配置与个人本地配置是否分开放置？</li>
+<li>规范膨胀后，是否已拆分为规则目录并测试加载正常？</li>
+</ol>
+<h2>六、常见误区与纠正</h2>
+<table>
+<tr><th>误区</th><th>实际情况</th><th>纠正办法</th></tr>
+<tr><td>觉得它变笨了</td><td>多半是早期背景被挤出上下文</td><td>压缩 + 改忽略列表，而不是换模型</td></tr>
+<tr><td>忽视敏感命令确认</td><td>那是保护机制</td><td>看清楚再确认，不要习惯性放行</td></tr>
+<tr><td>一切权限用通配符放开</td><td>图方便但风险大</td><td>多列具体允许项，拒绝宽泛通配</td></tr>
+<tr><td>把所有事塞进一段对话</td><td>上下文互相污染</td><td>按任务分会话，用恢复命令切换</td></tr>
+<tr><td>以为切换会话会合并上下文</td><td>不会自动合并</td><td>切换前先让它写一份摘要</td></tr>
+<tr><td>生成配置后就不再管</td><td>自动生成通常对但不够准</td><td>人工检查并按实际情况调整</td></tr>
+</table>
+<h2>六点五 · 九个技巧速查总表</h2>
+<table>
+<tr><th>#</th><th>技巧</th><th>一句话用法</th><th>记忆锚点</th></tr>
+<tr><td>1</td><td>终端集成</td><td>输入前加感叹号，命令结果直接进入对话</td><td>不切窗口</td></tr>
+<tr><td>2</td><td>规划模式</td><td>超过 30 分钟的任务先出计划再动手</td><td>先想后做</td></tr>
+<tr><td>3</td><td>初始化</td><td>自动扫描项目生成项目记忆文件</td><td>一键建档</td></tr>
+<tr><td>4</td><td>压缩</td><td>对话 5-6 轮后生成摘要，接续历史</td><td>瘦身</td></tr>
+<tr><td>5</td><td>上下文查看</td><td>看使用率，超 70% 就该处理</td><td>看油表</td></tr>
+<tr><td>6</td><td>忽略文件</td><td>屏蔽依赖目录、构建产物、日志、环境文件</td><td>少装垃圾</td></tr>
+<tr><td>7</td><td>会话恢复</td><td>多任务来回切换，保留各自上下文</td><td>存档读档</td></tr>
+<tr><td>8</td><td>自动接受</td><td>熟悉后跳过逐次确认，但改动前先提交</td><td>油门</td></tr>
+<tr><td>9</td><td>紧急制动</td><td>按一次停操作，按两次退出</td><td>刹车</td></tr>
+</table>
+<p>配套的三件套不要漏：<strong>分层配置</strong>（本地 / 共享 / 全局）、<strong>权限规则</strong>（操作类型 + 匹配模式）、<strong>规则目录</strong>（大项目的模块化规范）。九技巧解决单次协作的效率，三件套解决长期协作的一致性，两者缺一不可。</p>
+<h2>七、能力自测（五问）</h2>
+<ol>
+<li>一个预估 1 小时的开发任务，你的第一步是什么？</li>
+<li>对话进行到第 8 轮，你感觉它开始忘事，该怎么办？</li>
+<li>上下文使用率显示 75%，你要做哪三件事？</li>
+<li>Ctrl + C 和双击退出键的区别是什么？</li>
+<li>团队项目里，个人偏好应该放在哪一级配置？</li>
+</ol>
+<p><strong>参考答案</strong>：1）先进入规划模式出计划。2）用压缩命令生成摘要。3）识别大文件、优化忽略列表、执行压缩。4）前者停操作，后者退对话状态。5）项目本地配置，不提交到版本库。</p>
+<h2>八、常见疑问三问</h2>
+<p><strong>疑问一：压缩之后会不会丢掉重要信息？</strong></p>
+<p>压缩的原理是提取已做出的决策、已生成的代码、已确认的需求，而不是简单地砍掉开头。真正容易被丢的是那种「随口提了一句、当时不重要」的细节。稳妥做法是压缩前先让它把关键约定汇总成一段话，你可以先检查这段话对不对，再确认压缩。</p>
+<p><strong>疑问二：自动接受模式到底该不该长期开着？</strong></p>
+<p>取决于你对它判断风格的熟悉程度。刚接触新项目时建议保持默认模式，把每一步改动看一遍，确认它的判断基本靠谱后再开。另外无论开不开，都建议保持「改动前先提交」的习惯——这是比任何配置都可靠的回滚手段。</p>
+<p><strong>疑问三：忽略列表是不是写得越多越好？</strong></p>
+<p>不是。过度忽略会让它看不到真正需要的文件，表现为「它总说找不到某某文件」或者改动总是缺一半。正确做法是从最小配置开始（先忽略依赖目录和构建产物），观察效果，再按项目特点逐步添加，并定期用上下文查看命令复查。</p>
+<h2>九、三十分钟上手练习</h2>
+<p>挑一个你手头的真实项目，走完下面五步：</p>
+<ol>
+<li><strong>（5 分钟）</strong> 运行初始化命令，生成项目记忆文件，人工读一遍并修正不准确的地方。</li>
+<li><strong>（5 分钟）</strong> 建立忽略列表，先只忽略依赖目录和构建产物，不要贪多。</li>
+<li><strong>（10 分钟）</strong> 挑一个超过 30 分钟的真实任务，先进规划模式出计划，把计划写进文件。</li>
+<li><strong>（5 分钟）</strong> 用上下文查看命令看一次使用率，记录基线数值。</li>
+<li><strong>（5 分钟）</strong> 配置两条权限规则：一条允许常用查看类命令自动执行，一条要求涉及部署的命令必须确认。</li>
+</ol>
+<p>走完这五步，你会对「省、稳、传承」这三组技巧都有了一次实操体感，比听十遍印象更深。</p>
+<h2>十、时间不够时怎么砍</h2>
+<table>
+<tr><th>保留项</th><th>可砍项</th><th>说明</th></tr>
+<tr><td>忽略列表</td><td>规则目录拆分</td><td>前者直接省钱省额度，后者是规模化的事</td></tr>
+<tr><td>规划模式</td><td>会话切换技巧</td><td>前者防返工，后者只是效率优化</td></tr>
+<tr><td>开自动接受前提交</td><td>权限规则精细化</td><td>提交是保底回滚手段，权限可后置</td></tr>
+<tr><td>上下文查看命令</td><td>压缩命令</td><td>先有眼睛才知道何时该动手</td></tr>
+</table>
+<h2>十点五 · 三个典型场景的推荐组合</h2>
+<table>
+<tr><th>场景</th><th>推荐打开的</th><th>建议回避的</th><th>理由</th></tr>
+<tr><td>新手熟悉新项目</td><td>初始化生成、默认确认模式、上下文查看</td><td>自动接受、宽泛权限</td><td>先看懂它的判断，再谈提速</td></tr>
+<tr><td>熟悉后的日常迭代</td><td>自动接受、终端集成、规划模式</td><td>把所有事塞进一段对话</td><td>提速的同时保留阶段验收</td></tr>
+<tr><td>团队协作长期项目</td><td>共享配置、规则目录、忽略列表</td><td>个人偏好写进共享配置</td><td>统一底线，个人松紧各管各的</td></tr>
+</table>
+<p>选组合的思路很简单：<strong>先看风险，再看效率</strong>。新手阶段风险高，就多用刹车、少踩油门；熟了之后风险下降，才把油门踩下去；到了团队层面，重点从个人效率转向一致性，于是配置治理的权重超过技巧本身。</p>
+<h2>十一、一页纸总结</h2>
+<p><strong>一条主线</strong>：上下文是稀缺资源。</p>
+<p><strong>九个字</strong>：少占用、固定住、及时刹车。</p>
+<ul>
+<li><strong>少占用</strong>——忽略文件、压缩命令、上下文查看命令。</li>
+<li><strong>固定住</strong>——项目记忆文件、规则目录、分层配置。</li>
+<li><strong>及时刹车</strong>——紧急制动、权限确认、先提交再放开。</li>
+</ul>
+<p><strong>三个关键数值</strong>：上下文上限约 20 万计算单位；使用率 70% 是压缩信号；配置得当可省 40–60%。</p>
+<p><strong>一句话记牢</strong>：从「会用」到「用得好」，差的不是更多功能，而是把有限的上下文，装下最重要的东西。</p>
+<h2>十二、约束说明</h2>
+<ol>
+<li>本文为配套音频的图文解读稿，内容基于源文档进行口语化二次演绎，未引入源文档之外的案例、数据或引文。</li>
+<li>文中出现的命令名与快捷键以源文档描述为准，<strong>不同版本间可能存在差异</strong>，请以你所用版本的实际行为为准；涉及已标记为过时的官方命令，本文未作推荐。</li>
+<li>成本与额度相关数值（20 万计算单位上限、70% 阈值、40–60% 节省幅度）均来自源文档给出的量级参考，<strong>实际数值随版本、项目结构与配置而变</strong>，请以自己的实测为准。</li>
+<li>源切片为整册语料滑窗切分的产物，可能存在跨页边界；本集取材已按归属原则核对，仅采用与本集主题相符的部分。</li>
+<li>本集为二次演绎配音版，不代表原始项目官方立场。</li>
+</ol>
+<hr>
+<p><strong>来源</strong>：Easy-Vibe（datawhalechina/easy-vibe）docs/zh-cn/stage-3/core-skills/basics/index.md</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
