@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Code Superpowers 工程级开发 · Q1：用 Supe…</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 8 · EP 70</span>
+<h1>Claude Code Superpowers 工程级开发 · Q1：用 Supe…</h1>
+<p class="sub">第 8 章 · 第 70 讲 · 15:22</p>
+<div class="meta"><span>时长 <b>15:22</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>8</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-core-skills-superpowers-70-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-core-skills-superpowers-70-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-3-core-skills-superpowers-70/stage-3-core-skills-superpowers-70-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-3-core-skills-superpowers-70/stage-3-core-skills-superpowers-70-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-8.html">← 第 8 章目录</a>
+<a href="/p/stage-3-core-skills-spec-coding-69/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场 · 让人工智能更有纪律的那套技能集</span><span class="d">1:53</span></div>
+<div class="ch" data-t="113.04"><span class="t">1:53</span><span class="n">先看清人工智能的能力边界</span><span class="d">1:58</span></div>
+<div class="ch" data-t="231.264"><span class="t">3:51</span><span class="n">技能是怎么被触发的</span><span class="d">2:19</span></div>
+<div class="ch" data-t="370.968"><span class="t">6:10</span><span class="n">四种项目，四种打法</span><span class="d">2:10</span></div>
+<div class="ch" data-t="501.024"><span class="t">8:21</span><span class="n">四件日常任务的标准流程</span><span class="d">2:50</span></div>
+<div class="ch" data-t="671.424"><span class="t">11:11</span><span class="n">把经验沉淀到项目里</span><span class="d">2:00</span></div>
+<div class="ch" data-t="791.496"><span class="t">13:11</span><span class="n">常见疑问与收尾</span><span class="d">2:10</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Superpowers 工程级开发 · 解读与音频稿件</h1>
+<blockquote>本内容改编自开源项目 Easy-Vibe，为二次演绎配音版。</blockquote>
+<blockquote>来源：Easy-Vibe（datawhalechina/easy-vibe）docs/zh-cn/stage-3/core-skills/superpowers/index.md</blockquote>
+<blockquote>音频：&lt;slug&gt;-播客.mp3 ｜ 字幕：&lt;slug&gt;-播客.srt</blockquote>
+<hr>
+<h2>一、这一集讲什么</h2>
+<p>很多人对「用人工智能写代码」的期待是：我说一句话，它给我一个能跑的系统。现实是，它确实能写，但写出来的东西常常缺少章法——没有测试、边界情况漏掉、顺手改了你没让它改的地方。</p>
+<p>这一集要解决的问题不是「怎么让模型更聪明」，而是<strong>怎么给它装上流程纪律</strong>。Easy-Vibe 在 stage-3 核心技能篇里介绍的 Superpowers，本质是一套<strong>技能集合 + 触发机制</strong>：它不改变模型的能力上限，而是约束模型「按什么步骤干活」。</p>
+<p>一句话总结原文档的核心判断：</p>
+<blockquote>Superpowers 不让 AI 更聪明，而是让 AI 更有纪律。</blockquote>
+<hr>
+<h2>二、能力地图</h2>
+<p>先看清人工智能的能力边界，才能设计协作方式。</p>
+<table>
+<tr><th>能力项</th><th>AI 的表现</th><th>谁负责</th></tr>
+<tr><td>生成代码框架</td><td>快，但需要先有清楚的描述</td><td>人描述需求，AI 生成</td></tr>
+<tr><td>阅读既有代码</td><td>几秒扫完几千行，定位准确</td><td>AI 执行</td></tr>
+<tr><td>发现常见漏洞</td><td>语法错误、注入类问题识别率高</td><td>AI 扫描，人复核</td></tr>
+<tr><td>批量重复劳动</td><td>改变量名、统一格式、补注释</td><td>AI 执行</td></tr>
+<tr><td>理解业务逻辑</td><td>不了解，除非你详细告诉它</td><td>人</td></tr>
+<tr><td>技术选型与架构决策</td><td>做不了，需要权衡与经验</td><td>人</td></tr>
+<tr><td>团队隐性规范</td><td>不知道，需写成配置或明确说明</td><td>人</td></tr>
+<tr><td>最终质量把关</td><td>不能替代审查与测试</td><td>人</td></tr>
+</table>
+<p>分工口诀：<strong>人负责想清楚要做什么、做决策、把质量关；AI 负责执行编码、查资料、找明显问题。</strong></p>
+<p>这就像带一个初级开发者——你交代任务，他去实现，你来审查。区别只是它快得多，但判断力不如你。</p>
+<h3>提示1 · 把「审查」当成固定动作，而不是可选动作</h3>
+<p>AI 生成的代码<strong>不能直接使用</strong>。它可能写出&quot;看起来对但实际有洞&quot;的实现，最常见的漏洞就是漏掉边界情况（空输入、超长输入、无权限场景）。审查与测试这道关，请永远留给人。</p>
+<hr>
+<h2>三、技能是怎么被触发的</h2>
+<p>Superpowers 不是一个插件，而是一组技能（skills）的集合，安装后在后台待命。它的工作方式是<strong>靠触发</strong>：</p>
+<table>
+<tr><th>你的说法 / 场景</th><th>被唤醒的技能</th><th>效果</th></tr>
+<tr><td>「用测试驱动开发的方式」</td><td>测试驱动开发技能</td><td>先写测试、再写实现</td></tr>
+<tr><td>需求描述模糊</td><td>头脑风暴技能</td><td>主动反问，把模糊点问清楚</td></tr>
+<tr><td>提到「调试」</td><td>系统化调试技能</td><td>逐步缩小范围，而非随机试错</td></tr>
+</table>
+<p>也可以手动调用某个具体技能。</p>
+<h3>提示2 · 触发词就是你的控制杆</h3>
+<p>「这套技能集的作用是强化流程纪律，而不是凭空创造能力。」——你不提测试驱动开发，它可能写测试也可能不写；你提了，它就有章法地写。所以，学几个关键触发词，投入产出比极高。</p>
+<hr>
+<h2>四、Superpowers 与 Skills 的区别</h2>
+<table>
+<tr><th>维度</th><th>Superpowers</th><th>Skills</th></tr>
+<tr><td>本质</td><td>完整的开发方法论框架</td><td>可复用的技能包</td></tr>
+<tr><td>范围</td><td>覆盖整个开发流程</td><td>聚焦特定功能</td></tr>
+<tr><td>关系</td><td>内部使用 Skills</td><td>是 Skills 的集合</td></tr>
+</table>
+<p>类比：<strong>一个是零件，一个是装配好的流水线。</strong></p>
+<hr>
+<h2>五、四种项目，四种打法</h2>
+<p>同样让 AI 帮忙，项目阶段不同，打法完全不同。</p>
+<h3>5.1 全新项目（从零开始）</h3>
+<p>特点：没有历史包袱，可自由设计，需要建立结构与规范，适合快速迭代。</p>
+<p>流程：</p>
+<ol>
+<li>让 AI 规划项目结构与技术选型</li>
+<li>让 AI 搭建基础框架</li>
+<li>按优先级逐个实现功能</li>
+</ol>
+<p>关键点：一开始就立好代码规范；每完成一个模块就测试验证；及时更新文档。</p>
+<h3>5.2 成熟项目（已有大量代码）</h3>
+<p>特点：代码量大、有历史规范、需保持风格一致、修改要考虑影响范围。</p>
+<p>流程：</p>
+<ol>
+<li>先让 AI 了解项目结构与约定</li>
+<li>让 AI 找到项目中类似的实现作为参考</li>
+<li>让 AI 模仿现有风格实现新功能</li>
+</ol>
+<p>关键点：<strong>先理解再动手</strong>，避免破坏现有架构；保持风格一致；改完测相关功能。</p>
+<h3>5.3 快速原型（验证想法）</h3>
+<p>特点：追求速度，不在意代码质量，用于验证产品想法或技术方案，可能被丢弃。</p>
+<p>流程：直接描述需求，快速实现，快速迭代。</p>
+<p>关键点：不用太在意规范；快速验证、及时调整；<strong>原型成功后必须安排重构</strong>。</p>
+<h3>5.4 维护项目（以修缺陷为主）</h3>
+<p>特点：代码已稳定，主要是修问题，需要快速定位，修改要谨慎。</p>
+<p>流程：</p>
+<ol>
+<li>定位问题</li>
+<li>分析根因</li>
+<li>实施修复</li>
+</ol>
+<p>关键点：修完充分测试，确保不影响其他功能；添加防御性代码；<strong>记录问题与解法</strong>，便于后续复用。</p>
+<h3>提示3 · 先判断项目类型，再选工作流</h3>
+<p>用错打法的代价很大：在成熟项目里用「原型打法」会破坏架构；在原型阶段用「成熟项目打法」会拖慢验证速度。动手前先花三十秒判断自己属于哪一类。</p>
+<hr>
+<h2>六、四件日常任务的标准流程</h2>
+<h3>6.1 开发新功能</h3>
+<table>
+<tr><th>步骤</th><th>谁来做</th></tr>
+<tr><td>1. 理解需求（输入输出、边界、性能安全要求）</td><td>人</td></tr>
+<tr><td>2. 了解现有代码</td><td>AI</td></tr>
+<tr><td>3. 制定实现计划</td><td>人 + AI</td></tr>
+<tr><td>4. 实现功能</td><td>AI 生成，人审查</td></tr>
+<tr><td>5. 测试验证（主流程、边界、权限、自动化用例）</td><td>人</td></tr>
+</table>
+<p>注意：<strong>测试步骤不能省</strong>。自动化测试可以让 AI 帮忙写，但设计用例的思路必须由人定。</p>
+<h3>6.2 修复缺陷</h3>
+<p>先收集信息（错误信息、复现步骤、开始时间、影响范围）→ 让 AI 定位 → 一起分析根因 → AI 出方案、人审查 → 人验证。</p>
+<p>验证要点：按原步骤复现确认解决；测试相关功能确认无回归；<strong>思考其他地方是否存在同类问题</strong>。</p>
+<h3>6.3 重构代码</h3>
+<p>先明确目标（消除重复？理清结构？提升性能？范围多大？可承受多大风险）→ 与 AI 制定计划 → <strong>先准备安全网（补测试）</strong> → 逐步重构、每步验证 → 跑全量测试 + 手动过关键功能。</p>
+<h3>6.4 代码审查</h3>
+<ol>
+<li>让 AI 快速了解改动范围</li>
+<li>让 AI 检查常见问题</li>
+<li>人深入审查：业务逻辑、边界情况、更好的实现、是否需要补测试</li>
+<li>人给出反馈：指出问题 + 解释原因 + 提供改进建议</li>
+</ol>
+<p>典型例子：把用户输入直接拼接进数据库查询语句，别人输入特殊字符就能改写查询条件；改成占位符传参即可消除。这类问题交给 AI 扫，效率远高于人眼。</p>
+<h3>提示4 · 重构前先补测试，这是唯一的顺序铁律</h3>
+<p>重构的价值来自「改完还敢用」。没有测试兜底就重构，等于蒙眼走钢丝。顺序永远是：<strong>补测试 → 小步改 → 每步验证 → 全量回归。</strong></p>
+<hr>
+<h2>七、把经验沉淀到项目里</h2>
+<p>单次对话的技巧只能提升一次效率；固化下来才能提升长期效率。</p>
+<h3>7.1 项目说明文件</h3>
+<p>在项目根目录创建项目说明文件（原文档给出的文件名是 <code>CLAUDE.md</code> 或 <code>AGENTS.md</code>），记录：</p>
+<ul>
+<li>技术栈</li>
+<li>目录结构（组件、页面、接口调用、工具函数、类型定义分别放哪）</li>
+<li>代码规范与团队硬性要求</li>
+</ul>
+<p>它相当于给 AI 的一份<strong>入职手册</strong>——每次开工前读一遍，就不会按自己的习惯乱来。</p>
+<h3>7.2 保存有用的对话</h3>
+<p>解决复杂问题后：把方案写进项目文档（建议放在固定的解决方案目录）、下次遇到直接参考、分享给团队其他成员。一个人踩过的坑，全队都能绕开。</p>
+<h3>7.3 沟通卡住时怎么纠偏</h3>
+<p>如果多次纠正仍然不对，试试：</p>
+<ul>
+<li>提供更多上下文信息</li>
+<li>给出具体的代码示例</li>
+<li><strong>把大任务拆成更小的任务</strong></li>
+</ul>
+<p>其中拆任务最有效——粒度越小，跑偏概率越低。</p>
+<h3>提示5 · 项目说明文件是性价比最高的一次性投入</h3>
+<p>花一小时写清楚技术栈、目录结构和规范，之后每一次对话都省下重复解释的成本。这是本集所有技巧里，投入产出比最高的一条。</p>
+<hr>
+<h2>八、常见疑问</h2>
+<p><strong>Q：用 Superpowers 必须指定 TDD 吗？</strong></p>
+<p>不是必须。它是技能集合，每个技能有各自触发条件。不说 TDD，AI 可能写测试也可能不写；说了，流程才有保障。这不是强制项，而是你手里的一个开关。</p>
+<p><strong>Q：遇到 AI 不会的问题怎么办？</strong></p>
+<p>AI 不是万能的。它可能解决不了：非常新的技术（有知识截止日期）、团队特有的业务逻辑、需要访问外部系统才能判断的问题、复杂的性能优化。此时回到人：查官方文档、搜索方案、请教有经验的同事、到社区提问。</p>
+<p><strong>Q：适合哪些场景？</strong></p>
+<ul>
+<li>明确推荐：生产级代码开发、需要长期维护的项目、团队协作项目</li>
+<li>可选：快速原型、一次性脚本</li>
+</ul>
+<p><strong>Q：有哪些社区资源？</strong></p>
+<ul>
+<li><code>affaan-m/everything-claude-code</code>：综合工具包，包含 TDD 工作流</li>
+<li><code>shanraisshan/claude-code-best-practice</code>：社区维护的最佳实践资源集合</li>
+</ul>
+<hr>
+<h2>九、审查清单</h2>
+<p>每次让人工智能交付代码之前，照着这张清单过一遍：</p>
+<table>
+<tr><th>检查项</th><th>不通过的表现</th><th>处理</th></tr>
+<tr><td>需求是否被完整理解</td><td>它实现的功能和你说的不是一回事</td><td>让它先复述一遍需求</td></tr>
+<tr><td>边界情况是否覆盖</td><td>空输入、超长输入直接报错或崩掉</td><td>补用例，让它补防御代码</td></tr>
+<tr><td>权限是否校验</td><td>用户可以改或删掉别人的数据</td><td>明确要求加权限判断</td></tr>
+<tr><td>是否动了无关代码</td><td>改动范围超出本次任务</td><td>要求只改指定文件</td></tr>
+<tr><td>测试是否补上</td><td>只有实现没有测试</td><td>先补测试再合并</td></tr>
+<tr><td>团队规范是否遵守</td><td>命名、日志、错误码不符合约定</td><td>写进项目说明文件</td></tr>
+<tr><td>是否引入已知风险</td><td>用户输入被直接拼进查询语句</td><td>改为占位符传参</td></tr>
+<tr><td>能否回滚</td><td>出问题无法快速恢复</td><td>确保有版本控制与回退方案</td></tr>
+</table>
+<p>建议把这张表贴在项目说明文件里，让人工智能在每次交付前自查一遍。</p>
+<hr>
+<h2>十、能力自测</h2>
+<p>听完之后，试试回答这五个问题：</p>
+<ol>
+<li>AI 擅长哪三类工作，不擅长哪三类工作？</li>
+<li>想让 AI 先写测试再写实现，你应该说什么？</li>
+<li>面对一个已有十万行代码的项目，第一步应该做什么？</li>
+<li>重构之前必须先完成哪件事？</li>
+<li>项目说明文件里至少要写清楚哪三块内容？</li>
+</ol>
+<p>能答出四题以上，说明这一集的核心你已经拿到了。</p>
+<hr>
+<h2>十一、常见误区与纠正</h2>
+<table>
+<tr><th>误区</th><th>现实</th><th>纠正做法</th></tr>
+<tr><td>装上技能集，AI 就脱胎换骨</td><td>它只强化纪律，不创造能力</td><td>把触发词用起来，别期待魔法</td></tr>
+<tr><td>AI 写的代码可以直接上线</td><td>边界情况常被漏掉</td><td>审查 + 测试是人的固定动作</td></tr>
+<tr><td>成熟项目也能「直接让它改」</td><td>容易破坏既有架构</td><td>先读项目、找参考、再模仿风格</td></tr>
+<tr><td>原型验证成功就能直接上线</td><td>原型代码扛不住真实流量</td><td>安排一次正式重构</td></tr>
+<tr><td>重构就是「让它重写一遍」</td><td>无测试兜底等于冒险</td><td>先补测试，再小步重构</td></tr>
+<tr><td>一次对话解决不了就反复说</td><td>粒度太大是根因</td><td>拆成小任务逐个击破</td></tr>
+</table>
+<hr>
+<h2>十二、时间不够时怎么砍</h2>
+<table>
+<tr><th>优先级</th><th>动作</th><th>理由</th></tr>
+<tr><td>必做</td><td>写项目说明文件</td><td>一次性投入，长期收益</td></tr>
+<tr><td>必做</td><td>判断项目类型并选对工作流</td><td>决定后续所有动作的方向</td></tr>
+<tr><td>必做</td><td>重构前补测试</td><td>唯一不可跳过的顺序铁律</td></tr>
+<tr><td>可做</td><td>记住全部触发词</td><td>先记「测试驱动开发」和「调试」两个</td></tr>
+<tr><td>可缓</td><td>沉淀解决方案文档</td><td>团队规模小时收益递减</td></tr>
+</table>
+<hr>
+<h2>十三、一页纸总结</h2>
+<ul>
+<li><strong>核心判断</strong>：技能集不让 AI 更聪明，它让 AI 更有纪律。</li>
+<li><strong>边界</strong>：AI 做规则明确的活；人做业务理解、技术决策、质量把关。</li>
+<li><strong>触发</strong>：关键词唤醒技能——测试驱动开发、头脑风暴、系统化调试。</li>
+<li><strong>四类项目</strong>：全新项目立规范；成熟项目先理解；快速原型追速度；维护项目重记录。</li>
+<li><strong>四类任务</strong>：新功能五步走；修缺陷先收集信息；重构先补测试；审查人机分工。</li>
+<li><strong>沉淀</strong>：项目说明文件、解决方案文档、拆小任务。</li>
+<li><strong>场景</strong>：生产级开发、长期维护、团队协作推荐用；原型与一次性脚本可选。</li>
+</ul>
+<p>记住这一句就够了：<strong>决定产出的不是模型有多强，而是你把需求想得多清楚、边界划得多明白、审查做得多认真。</strong></p>
+<hr>
+<h2>十四、把这一集用到自己项目上的三步</h2>
+<p>第一步，今天就把项目说明文件建起来。只写三块内容就够，技术栈、目录结构、代码规范。不要追求完美，写完第一版，后面再补。</p>
+<p>第二步，挑一个你最常出错的环节，只练一个触发词。比如每次让它写功能前，先加一句用测试驱动开发的方式。坚持一周，看看返工次数有没有下降。</p>
+<p>第三步，在每次交付前跑一遍第九节的审查清单。前两次会觉得慢，第三次开始就变成习惯，而你踩的坑会明显变少。</p>
+<p>这三步都不需要额外工具，也不依赖任何特定产品，任何人和人工智能协作写代码的场景都适用。</p>
+<hr>
+<h2>十五、约束说明</h2>
+<ul>
+<li>本集为二次演绎配音版，内容基于 Easy-Vibe 开源教程 stage-3 核心技能篇 Superpowers 一节改写，未引入源文档之外的案例、数据与引文。</li>
+<li>源切片在切分过程中混入了相邻页面（学习路线图「三站」部分）的内容，本集已予以排除，仅保留与 Superpowers 及人工智能协作工作流相关的部分。</li>
+<li>源文档中部分章节的操作步骤在原页面上配有代码示例，本集转为口语化描述，未照搬代码。</li>
+<li>涉及第三方工具名称与社区仓库，以源文档记载为准，不构成选型建议。</li>
+</ul>
+<hr>
+<p><strong>来源</strong>：Easy-Vibe（datawhalechina/easy-vibe）docs/zh-cn/stage-3/core-skills/superpowers/index.md</p>
+<p><strong>声明</strong>：本内容改编自开源项目 Easy-Vibe，为二次演绎配音版。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
