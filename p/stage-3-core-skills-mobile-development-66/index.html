@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Code 手机远程开发 · 云端方案对比</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 8 · EP 66</span>
+<h1>Claude Code 手机远程开发 · 云端方案对比</h1>
+<p class="sub">第 8 章 · 第 66 讲 · 14:24</p>
+<div class="meta"><span>时长 <b>14:24</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>8</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-core-skills-mobile-development-66-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-core-skills-mobile-development-66-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-3-core-skills-mobile-development-66/stage-3-core-skills-mobile-development-66-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-3-core-skills-mobile-development-66/stage-3-core-skills-mobile-development-66-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-8.html">← 第 8 章目录</a>
+<a href="/p/stage-3-core-skills-long-running-tasks-64/">← 上一讲</a>
+<a href="/p/stage-3-core-skills-skills-67/">下一讲 →</a>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:41</span></div>
+<div class="ch" data-t="101.448"><span class="t">1:41</span><span class="n">七个方案一张表</span><span class="d">1:58</span></div>
+<div class="ch" data-t="220.056"><span class="t">3:40</span><span class="n">四个云端平台</span><span class="d">1:48</span></div>
+<div class="ch" data-t="328.368"><span class="t">5:28</span><span class="n">怎么选，看你是谁</span><span class="d">1:35</span></div>
+<div class="ch" data-t="424.032"><span class="t">7:04</span><span class="n">需不需要内网穿透</span><span class="d">1:27</span></div>
+<div class="ch" data-t="511.92"><span class="t">8:31</span><span class="n">电池与断线</span><span class="d">1:25</span></div>
+<div class="ch" data-t="597.912"><span class="t">9:57</span><span class="n">安全这道闸</span><span class="d">1:37</span></div>
+<div class="ch" data-t="695.4"><span class="t">11:35</span><span class="n">去哪儿找资源</span><span class="d">1:34</span></div>
+<div class="ch" data-t="789.864"><span class="t">13:09</span><span class="n">收尾</span><span class="d">1:14</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe · Claude Code 手机远程开发：七个方案、四个云端平台与选型方法 — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-3/core-skills/mobile-development/index.md</code>），为<strong>二次演绎配音版</strong>。本文在原文基础上做了口语化改写、结构重组与实践补充，观点与例子由演绎方添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>stage-3-core-skills-mobile-development-66</code></li>
+<li>所属章节：第 8 章</li>
+<li>原文覆盖小节：云端方案对比、对比表、选择指南、安全最佳实践、需要内网穿透吗、手机开发会影响电池吗、网络断开会怎样、总结、开源项目、中文教程</li>
+<li>对应音频：<code>stage-3-core-skills-mobile-development-66-播客.mp3</code></li>
+<li>字幕：<code>stage-3-core-skills-mobile-development-66-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>地铁上想到缺陷修复方案、咖啡厅收到线上故障、陪家人逛街时想看一眼项目进展——这三个场景共同指向一个问题：<strong>怎么把开发环境装进口袋，让 Claude Code 跟着手机走。</strong></p>
+<p>原文的答案是「手机只是控制端，真正的开发工作在别处完成」。音频稿围绕这个核心思想，按四块展开：</p>
+<ol>
+<li><strong>七个手机端方案对照</strong> —— 难度、穿透、费用、场景四维度；</li>
+<li><strong>四个云端平台对比</strong> —— Sealos DevBox / Codespaces / Gitpod / Replit；</li>
+<li><strong>三个现实问题</strong> —— 要不要内网穿透、费不费电、断线会怎样；</li>
+<li><strong>安全与资源</strong> —— 五条安全实践、四个开源项目、四个中文教程。</li>
+</ol>
+<hr>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>能力项</th><th>原文怎么说的</th><th>演绎方的解读</th><th>所属环节</th></tr>
+<tr><td>核心思想</td><td>手机只是控制端，开发在别处完成</td><td>判断方案好坏的总尺子</td><td>总纲</td></tr>
+<tr><td>iOS 官方应用</td><td>简单 / 每月二十美元</td><td>正规但有两前提，不在大陆且有预算</td><td>方案对比</td></tr>
+<tr><td>Happy Coder</td><td>较简单 / 免费 / 扫码即用</td><td>便利优先，大陆用户现实之选</td><td>方案对比</td></tr>
+<tr><td>HAPI</td><td>中等 / 免费 / 多模型 / 本地优先</td><td>换模型不换工具，数据不放云端</td><td>方案对比</td></tr>
+<tr><td>SSH + Tailscale</td><td>较复杂 / 免费 / 体验最完整</td><td>最接近桌面，配置一次长期受益</td><td>方案对比</td></tr>
+<tr><td>Termux</td><td>中等 / 免费 / 纯安卓本地</td><td>手机真干活，性能与耗电代价最高</td><td>方案对比</td></tr>
+<tr><td>Claude Code UI</td><td>中等 / 需要穿透 / 免费</td><td>七个里唯一被动入站</td><td>方案对比</td></tr>
+<tr><td>云端 DevBox</td><td>简单 / 按量付费</td><td>无常开电脑者的理想解</td><td>方案对比</td></tr>
+<tr><td>Sealos DevBox</td><td>预装 / 约一分钟启动 / 按量</td><td>云端四平台里最省事</td><td>云端平台</td></tr>
+<tr><td>GitHub Codespaces</td><td>手动 / 两到三分钟 / 免费额度加按小时</td><td>接 GitHub 生态顺理成章</td><td>云端平台</td></tr>
+<tr><td>Gitpod</td><td>手动 / 一到两分钟</td><td>定位近 Codespaces，可作备选</td><td>云端平台</td></tr>
+<tr><td>Replit</td><td>原生应用 / 即时启动</td><td>移动体验是重点，不是集成度</td><td>云端平台</td></tr>
+<tr><td>穿透判断</td><td>大部分方案不需要</td><td>看连接是谁发起的，被动入站才要</td><td>网络原理</td></tr>
+<tr><td>耗电排序</td><td>SSH 低 / App 中 / 浏览器中 / Termux 高</td><td>手机当显示器还是当主机，决定耗电</td><td>现实问题</td></tr>
+<tr><td>断线恢复</td><td>远端方案继续跑，本地方案会中断</td><td>断线不断工是主力方案的门槛</td><td>现实问题</td></tr>
+<tr><td>安全五条</td><td>分级 / 密钥 / 沙盒 / 自建中继 / Headscale</td><td>便利与安全是一杆秤</td><td>安全</td></tr>
+<tr><td>资源</td><td>四开源项目 + 四中文教程</td><td>看维护活跃度，方法论不过时</td><td>资源</td></tr>
+</table>
+<hr>
+<h2>三、逐节解读</h2>
+<h3>3.1 核心思想：一句总尺子</h3>
+<p>原文总结只有一句话：<strong>手机只是控制端，真正的开发工作在别处完成。</strong> 演绎方认为这句话是全篇的总尺子，后面所有对比都从它推出：</p>
+<ul>
+<li>活儿放远端的方案，断线不断工、手机低耗电、随时可接力；</li>
+<li>活儿放手机的方案（Termux），自由度高但断线即中断、耗电高；</li>
+<li>于是选型的第一个问题不是「哪个工具好」，而是「你的活儿放在哪」。</li>
+</ul>
+<p>原文点出的大陆限制也要先记住：Claude App 在中国大陆无法直接使用，大陆用户的现实路线是 Happy Coder 配国内接口中转，或有海外账号切区下载官方应用。</p>
+<h3>3.2 七个方案：先问处境，再选工具</h3>
+<p>原文的七方案对照表（难度 / 穿透 / 费用 / 场景）音频中逐个讲过，这里压缩成三组记忆：</p>
+<table>
+<tr><th>分组</th><th>方案</th><th>一句话</th></tr>
+<tr><td>便利组</td><td>Happy Coder、iOS 官方应用</td><td>扫码即用或正规生态，牺牲一些控制权</td></tr>
+<tr><td>专业组</td><td>SSH + Tailscale、HAPI</td><td>配置一次，体验与功能最完整</td></tr>
+<tr><td>极端组</td><td>Termux、云端 DevBox、Claude Code UI</td><td>分别对应只有手机、没有电脑、只要网页界面</td></tr>
+</table>
+<p>原文的选择指南是七个「如果」，演绎方把它翻译成四个处境问题：<strong>网络环境（在不在大陆）、设备（只有手机还是有常开电脑）、模型需求（要不要多模型）、预算（要不要付费）。</strong> 四个问题答完，方案基本唯一。脱离处境比好坏，是选型最常见的内耗。</p>
+<h3>3.3 四个云端平台：看三个维度</h3>
+<p>云端开发环境的定位是「无常开电脑」的场景。原文对比四平台，演绎方归纳三个决策维度：</p>
+<ul>
+<li><strong>预装程度</strong>：Sealos DevBox 预装 Claude Code，Codespaces 与 Gitpod 需手动配置；</li>
+<li><strong>启动速度</strong>：Replit 即时，DevBox 约一分钟，Gitpod 一到两分钟，Codespaces 两到三分钟；</li>
+<li><strong>计费方式</strong>：按量付费适合偶尔用，按小时适合持续开发，订阅适合天天挂。</li>
+</ul>
+<p>演绎方补两点原文之外的实践提醒：一是计费前先估算使用频率，别让便利变成隐形开销；二是云端环境「坏了就重建」的干净特性，比本地折腾依赖更省心——这是云端方案常被忽略的隐性优势。</p>
+<p>再补一个和上一段的衔接判断。四个平台里只有 Replit 把移动端做成了原生应用，其余三个本质上都是「云端电脑加网页入口」。所以如果你的主场景是手机，选型时要把「移动入口的质量」权重抬高，它比预装程度更影响日常体验。反过来，如果只是偶尔出门应急，网页入口完全够用，优先看预装和启动速度。</p>
+<h3>3.4 三个现实问题：穿透、电池、断线</h3>
+<p><strong>穿透。</strong> 原文明确大部分现代方案不需要内网穿透。演绎方给了一个一秒判断的口诀：<strong>看连接是谁发起的</strong>——双方都主动连服务器（中继模式），门不用开；只有一方被动等着被连（Claude Code UI 的被动入站），才需要穿透。Tailscale 的打洞加中继回退、HAPI 的 WireGuard 加传输层加密，都属于「主动出站」家族。</p>
+<p><strong>电池。</strong> 耗电差异的原因在于手机的角色：SSH 终端只做文本显示（当显示器），官方应用是云端执行（当遥控器），Termux 是本地运行（当主机）。原文建议长时间使用连接充电器——演绎方补一句，耗电量其实是「手机角色」的直观指标，看到耗电高就知道这方案在让手机真干活。</p>
+<p><strong>断线。</strong> 这是能不能当主力的分水岭。SSH 加 Tmux 最稳：Claude 在电脑上继续运行，重连恢复现场；Happy Coder 与 HAPI 自动重连；官方应用云端继续；Termux 会话直接中断。<strong>断线不断工，是远端方案的共同红利。</strong></p>
+<h3>3.5 安全：五条实践与一个权衡</h3>
+<p>原文安全五条：代码敏感度分级、密钥管理、沙盒模式、自建中继、用 Headscale 替代。演绎方按落地顺序重排为：先分级（决定什么能经手中转）→ 再管密钥（不进代码不进仓库）→ 沙盒限制破坏面 → 敏感项目上自建（Happy Coder 自建中继或 Headscale 开源替代）。</p>
+<p>原文总结里的提醒值得原样传达：<strong>敏感代码要慎用第三方中继，API 密钥要妥善管理，重要项目最好用自建中继。</strong> 便利与安全是一杆秤，省事和省心之间，敏感项目选省心。</p>
+<hr>
+<h2>四、审查清单</h2>
+<ul>
+<li>能说出核心思想：手机只是控制端，真正的开发工作在别处完成</li>
+<li>已确认自己的四个处境：网络环境、设备、模型需求、预算</li>
+<li>能从七个方案里按处境选出主方案与备选方案</li>
+<li>理解四平台差异：预装程度、启动速度、计费方式</li>
+<li>已用「连接谁发起」判断所选方案是否需要内网穿透</li>
+<li>了解所选方案的耗电等级，长时间使用备好充电器</li>
+<li>已验证断线行为：主力方案必须断线不断工</li>
+<li>代码已做敏感度分级，明确哪些项目不经手中转</li>
+<li>接口密钥不在代码与仓库中</li>
+<li>已开启沙盒模式或等效的访问范围限制</li>
+<li>敏感项目已评估自建中继（Happy Coder 自建或 Headscale）</li>
+<li>已访问过开源项目页面，确认维护活跃度后再采用</li>
+</ul>
+<hr>
+<h2>五、实践提示</h2>
+<h3>提示1 · 选型先答四个处境问题，再看方案表</h3>
+<p>网络环境在不在大陆、手里只有手机还是有常开电脑、要不要多模型、愿不愿意付费。四个问题答完，七个方案基本只剩一两个候选。处境是会变的，每隔半年重答一次，方案也该跟着换。</p>
+<h3>提示2 · 用「连接谁发起」一秒判断要不要穿透</h3>
+<p>双方都主动连服务器，不用穿透；一方被动等着被连，才需要穿透。这把尺子能量任何新出的远程工具，比背方案列表可靠。除非你特意要网页界面方案，穿透可以从待办清单直接划掉。</p>
+<h3>提示3 · 把「断线不断工」当主力方案的门槛</h3>
+<p>偶尔应急，任何方案都行。要当 daily driver，必须断线后活儿还在跑。SSH 加 Tmux 是标杆组合，Happy Coder 与 HAPI 的自动重连是及格线，Termux 类本地方案就当单机工具用，别指望它扛移动场景。</p>
+<h3>提示4 · 手机端管甜区，深度活留给桌面</h3>
+<p>查看进度、审批请求、小改动、应急响应，这是手机端的甜区。重构大模块、连续几小时的深度调试，留给桌面。把对的场景放对工具上，口袋开发才是助力。工具没有高下，场景有分工。</p>
+<h3>提示5 · 开源项目看最近提交时间再入手</h3>
+<p>工具生态迭代快，星标数只代表过去。选型前先去开源页面看最近一次提交时间，半年没动静的要谨慎。今天的推荐可能明天过时，但选型方法不过时：看处境、看原理、看维护活跃度。</p>
+<hr>
+<h2>六、约束说明</h2>
+<ol>
+<li><strong>本集内容全部来自原文 <code>stage-3/core-skills/mobile-development/index.md</code>，未跨文件取材。</strong> 七个方案的难度、穿透、费用、场景，四个云端平台的预装与启动时间与计费，安全五条实践，四个开源项目与四个中文教程，均按原文转述，未虚构任何工具名、价格或数据。</li>
+<li><strong>切片串页污染已排除。</strong> 本篇切片文件自「Skills 简介」起的大段内容（Skills 概念、为什么需要 Skills、find-skills 安装与使用、Remotion 视频技能、frontend-slides 演示文稿技能、内置视觉风格表等）经核对属于 Skills 篇（另一来源页），与本篇来源页不符，<strong>已整段排除，未在音频与本文中使用</strong>。该部分内容归入 Skills 对应篇目。</li>
+<li><strong>原文以代码块给出的命令未在音频中逐字朗读。</strong> 包括 find-skills 安装命令、Tmux 会话创建、SSH 连接配置、一键连接脚本等（且多位于被排除的污染段），音频改为描述其作用与结果，具体命令以原文档为准。</li>
+<li><strong>原文中的表格做了口语化重排。</strong> 七方案对照表改为分组讲解，云端平台表改为三维度归纳，穿透原理表、耗电表、断线表改为按「手机角色」和「活儿放哪」两条线索重组，未逐格朗读。</li>
+<li><strong>演绎方添加的内容限于四类</strong>：结构性归纳（三组方案记忆、四平台三维度、安全五条重排）、判断口诀（连接谁发起、断线不断工门槛、手机角色决定耗电）、场景边界（手机端甜区与桌面分工）、以及工程提醒（计费先估频率、坏了就重建、看最近提交时间）。这些内容属于实践补充，不等同于原文观点。</li>
+<li><strong>安全声明。</strong> 本集涉及的中转服务、自建中继、密钥管理均为流程说明，不包含任何真实可用的凭据、服务器地址或私有项目信息。</li>
+</ol>
+<hr>
+<h2>七、这一集在整条链路上的位置</h2>
+<p>在「把 Claude Code 用到位」这条线上，本集是<strong>场景扩展篇</strong>：</p>
+<ul>
+<li>前面几集解决「在电脑上怎么高效用」——命令、上下文、任务流；</li>
+<li>本集解决「离开电脑怎么不失控」——控制端思路与移动方案选型；</li>
+<li>后续的 Skills 篇则往深走：把个人与团队的经验固化成可复用技能包。</li>
+</ul>
+<p>一条暗线贯穿始终：<strong>人的角色在持续后移</strong>——从写代码的人，到做选择题的人，再到看板和决策的人。移动开发篇是这条暗线上最直观的一站：开发没有搬进手机，但控制权随身带走了。想清楚自己要在哪个位置，选型就不再纠结。</p>
+<p>还有一层现实意义值得点出。口袋开发降低的不是写代码的门槛，而是响应速度的门槛。以前故障响应受限于有没有带电脑，现在只受限于有没有信号。对需要随时在线的团队来说，这个变化直接改写值班和协作的节奏——值班的人可以在任何地方先看一眼、先批一个、先止一笔损，再决定要不要打开电脑。工具的价值，常常不在它能做什么，而在它把什么从「必须回到桌前」变成「原地就能办」。</p>
+<hr>
+<p><strong>来源</strong>：Easy-Vibe（datawhalechina/easy-vibe）<code>docs/zh-cn/stage-3/core-skills/mobile-development/index.md</code>。本音频与本文为二次演绎配音版，非原文照读。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
