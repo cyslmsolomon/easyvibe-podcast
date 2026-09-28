@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Agent Teams 完全指南 · 核心区别对比</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 8 · EP 57</span>
+<h1>Claude Agent Teams 完全指南 · 核心区别对比</h1>
+<p class="sub">第 8 章 · 第 57 讲 · 16:20</p>
+<div class="meta"><span>时长 <b>16:20</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>8</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-core-skills-agent-teams-57-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-core-skills-agent-teams-57-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-3-core-skills-agent-teams-57/stage-3-core-skills-agent-teams-57-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-3-core-skills-agent-teams-57/stage-3-core-skills-agent-teams-57-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-8.html">← 第 8 章目录</a>
+<a href="/p/stage-3-ai-advanced-rag-introduction-56/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场 · 一个人干不完的活，能不能派给一群人工智能</span><span class="d">1:31</span></div>
+<div class="ch" data-t="91.344"><span class="t">1:31</span><span class="n">第一段 · 子代理和团队代理，到底差在哪</span><span class="d">2:18</span></div>
+<div class="ch" data-t="230.304"><span class="t">3:50</span><span class="n">第二段 · 一个团队由四个零件拼起来</span><span class="d">1:44</span></div>
+<div class="ch" data-t="334.512"><span class="t">5:34</span><span class="n">第三段 · 共享任务板，怎么防止两个人改同一个文件</span><span class="d">1:39</span></div>
+<div class="ch" data-t="434.16"><span class="t">7:14</span><span class="n">第四段 · 消息系统，成员之间怎么说话</span><span class="d">1:22</span></div>
+<div class="ch" data-t="517.008"><span class="t">8:37</span><span class="n">第五段 · 先打开开关，然后让五人小队做个游戏</span><span class="d">2:21</span></div>
+<div class="ch" data-t="658.584"><span class="t">10:58</span><span class="n">第六段 · 同一件事，两种做法差多少</span><span class="d">2:02</span></div>
+<div class="ch" data-t="781.32"><span class="t">13:01</span><span class="n">第七段 · 合同优先，开工前先把接口定死</span><span class="d">1:41</span></div>
+<div class="ch" data-t="882.528"><span class="t">14:42</span><span class="n">收尾 · 选对工具，也选对模型</span><span class="d">1:37</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>多智能体团队怎么协作 · 解读与音频稿件</h1>
+<blockquote>对应音频：stage-3-core-skills-agent-teams-57-播客.mp3</blockquote>
+<blockquote>集目编号：57 · 章节：第八章 · 原始页面：stage-3/core-skills/agent-teams/index.md</blockquote>
+<blockquote>原标题：Claude Agent Teams 完全指南 · 核心区别对比</blockquote>
+<hr>
+<h2>一、这一集讲了什么</h2>
+<p>当一个项目大到单个对话窗口装不下时，人工智能就开始偷工减料。这一集讲的是解决这个问题的协作方案：把多个智能体组织成一个团队。</p>
+<p>全篇分三层。第一层是概念辨析，把已有的子代理机制和团队代理机制区分开，前者解决并行，后者解决协作。第二层是结构拆解，讲清楚一个团队由哪四个零件组成，以及每个零件解决什么问题。第三层是工程经验，用一个完整的游戏开发案例给出量化对比，并提炼出两条真正能落地的实践原则：合同优先，以及按任务类型分配模型。</p>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>层级</th><th>能力</th><th>落到本集的对应内容</th></tr>
+<tr><td>概念层</td><td>区分并行与协作</td><td>子代理的星型拓扑 vs 团队代理的网状拓扑</td></tr>
+<tr><td>概念层</td><td>判断适用场景</td><td>六维度对比表与选型界限</td></tr>
+<tr><td>结构层</td><td>理解团队角色分工</td><td>负责人的四项职责</td></tr>
+<tr><td>结构层</td><td>理解成员独立性</td><td>独立上下文、完整工具权限、自主认领、直接通信</td></tr>
+<tr><td>结构层</td><td>掌握任务协调机制</td><td>状态机、依赖关系、自动解锁、文件锁</td></tr>
+<tr><td>结构层</td><td>掌握通信机制</td><td>点对点、广播、基于文件系统的实现</td></tr>
+<tr><td>操作层</td><td>启用实验性功能</td><td>自动配置与手动配置两条路</td></tr>
+<tr><td>操作层</td><td>观察团队运行</td><td>终端分屏可视化</td></tr>
+<tr><td>工程层</td><td>评估收益与代价</td><td>代码量、完整度、耗时、词元与成本的量化对比</td></tr>
+<tr><td>工程层</td><td>规避并行风险</td><td>合同优先的接口契约方法</td></tr>
+<tr><td>工程层</td><td>控制成本</td><td>按判断力需求分配模型档位</td></tr>
+</table>
+<h2>三、逐段要点</h2>
+<p><strong>开场 · 一个人干不完的活</strong></p>
+<p>从「写着写着就偷工减料」这一常见现象切入，指出根因不是模型能力而是上下文容量。提出多智能体团队的设想，并预告难点不在分工而在协调。</p>
+<p><strong>第一段 · 子代理和团队代理，到底差在哪</strong></p>
+<p>从拓扑、通信、上下文、并行能力、任务协调、成本六个维度做对比。给出两个形象比喻：经理与助理、项目经理与开发团队。最后落到选型界限，并点明两者的本质区别是并行与协作。</p>
+<p><strong>第二段 · 一个团队由四个零件拼起来</strong></p>
+<p>拆前两个零件。负责人不写代码，负责拆解、组队、派活、整合四件事，角色更接近技术负责人。成员是独立实例，拥有二十万容量且完全隔离的上下文、完整工具权限、自主认领权、直接通信能力。</p>
+<p><strong>第三段 · 共享任务板，怎么防止两个人改同一个文件</strong></p>
+<p>讲任务板的四件事：状态管理、依赖关系、自动解锁、文件锁。重点解释文件锁的工程意义，它堵死的是多人同时写同一文件导致互相覆盖这一经典灾难。</p>
+<p><strong>第四段 · 消息系统，成员之间怎么说话</strong></p>
+<p>讲两种通信方式，以及基于本地文件系统的实现。分析这种设计的稳定性优势与只能本机的局限。指出消息系统存在的意义是让「协商接口」这件事成为可能。</p>
+<p><strong>第五段 · 先打开开关，然后让五人小队做个游戏</strong></p>
+<p>前半讲启用方式与验证方法，强调改完配置必须完全退出重启。后半用角色扮演游戏案例串起三阶段流程：架构设计、并行开发、集成测试。</p>
+<p><strong>第六段 · 同一件事，两种做法差多少</strong></p>
+<p>给出八项量化对比，包括代码量、完整度、可维护性、缺陷数、扩展性、耗时、词元消耗与成本。并分析差距成因：单个提示词有上下文压力、注意力分散、缺乏协作验证三个硬伤。</p>
+<p><strong>第七段 · 合同优先</strong></p>
+<p>讲并行开发真正的风险是对不上而不是写得慢。给出接口契约应包含的五项内容，并指出这一思路与人类软件工程经验一致。</p>
+<p><strong>收尾 · 选对工具，也选对模型</strong></p>
+<p>点明核心价值是更完整更专业而非更快。给出模型分配原则：需要判断力的给强模型，需要执行力的给便宜模型，并附上价格对比。</p>
+<h2>四、关键概念速查</h2>
+<ul>
+<li><strong>子代理</strong>：星型结构，子代理之间不通信，全部经主代理中转，解决的是并行。</li>
+<li><strong>团队代理</strong>：网状结构，成员之间可直接通信，解决的是协作。</li>
+<li><strong>负责人</strong>：团队的大脑，负责拆解、组队、派活、整合，不直接写代码。</li>
+<li><strong>成员</strong>：独立实例，拥有完全隔离的上下文窗口与完整工具权限。</li>
+<li><strong>共享任务板</strong>：管状态、依赖、自动解锁、文件锁，是一套协作规则。</li>
+<li><strong>文件锁</strong>：成员认领任务时创建锁文件，防止多人同时改同一文件。</li>
+<li><strong>消息系统</strong>：基于本地文件存储的点对点与广播通信，不需要网络。</li>
+<li><strong>合同优先</strong>：并行开工前先锁定接口契约，避免对接时全面返工。</li>
+<li><strong>模型分配</strong>：判断型任务用强模型，执行型任务用便宜模型。</li>
+</ul>
+<h2>五、审查清单</h2>
+<p>准备上多智能体团队之前，用这份清单过一遍。</p>
+<ul>
+<li>这个任务真的需要协作吗？还是只需要并行？有没有被过度设计？</li>
+<li>任务能否拆成边界清晰、彼此依赖明确的几块？</li>
+<li>各模块之间的接口是否已经写成书面契约？</li>
+<li>契约里是否包含函数签名、数据格式、状态码、错误处理、字段校验五项？</li>
+<li>任务之间的依赖关系是否在任务板上写明，而不是靠负责人临场判断？</li>
+<li>是否存在多个成员会同时改同一文件的风险？文件锁是否生效？</li>
+<li>成员之间的协商是否真的发生了，还是各自闷头写？</li>
+<li>负责人用的是不是推理能力最强的档位？</li>
+<li>执行型成员是否用了更便宜的档位，成本是否可控？</li>
+<li>是否评估过词元消耗的大致量级，有没有超出预算？</li>
+<li>该功能是实验特性，失败时的回退方案是什么？</li>
+</ul>
+<h3>提示一 · 先用分屏看一次，再谈优化</h3>
+<p>第一次使用多智能体团队时，强烈建议配置终端分屏，亲眼看着几个成员同时输出。你会直观地理解三件事：并行到底是什么意思，消息协商在什么时机发生，以及负责人在什么时候介入。看完这一次，你后面所有的设计决策都会更靠谱。理解机制远比记住命令重要。</p>
+<h3>提示二 · 接口契约写得越具体，返工越少</h3>
+<p>合同优先这条原则，很多人知道但做不好，原因是契约写得太抽象。有效的契约要具体到字段级别：这个接口返回的对象里，第一个字段叫什么名字、是什么类型、为空时表示什么。契约越具体，成员之间需要协商的次数就越少，并行效率反而越高。</p>
+<h3>提示三 · 拆分粒度决定并行上限</h3>
+<p>任务拆得太粗，一个人扛一大块，等于没并行。拆得太细，接口数量爆炸，协调成本吃掉全部收益。经验法则是按「可以独立验证」来切：这一块做完之后，能不能在不依赖其他模块的情况下单独测一遍。能，就是一个合适的粒度。</p>
+<h3>提示四 · 成本要提前算，不要事后惊讶</h3>
+<p>多个成员各自独立运行、频繁通信，词元消耗不是线性叠加，而是会明显放大。文档给出的量级是单个提示词约五万，团队约二十万，成本从约零点五美元到约两美元。复杂项目跑几次迭代，账单会很明显。开始前先估一次量级，并且优先给执行型成员配便宜档位。</p>
+<h3>提示五 · 记得这只是实验性功能</h3>
+<p>多智能体团队目前仍是实验特性，默认关闭，行为可能随版本变化。因此不要把它用在关键路径上而不留回退方案。同时要理解它背后的机制，而不是死记某个配置项。机制是稳定的，配置是会变的。</p>
+<h2>六、约束说明</h2>
+<p><strong>约束一：取材范围</strong></p>
+<p>本集严格取材于原始页面 <code>stage-3/core-skills/agent-teams/index.md</code> 中关于多智能体团队的正文，包括核心区别对比、形象比喻、适用场景、团队组成、启用方式、实战案例、量化对比与两条实践建议。</p>
+<p><strong>约束二：切片完整性核对</strong></p>
+<p>本集所用切片经标题与来源页面核对，各节主题一致，均围绕多智能体团队展开，未发现混入其他页面内容。原始资料中的代码块与命令行示例在切片阶段已被剥离，本集因此未复述具体命令，只讲解其背后的机制与步骤，这一处理方式已在音频中体现为概念讲述而非操作演示。</p>
+<p><strong>约束三：术语表述转换</strong></p>
+<p>为适配中文口播，本集把英文角色名与机制名一律转成中文说法，例如把团队负责人、团队成员、共享任务板、消息系统作为通篇用语。文件路径不做逐字符朗读，改为描述其所在位置与作用。</p>
+<p><strong>约束四：数字与数据</strong></p>
+<p>所有数字均按中文读法转换，例如二十万、两千行、百分之九十五以上。量化对比表中的所有数值均来自原始资料，未做任何外推或估算；模型价格亦按原文给出的量级转述。</p>
+<p><strong>约束五：二次演绎边界</strong></p>
+<p>本集为配音版二次演绎。讲解中使用的类比（经理与助理、项目经理与开发团队、监控墙、菜刀盖楼）是为便于零基础听众理解所做的表达转换，不改变原始资料的技术含义。凡原始资料未涉及的性能结论与实践建议，本集一律未作断言。</p>
+<h2>七、常见误区</h2>
+<p><strong>误区一：开更多成员就一定更快。</strong></p>
+<p>多智能体团队的价值在于更完整、更专业，而不是更快。成员多了，协调成本和词元消耗都会上升。简单任务用单个提示词反而又快又省。</p>
+<p><strong>误区二：有了任务板就不会冲突。</strong></p>
+<p>任务板提供的是规则，规则生效的前提是你把依赖关系和任务边界写对了。如果拆任务时边界模糊，两个人依然会碰同一批文件。</p>
+<p><strong>误区三：成员之间会自动协商。</strong></p>
+<p>通信能力是有了，但协商不会凭空发生。它需要在任务描述里明确要求成员在接口问题上主动沟通，否则成员很可能各自闷头写完。</p>
+<p><strong>误区四：负责人也该写代码。</strong></p>
+<p>负责人的职责是拆解、组队、派活、整合。让它下场写代码，会消耗它的上下文，也会让它失去对全局的把握。</p>
+<p><strong>误区五：接口可以边写边定。</strong></p>
+<p>这是并行开发里最贵的错误。边写边定等于每个人都在猜，等到集成时才发现对不上，返工的是两个人的全部工作量。</p>
+<h2>八、从零跑一次的实践路径</h2>
+<p>如果你准备第一次尝试，可以按下面五步走。</p>
+<p><strong>第一步，选一个真正复杂的任务。</strong> 太简单体现不出价值，建议选涉及三个以上模块、需要不同专业视角的需求。</p>
+<p><strong>第二步，先让它出接口契约。</strong> 不要直接开团队，先让人工智能把模块边界和接口设计出来，人工过一遍再放行。</p>
+<p><strong>第三步，开团队并配分屏。</strong> 启用实验功能，配置终端分屏，亲眼观察一轮。</p>
+<p><strong>第四步，盯协商而不是盯进度。</strong> 观察成员之间有没有就接口、数据格式、字段命名进行沟通。没有沟通，说明任务描述里缺了要求。</p>
+<p><strong>第五步，复盘成本与质量。</strong> 记录耗时、代码量、缺陷情况与大致的词元消耗，跟单个提示词的做法对比一次，形成你自己的判断基线。</p>
+<h2>九、一页纸速记</h2>
+<ul>
+<li>子代理解决并行，团队代理解决协作，不要混用。</li>
+<li>负责人不写代码，它写任务单。</li>
+<li>成员的独立上下文是并行的前提。</li>
+<li>文件锁解决的是互相覆盖，这是并行最大的坑。</li>
+<li>消息系统基于本地文件，稳定但只能本机。</li>
+<li>价值是更完整更专业，不是更快。</li>
+<li>合同优先：接口先定死，再开工。</li>
+<li>模型分配：判断给强的，执行给便宜的。</li>
+<li>实验性功能，先理解机制，别死记配置。</li>
+</ul>
+<h2>十、延伸思考</h2>
+<ul>
+<li>如果你的项目里，模块之间几乎不存在依赖关系，还有必要上团队吗？</li>
+<li>成员数量是不是越多越好？增加到多少会出现收益递减，拐点可能由什么决定？</li>
+<li>如果负责人的拆解质量不稳定，有没有办法把拆解本身也变成可验证的步骤？</li>
+<li>消息系统基于本地文件，如果未来要跨机器协作，这个设计需要怎么改？</li>
+<li>合同优先这条原则，在你熟悉的人类团队协作里，有哪些对应的实践？</li>
+</ul>
+<h2>十一、量化对比表（完整版）</h2>
+<p>原始资料中给出的对照数据，整理如下，便于你在评估是否值得上团队时直接引用。</p>
+<table>
+<tr><th>对比维度</th><th>单个提示词</th><th>多智能体团队</th></tr>
+<tr><td>总代码行数</td><td>五百到八百行</td><td>两千行以上</td></tr>
+<tr><td>开发时间</td><td>三十到六十分钟，功能不完整</td><td>一到两小时，功能完整</td></tr>
+<tr><td>功能完整性</td><td>百分之六十到七十</td><td>百分之九十五以上</td></tr>
+<tr><td>代码可维护性</td><td>中等，容易是一个大文件</td><td>高，模块化设计</td></tr>
+<tr><td>缺陷数量</td><td>较多，缺少测试</td><td>较少，成员互相验证</td></tr>
+<tr><td>后期扩展</td><td>困难，代码耦合</td><td>容易，结构清晰</td></tr>
+<tr><td>词元消耗</td><td>约五万</td><td>约二十万</td></tr>
+<tr><td>成本</td><td>约零点五美元</td><td>约两美元</td></tr>
+</table>
+<p>对应地，单个提示词方式下常见的四种问题是：代码被截断，回复有长度限制；功能不完整，高级特性缺失；细节缺失，例如音效只留一行待办注释；调试困难，同一段对话越改越乱。</p>
+<p>而团队方式的优势可以归纳为四条：专业分工让细节得以深入，并行处理提升效率，互相验证减少集成问题，独立上下文避免彼此挤占。</p>
+<h2>十二、常见问题快答</h2>
+<p><strong>问：任务板上的依赖关系，一定要写吗？</strong></p>
+<p>要写。自动解锁机制完全依赖这份依赖声明。不写的话，系统不知道谁在等谁，任务就只能在负责人的临场判断下推进，失去了自动化调度的意义。</p>
+<p><strong>问：成员之间的通信会占用各自的上下文吗？</strong></p>
+<p>消息是独立存储的，但读取消息会进入上下文。因此通信要克制，只在真正需要协商时发起，避免把大量无关对话灌进成员窗口。</p>
+<p><strong>问：为什么负责人不能顺便写代码？</strong></p>
+<p>两个原因。一是上下文，负责人要装下全局信息，没有余量再装实现细节。二是角色冲突，下场写代码的负责人很难再客观审查别人的产出。</p>
+<p><strong>问：合同优先会不会拖慢启动速度？</strong></p>
+<p>会花一点时间，但它换掉的是集成阶段的返工。经验上，接口返工的代价远高于提前设计接口的代价，尤其当涉及两个以上成员时。</p>
+<p><strong>问：这个功能稳定吗，能不能用在生产项目上？</strong></p>
+<p>它目前仍是实验性功能，默认关闭。建议先在非关键项目上跑通流程、积累经验，再考虑扩大使用范围，并始终保留回退方案。</p>
+<p><strong>问：成员数量怎么定，越多越好吗？</strong></p>
+<p>不是。成员数量应该由模块边界决定，而不是由愿望决定。每增加一个成员，就多一份协调成本和通信开销。合理的做法是，先按契约把模块切清楚，有多少个可以独立验证的模块，就配多少个成员。</p>
+<p><strong>问：如果成员产出的质量不一致怎么办？</strong></p>
+<p>这正是负责人整合职责存在的意义。负责人要做的不是简单把代码拼起来，而是审查各模块是否符合契约、是否可以对接。质量不一致的问题，应该在这一步被拦住，而不是留到集成之后。</p>
+<h2>十三、本节与前后内容的衔接</h2>
+<p>本节属于核心技能板块，讨论的是「怎么让多个人工智能一起干活」。往前看，它是子代理概念的进一步演进；往后看，它引出的合同优先与成本控制两条原则，会贯穿后续所有面向复杂项目的实践。理解本节的关键，不在于记住某个配置项，而在于理解并行与协作的区别，以及协作所必须付出的协调成本。</p>
+<hr>
+<blockquote>来源：Easy-Vibe（datawhalechina/easy-vibe）docs/zh-cn/stage-3/core-skills/agent-teams/index.md</blockquote>
+<blockquote>本音频与文稿为基于该开源内容的二次演绎配音版，仅用于学习交流。</blockquote></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
