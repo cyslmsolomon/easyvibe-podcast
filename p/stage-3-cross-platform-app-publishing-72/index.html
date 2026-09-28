@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>如何把开发好的程序发布上架 · 5.1 创建应用记录</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 8 · EP 72</span>
+<h1>如何把开发好的程序发布上架 · 5.1 创建应用记录</h1>
+<p class="sub">第 8 章 · 第 72 讲 · 15:44</p>
+<div class="meta"><span>时长 <b>15:44</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>8</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-cross-platform-app-publishing-72-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-cross-platform-app-publishing-72-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-3-cross-platform-app-publishing-72/stage-3-cross-platform-app-publishing-72-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-3-cross-platform-app-publishing-72/stage-3-cross-platform-app-publishing-72-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-8.html">← 第 8 章目录</a>
+<a href="/p/stage-3-cross-platform-android-app-71/">← 上一讲</a>
+<a href="/p/stage-3-cross-platform-browser-ai-extension-73/">下一讲 →</a>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:18</span></div>
+<div class="ch" data-t="78.816"><span class="t">1:18</span><span class="n">苹果上架五步</span><span class="d">2:10</span></div>
+<div class="ch" data-t="209.28"><span class="t">3:29</span><span class="n">提交审核与被拒</span><span class="d">1:28</span></div>
+<div class="ch" data-t="297.888"><span class="t">4:57</span><span class="n">微软商店与官网分发</span><span class="d">1:39</span></div>
+<div class="ch" data-t="397.584"><span class="t">6:37</span><span class="n">苹果电脑与Linux</span><span class="d">1:46</span></div>
+<div class="ch" data-t="503.928"><span class="t">8:23</span><span class="n">网页 小程序与插件</span><span class="d">2:11</span></div>
+<div class="ch" data-t="635.904"><span class="t">10:35</span><span class="n">审核八大失败原因</span><span class="d">1:30</span></div>
+<div class="ch" data-t="726.84"><span class="t">12:06</span><span class="n">分阶段发布与更新纪律</span><span class="d">1:56</span></div>
+<div class="ch" data-t="843.24"><span class="t">14:03</span><span class="n">最短行动清单</span><span class="d">1:40</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>如何把开发好的程序发布上架 · 从打包到分阶段放量</h1>
+<h2>一、这篇在讲什么</h2>
+<p>本篇讲发布上架。核心观点先说：<strong>上架不是开发结束后的行政手续，而是产品工程的一部分</strong>。把身份、签名、隐私、测试、监控和回滚从第一版就设计好，第二次发布会比第一次轻松很多。</p>
+<p>覆盖七种渠道的走法：苹果应用商店、微软商店、官网分发、苹果电脑商店与官网、Linux 两个商店、网页与渐进式应用、微信小程序、浏览器插件。再讲审核八类常见失败原因及提交前自查、七步分阶段发布、更新时不能变的七件事、第一次上架十步清单。底层逻辑只有一条：让用户稳定地装上、放心地用、出问题能找回。</p>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>教程环节</th><th>对应能力</th><th>在产品工作中的位置</th></tr>
+<tr><td>苹果上架五步</td><td>应用身份与后台配置</td><td>移动端交付基本功</td></tr>
+<tr><td>归档与测试平台</td><td>先验证再上传</td><td>发布前质量门</td></tr>
+<tr><td>提交审核与被拒</td><td>按条款复现与回应</td><td>审核沟通</td></tr>
+<tr><td>微软商店七步</td><td>商店提交流程</td><td>Windows 端交付</td></tr>
+<tr><td>官网分发</td><td>自建信任链路</td><td>企业软件分发</td></tr>
+<tr><td>苹果电脑分发</td><td>签名与公证</td><td>桌面交付关键路径</td></tr>
+<tr><td>Linux 商店</td><td>元数据与自动检查</td><td>开源分发</td></tr>
+<tr><td>Web 与 PWA</td><td>部署即发布</td><td>上线检查单</td></tr>
+<tr><td>审核失败八因</td><td>提交前自查</td><td>风险前置</td></tr>
+<tr><td>分阶段发布</td><td>灰度与回滚</td><td>发布管理</td></tr>
+<tr><td>更新纪律</td><td>身份签名数据兼容</td><td>版本工程</td></tr>
+<tr><td>十步清单</td><td>最小上架路径</td><td>首次落地</td></tr>
+</table>
+<h2>三、苹果上架：身份先行</h2>
+<p>五步：用组织控制的账号加入开发者计划；在证书与描述文件确认应用标识和能力；在后台创建应用记录；保证后台包标识与工程完全一致；配置版本、价格、销售地区和团队角色。收费或内购应用还需完成协议、税务和收款信息，其审核周期常比应用本身长，要提前办。</p>
+<p>强调组织账号的原因：个人账号绑个人身份，人离职后应用归属与后续更新全是麻烦；组织账号归公司，角色可在后台调整。这是企业发布与个人玩票的第一个分岔口。</p>
+<p>归档与上传：选真实设备构建目标生成归档，先验证再上传。加入测试平台后，先内部测试员走核心流程，再外部测试员覆盖更多设备与账号；重点验证首次安装、覆盖升级、登录、订阅恢复、推送和后台恢复；并确认最终提交的就是测试通过的那个构建。自己团队的设备型号整齐，真实用户的旧手机、旧系统、奇怪网络只有外部测试员带得进来。</p>
+<h2>四、提交审核与被拒处理</h2>
+<p>版本页面选中构建，补齐截图、描述、隐私申报、年龄分级、出口合规和审核信息。这些材料都在回答同一个问题：应用是什么、给谁用、碰了什么数据。顺序上先点加入审核，再在审核页面点提交，只完成前一步不等于已送审。</p>
+<p>需要登录的应用，审核备注要给测试账号，且账号要长期有效、权限够走完核心流程。被拒后按具体条款复现：能补充说明解决的在后台回复；需改代码的增加构建号、重新归档、选择新构建，不要同一包反复提交。</p>
+<p>AI 的正确用法：把审核原文、条款编号和当前应用行为一起交给 AI，要它给出复现步骤、可能原因、最小修改和复测方法，最终以平台回复为准。AI 擅长把规则和代码对上，但不知道应用在用户手机上实际做了什么。</p>
+<h3>提示一 · 测的是甲，交的是乙，前面全白测</h3>
+<p>提交审核前核对构建号：测试通过的构建与提交的构建是同一个。这一条能挡住大部分到审核阶段才暴露的问题。</p>
+<h2>五、微软商店与官网分发</h2>
+<p>微软商店七步：注册开发者账号；合作中心预留名称；生成安装包并本地测试；创建提交，上传包、截图、介绍、年龄分级和隐私信息；运行认证检查；通过后设置发布时间与可用市场；从商店安装正式版并复测自动更新。商店会在认证中重新签名，传统安装程序及其可执行文件仍需满足签名要求。</p>
+<p>官网分发责任全回自己身上：受信任证书签名；加密传输托管并公布校验摘要；处理系统拦截与误报；提供静默安装、卸载和自动更新；保留旧版本与紧急回滚；明确支持的系统版本与处理器架构。未签名安装包直接发群不成立：建不起信任，也没有可靠更新链路。用户看到未知发布者警告，第一反应是关掉。</p>
+<h2>六、苹果电脑与 Linux</h2>
+<p>苹果电脑商店流程类似手机：创建应用、配置签名和沙盒、归档上传、补齐资料、提交审核；商店版遵守沙盒、能力和更新规则，后续更新由商店提供。</p>
+<p>官网分发六步：开发者证书对应用及内部组件签名；检查运行时加固、权限和嵌套程序签名；提交公证服务；通过后把票据贴到交付物；在干净电脑上从官网下载并验证系统守卫；再接安全自动更新。公证省不掉，否则用户首次打开即被拦。</p>
+<p>Linux 两商店：扁平包格式需构建清单、元数据、图标截图，本地构建与检查后向官方仓库提合并申请，合并后进独立仓库维护；快照格式需账号、唯一名称、构建配置，构建测试后上传测试或稳定渠道，支持边缘、候选、稳定渠道管理。两者都要求构建和元数据经得起自动检查。</p>
+<h2>七、Web、小程序与浏览器插件</h2>
+<p>Web 与渐进式应用没有统一上架按钮，部署到加密域名并稳定访问就是主要发布。上线七查：正式域名、加密传输、解析与证书续期；密钥没有进入前端产物；错误页、离线页与故障提示可理解；安装清单的名称、图标、启动地址与显示模式正确；离线缓存更新不让用户停留旧版；多设备多输入方式测试；监控、备份、回滚与状态通知配齐。前端产物公开，密钥写进前端等于把钥匙挂在大门口，上线前挨个搜一遍，搜到按事故处理。要桌面安装体验再补齐清单、图标与离线缓存，不为上架套壳。</p>
+<p>小程序流程：上传代码、后台选版本、配置隐私指引与业务类目、提交审核、通过后发布；支付、内容、医疗、教育等类目需备资质。体验版与正式版环境不同时，特别检查接口域名、云环境、支付商户号与隐私弹窗，别让审核包连测试服务。</p>
+<p>浏览器插件各家后台上传扩展包，填功能、权限用途、隐私行为、截图与测试说明。权限最少够用：只读当前站点不申请所有网站，只在点击时执行不持续读历史。每多一个敏感权限，商店就多问一句为什么。</p>
+<h2>八、审核八类失败原因</h2>
+<table>
+<tr><th>现象</th><th>常见原因</th><th>提交前怎么发现</th></tr>
+<tr><td>一启动崩溃或白屏</td><td>发布配置、生产接口或架构未测</td><td>从商店测试渠道全新安装</td></tr>
+<tr><td>审核无法登录</td><td>验证码、地区限制、账号过期</td><td>用审核说明在另一台设备操作</td></tr>
+<tr><td>隐私问题</td><td>内置工具行为、权限与声明不一致</td><td>做一次数据与权限盘点</td></tr>
+<tr><td>功能太少像演示</td><td>占位页、死链接、按钮无作用</td><td>删除未完成入口或补齐链路</td></tr>
+<tr><td>支付被拒</td><td>数字内容未用平台要求支付方式</td><td>开发前读目标商店支付规则</td></tr>
+<tr><td>权限过度</td><td>请求无关敏感权限</td><td>删除后复测核心流程</td></tr>
+<tr><td>素材侵权</td><td>图标、字体、音乐、截图来源不明</td><td>保存授权、发票、许可证记录</td></tr>
+<tr><td>描述与程序不一致</td><td>复用旧截图与营销文案</td><td>用候选发布包重做素材</td></tr>
+</table>
+<p>八类共同点：提交前都能自己发现。审核不是抽奖，是把没测的地方补测。做成提交前清单每次过一遍，能挡掉七类。</p>
+<h2>九、分阶段发布与更新纪律</h2>
+<p>七步发布：本机与真机测试、团队内部测试、少量真实用户封闭测试、提交审核、分阶段或小比例发布、观察崩溃率与接口错误与登录与支付与客服反馈、指标稳定后全量。发布计划写清四件事：谁按发布按钮、谁盯监控、出现什么指标暂停、如何回滚、用户怎样被通知。分阶段的好处是出事波及面小，百分之一用户崩溃是几十条客诉，全部用户崩溃就是一星差评潮，修复期新用户还在涌入。</p>
+<p>更新七查：各平台包名与包身份不变；上传密钥与签名链可用；本地数据库能从旧结构迁移；自动更新不破坏编辑中数据；商店隐私申报随新工具新功能更新；后端先兼容旧客户端再发新客户端；旧版本留受控可用或升级窗口。签名密钥、开发者账号与包身份不是普通构建文件，丢失可能等于失去给现有用户更新的能力。备份要加密、分开存放、定期验证可恢复。</p>
+<h3>提示二 · 分阶段发布，把回滚写进计划</h3>
+<p>没有回滚方案的全量发布是赌博。发布计划里回滚和监控要写在按按钮之前，不是出事之后现补。指标暂停线要具体到数字，例如崩溃率超过千分之五即暂停放量，写不出数字的暂停线等于没有。</p>
+<h3>提示三 · 密钥、账号、包身份，按资产管不按文件管</h3>
+<p>这三样丢任何一样，轻则重新提交审核，重则失去给现有用户更新的能力。备份要加密、分开存放、定期演练恢复，并写进交接文档。很多团队的真正绝境不是丢钥，而是钥在、密码没人记得。</p>
+<h2>十、第一次上架十步清单</h2>
+<p>选择第一个平台与唯一渠道；组织账号注册后台；固定应用名与包标识；准备并安全备份签名材料；构建发布包在干净设备安装；准备图标、截图、介绍、支持页与隐私政策；提供长期有效的审核测试账号；内测渠道安装并走完核心流程；提交审核并保存每次反馈与修改记录；小范围发布确认监控正常后全量。</p>
+<p>最易跳过的是审核测试账号：用主账号测遍全程，忘了审核人员拿不到内部账号，一道登录墙能卡几天。</p>
+<h2>十一、审查清单</h2>
+<ol>
+<li>用组织账号注册，应用归属清晰。</li>
+<li>后台包标识与工程完全一致，逐个字母核对。</li>
+<li>协议税务收款材料提前办，周期留够。</li>
+<li>先验证再上传，测试构建与提交构建一致。</li>
+<li>内部外部测试员都覆盖，五项恢复场景验过。</li>
+<li>商店材料如实回答应用是什么、给谁用、碰什么数据。</li>
+<li>审核备注含长期有效测试账号与操作说明。</li>
+<li>被拒按条款复现，改代码必加构建号。</li>
+<li>官网分发六件套齐：签名、托管、更新、回滚、架构说明、误报处理。</li>
+<li>苹果电脑官网分发走完公证与干净机验证。</li>
+<li>上线前搜过前端产物，无密钥无内部地址。</li>
+<li>提交前清单八类自查过一遍。</li>
+<li>发布计划含监控指标、暂停线、回滚步骤与用户通知。</li>
+<li>签名材料加密备份并验证过可恢复。</li>
+</ol>
+<h2>十二、约束说明</h2>
+<ol>
+<li>本篇素材取自 <code>stage-3/cross-platform/app-publishing/index.md</code> 对应切片，范围自「5.1 创建应用记录」起，至「14. 第一次上架的最短行动清单」止；切片尾部「真正的浏览器助手长什么样」起属下一篇目（浏览器扩展页）内容，已整体排除，未在本篇使用。</li>
+<li>篇中五步、七步、六步、七查、八类原因、七步发布、十步清单等均照录切片原文，未作改动。</li>
+<li>「组织账号是企业发布与个人玩票的分岔口」「审核不是抽奖」「钥匙挂在大门口」「测甲交乙」等为二次演绎添加的记忆框架，源文档只给出流程与清单，未给出这些口诀式总结。</li>
+<li>前端产物密钥风险的检查办法为面向零基础听众的操作性补充，源文档仅要求密钥不进入前端产物。</li>
+<li>口播稿中数量均用中文数字表述，工具与产品名保留原术语；本内容为二次演绎配音版，若与源文档表述有出入，以源文档为准，各商店规则以平台当期文档为准。</li>
+</ol>
+<h2>十三、常见误区与纠正</h2>
+<table>
+<tr><th>误区</th><th>表现</th><th>纠正</th></tr>
+<tr><td>用个人账号发布</td><td>离职后应用归属成谜</td><td>组织账号注册，角色后台管</td></tr>
+<tr><td>两边包标识不一致</td><td>上传以各种怪方式失败</td><td>逐个字母核对再传</td></tr>
+<tr><td>测甲交乙</td><td>测试全白做</td><td>提交前核对构建号</td></tr>
+<tr><td>点加入即送审</td><td>一周没进队列</td><td>再点提交，确认状态</td></tr>
+<tr><td>无审核账号</td><td>登录墙卡住审核</td><td>备注长期有效测试账号</td></tr>
+<tr><td>被拒反复同包提交</td><td>反复被拒浪费时间</td><td>加构建号重新归档</td></tr>
+<tr><td>未签名安装包发群</td><td>用户不敢装，无更新链路</td><td>证书签名加校验摘要</td></tr>
+<tr><td>官网分发跳过公证</td><td>用户首次打开被拦</td><td>六步走完再上线</td></tr>
+<tr><td>密钥进前端产物</td><td>凭据公开可被扫</td><td>上线前全文搜索排查</td></tr>
+<tr><td>直接全量发布</td><td>崩溃潮与差评潮</td><td>七步放量，回滚写进计划</td></tr>
+<tr><td>忽略数据库迁移</td><td>更新后老数据丢失</td><td>更新前做结构迁移测试</td></tr>
+</table>
+<h2>十四、能力自测</h2>
+<ol>
+<li>为什么强调用组织账号而不是个人账号？</li>
+<li>测试平台为什么要先内后外？</li>
+<li>提交审核的两个点击分别是什么，漏哪个会怎样？</li>
+<li>官网分发和商店分发最大的差别是什么？</li>
+<li>苹果电脑官网分发为什么不能省公证？</li>
+<li>前端产物里发现密钥，为什么要当事故处理？</li>
+<li>八类审核失败原因里，哪几类能靠提交前清单挡掉？</li>
+<li>发布计划必须写清的四件事是什么？</li>
+<li>为什么说丢失签名密钥可能等于失去更新能力？</li>
+</ol>
+<p>参考答案：一，个人账号绑个人身份，人离职应用归属与更新能力都成问题，组织账号归公司可管角色。二，内部测核心流程，外部补设备与账号覆盖，真实旧设备只有外部带得进来。三，先加入审核再点提交，只点加入不进队列。四，商店管安装与信任，官网这些全归自己，还要自建更新与回滚。五，不公证会被系统守卫拦截，用户第一次打开就放弃。六，前端产物公开，密钥等于挂在大门口，扫到只是时间问题。七，八类都能靠提交前自查挡掉大部分，剩下按条款流程处理。八，谁按按钮、谁盯监控、什么指标暂停、如何回滚与通知用户。九，签名链和包身份是更新的前提，丢了无法再给现有用户发新版。</p>
+<h2>十五、一页纸总结</h2>
+<table>
+<tr><th>主题</th><th>一句话要点</th></tr>
+<tr><td>总观点</td><td>上架是产品工程的一部分</td></tr>
+<tr><td>苹果五步</td><td>组织账号、身份一致、材料提前</td></tr>
+<tr><td>测试平台</td><td>先内后外，测甲交甲</td></tr>
+<tr><td>审核</td><td>两击送审，被拒按条款改</td></tr>
+<tr><td>微软</td><td>商店七步，安装后复测更新</td></tr>
+<tr><td>官网</td><td>签名、托管、更新、回滚自负</td></tr>
+<tr><td>苹果电脑</td><td>官网分发必须公证</td></tr>
+<tr><td>Linux</td><td>元数据经得起自动检查</td></tr>
+<tr><td>Web</td><td>部署即发布，密钥不进前端</td></tr>
+<tr><td>插件</td><td>权限最少够用</td></tr>
+<tr><td>发布</td><td>七步放量，回滚写进计划</td></tr>
+<tr><td>更新</td><td>身份签名数据库三不变</td></tr>
+<tr><td>一句话</td><td>第一次把规矩立好，以后每次发布都走老路</td></tr>
+</table>
+<hr>
+<p>*配套文件：口播稿 <code>script.txt</code>、音频 <code>stage-3-cross-platform-app-publishing-72-播客.mp3</code>、字幕 <code>stage-3-cross-platform-app-publishing-72-播客.srt</code>。*</p>
+<p><strong>来源：Easy-Vibe（datawhalechina/easy-vibe）docs/zh-cn/stage-3/cross-platform/app-publishing/index.md</strong></p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
