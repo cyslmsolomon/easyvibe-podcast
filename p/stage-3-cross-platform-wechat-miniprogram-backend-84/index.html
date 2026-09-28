@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>如何构建微信小程序（包含后端） · 1.3 小程序后端的几种做法</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 8 · EP 84</span>
+<h1>如何构建微信小程序（包含后端） · 1.3 小程序后端的几种做法</h1>
+<p class="sub">第 8 章 · 第 84 讲 · 15:19</p>
+<div class="meta"><span>时长 <b>15:19</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>8</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-cross-platform-wechat-miniprogram-backend-84-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-cross-platform-wechat-miniprogram-backend-84-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-3-cross-platform-wechat-miniprogram-backend-84/stage-3-cross-platform-wechat-miniprogram-backend-84-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-3-cross-platform-wechat-miniprogram-backend-84/stage-3-cross-platform-wechat-miniprogram-backend-84-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-8.html">← 第 8 章目录</a>
+<a href="/p/stage-3-cross-platform-vscode-extension-83/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:25</span></div>
+<div class="ch" data-t="85.968"><span class="t">1:25</span><span class="n">接后端的三条路</span><span class="d">2:13</span></div>
+<div class="ch" data-t="219.0"><span class="t">3:39</span><span class="n">四个工具与账号准备</span><span class="d">1:51</span></div>
+<div class="ch" data-t="330.672"><span class="t">5:30</span><span class="n">开通云开发</span><span class="d">2:18</span></div>
+<div class="ch" data-t="468.984"><span class="t">7:48</span><span class="n">先留基线 再让 AI 做页面</span><span class="d">2:02</span></div>
+<div class="ch" data-t="591.288"><span class="t">9:51</span><span class="n">接通第一条后端链路</span><span class="d">1:41</span></div>
+<div class="ch" data-t="692.4"><span class="t">11:32</span><span class="n">身份与第一张工单</span><span class="d">2:14</span></div>
+<div class="ch" data-t="827.352"><span class="t">13:47</span><span class="n">防重复提交</span><span class="d">1:32</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>如何构建微信小程序（包含后端） · 从选路线到工单入库</h1>
+<h2>一、这篇在讲什么</h2>
+<p>本篇把一个小程序从纯前端应用变成有后端的应用。产品是 Northstar Service Hub 客户服务小程序，含会员首页、创建服务请求、我的工单三个页面。全篇围绕一条链路展开：<strong>用户点击提交 → 小程序调用云函数 → 后端识别当前用户 → 工单保存到数据库 → 页面显示工单编号</strong>。</p>
+<p>教程反复使用同一工作句式：一次只给一个小任务，看到成功结果再走下一步。本篇所有操作原话均照录切片原文，演绎部分在约束说明中单独列出。对零基础听众只需记住一个比喻：小程序是前台，后端是后厨，前台点菜、后厨做菜，本篇通的就是这条跑菜的路。这条路由七个环节组成，本篇覆盖从选路线、备工具、开环境，到通链路、认身份、存工单、防重复的全过程，项目创建与账号注册在之前步骤完成，未纳入本篇。</p>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>教程环节</th><th>对应能力</th><th>在产品工作中的位置</th></tr>
+<tr><td>三条接后端路线</td><td>按现状选技术路线</td><td>架构选型的输入判断</td></tr>
+<tr><td>四个工具分工</td><td>分清研发各环节归属</td><td>协作流程梳理</td></tr>
+<tr><td>账号与 AppID 准备</td><td>身份先行，避免假故障</td><td>环境类问题的第一排查项</td></tr>
+<tr><td>接入云端能力</td><td>安全地连接外部服务</td><td>密钥与权限纪律</td></tr>
+<tr><td>开通云开发环境</td><td>区分身份、名称、编号</td><td>环境管理基本功</td></tr>
+<tr><td>先留基线再做页面</td><td>变更前固定对照点</td><td>回归判断的地基</td></tr>
+<tr><td>自然语言迭代页面</td><td>先骨架、再砍内容、后磨表达</td><td>原型迭代次序</td></tr>
+<tr><td>接通云函数</td><td>最小链路验证</td><td>联调第一步</td></tr>
+<tr><td>身份由后端识别</td><td>可信判断放离数据近处</td><td>安全边界</td></tr>
+<tr><td>工单入库与防重</td><td>前后端两道防线</td><td>健壮性验收</td></tr>
+</table>
+<h2>三、三条路与选型三问</h2>
+<p>接后端常见三条路。第一种，云开发原生能力：小程序直接调用云函数，云函数操作文档型数据库和云存储，与微信身份结合最近，不需第一天就自建登录、买服务器、配 HTTPS。第二种，云托管：等项目要同时服务小程序、网页和管理后台，或已有完整后端框架时再考虑。第三种，接入企业原有后端：公司本来就有后端团队，不必为小程序重做一套，现有连接服务可把已有服务接进来。</p>
+<p>两个易混名字：连接服务负责接公司原来的服务，网关负责给云函数和云托管提供 HTTP 入口，不是同一个东西。文档里两者一起出现时最容易买错戴错，一个对外接旧系统，一个对内开入口，方向正好相反。关系型数据库虽已支持，但只能在新建环境时选择，传统环境不能直接切换，本次不用。</p>
+<p>选型三问：要不要同时服务多端，是就看云托管；公司有没有现成后端团队和接口，有就接原来的；都没有，第一次做就用云开发原生。新手总想一次选对，反复比较三天不开工，其实三条路的前期页面工作几乎一样，先把第一条跑通，换路改的是连接方式，不是产品。</p>
+<h3>提示一 · 先跑通，再谈选型优化</h3>
+<p>选型空转是隐形成本。页面工作在三条路上几乎相同，先跑通最小链路，拿着实测再决定要不要换路。</p>
+<h2>四、四个工具与账号准备</h2>
+<p>四个工具各司其职：Trae 打开真实项目、与 AI 对话、修改文件并连接云端能力；HBuilderX 负责构建，把源项目运行到小程序模拟器；微信开发者工具负责预览、开通云开发、查看环境、部署云函数和上传版本；CloudBase 控制台看数据库记录、云函数日志、存储文件和环境状态。口诀：代码在 Trae，构建在 HBuilderX，页面在开发者工具，数据和日志在控制台。</p>
+<p>账号准备先回到微信公众平台开发设置确认 AppID，再核对项目内 AppID 一致、开发者工具登录账号有开发权限。AppID 填错的典型现象是看不到正确云环境、上传版本跑到别的项目，这类问题不要急着让 AI 重写代码，先确认身份。</p>
+<p>接入云端能力时走官方登录和环境选择流程，不要把平台密钥粘进提示词。连接后先只检查不修改：请检查云端是否连接成功并告诉我当前环境。AI 能正确识别项目类型、当前环境并列出技能，才算准备好。工具暂时不可用也不阻塞，提示词仍可用，只是部署和查日志要自己去控制台。</p>
+<h2>五、开通云开发与三个标识</h2>
+<p>从微信开发者工具进入云开发，不要走控制台新购流程。页面出现区域选择、数据库类型、付费套餐时，说明走错入口，直接退出。正确路径是从开发者工具创建，环境自动关联当前小程序。环境名称取易辨认的名字即可。</p>
+<p>三个标识务必分清：AppID 是小程序的身份，环境名称是给人看的名字，环境 ID 是后端环境的唯一编号。混用是新手事故高发区。</p>
+<p>截至二零二六年八月，每个云开发账号有一个免费体验环境，每月三千资源点，足够本章练习。免费环境用于开发体验，正式发布后到期时间变为上线后第十五天。跟着教程操作不必付费，长期上线再决定升级或接企业后端。开发者工具若只带你去购买页，可先到公众平台行业能力报名成长计划，符合条件可获有效期六个月的个人版环境。正式项目要把开发、测试、生产环境分开，练习只用开发环境，不要为截图创建可能费用的环境。</p>
+<h3>提示二 · 分清三个标识，事故少一半</h3>
+<p>AppID、环境名称、环境 ID 各管各的。身份错了看不到环境，名称错了找不到环境，编号错了连到别的环境。动手前先把三个名字写在纸上。</p>
+<h2>六、先留基线，再让 AI 做页面</h2>
+<p>打开基础项目，先确认修改的是源项目而非编译结果。先完整运行一次，记住接后端之前的样子，这是基线。后面出问题，能区分是本轮改动还是旧环境本身坏了。</p>
+<p>第一个指令给完整产品目标而非局部任务：请把当前项目改成客户服务小程序，先做三个页面，使用演示数据。不在第一步就同时处理登录、数据库、上传和支付。AI 执行时要看清它改了哪些文件；若它准备另建项目，马上制止；结果不满意可回退到修改前。</p>
+<p>页面迭代分三层：先搭骨架，再砍内容，最后磨表达。教程实录：先简化首页只保留会员状态、三个常用服务和最近一条工单；再把表单的问题信息和联系方式分开且不出现技术词。改完没变化，先停止运行再重新运行。</p>
+<h2>七、接通第一条后端链路</h2>
+<p>链路七环：点击提交、调用云函数、识别用户、工单入库、显示编号，缺一不可。不认身份，工单不知道谁报的；不显示编号，用户不知道报上没报上。</p>
+<p>第一次不建十几个函数，先做连接测试：请把当前小程序接到云端，并在首页增加检查后端连接按钮，连接成功显示当前时间，完成后告诉我需要部署哪个云函数。AI 改完还需在开发者工具或控制台部署云函数。页面显示服务正常且日志出现一次调用，才算跑通。这一步一次验证四件事：页面能调起后端、云函数部署成功、网络通、日志可查。后半句提示词把部署动作一并问出来，避免卡在改了代码没部署。</p>
+<h2>八、身份、工单与防重</h2>
+<p>身份必须由后端识别。前端提交的用户标识或一句我是管理员都可能被改，可信身份由云函数从微信调用上下文获取。提示词：请让云函数识别当前用户，不要使用前端传来的身份，页面和日志不要显示完整 OpenID。多数小程序无需自建登录系统。原则：谁离数据近，谁说话算数，前端只负责收集和展示。</p>
+<p>保存第一张工单时只做一件事：提交后保存到云端并显示编号，不同时做积分、支付和后台。改完确认部署哪个云函数、去哪看结果。部署后在数据库集合管理中找或创建工单集合，模拟器提交，页面出编号且数据库出现记录，才算成功。要看两个地方：只看到编号可能写的是缓存，只看到记录可能返回假编号。</p>
+<p>防重复提交要分两层。页面快速点两次不够，那可能只是按钮防重复点击。正确测法是用同一个请求编号请求两次，仍只有一张工单，才说明后端处理好。前端防手误，后端防伪造重放。</p>
+<h3>提示三 · 绕过界面直接打后端，它还成立吗</h3>
+<p>判断功能是否真健壮，就问这一句。只做了前端校验的功能，经此一问就会现形。重要的判断和校验，都要能在没有界面的情况下成立。</p>
+<h2>九、审查清单</h2>
+<ol>
+<li>三条路线与两个易混名字说清楚，选型三问有答案。</li>
+<li>四个工具分工明确，找窗口有口诀。</li>
+<li>AppID 在平台、项目、工具三处一致。</li>
+<li>未把平台密钥粘进提示词，走官方登录流程。</li>
+<li>连接后先只检查不修改，能识别项目与环境。</li>
+<li>云开发从开发者工具创建，未误入购买流程。</li>
+<li>AppID、环境名称、环境 ID 三者未混用。</li>
+<li>免费额度用途清楚，未提前付费。</li>
+<li>练习只用开发环境，未额外创建可能费用的环境。</li>
+<li>修改源项目而非编译结果，改动前留好基线。</li>
+<li>第一个指令给完整目标，未一上来堆登录数据库支付。</li>
+<li>AI 未另建项目，变更可回退。</li>
+<li>页面按骨架、内容、表达三层迭代。</li>
+<li>连接测试四件事全过，云函数已部署。</li>
+<li>身份由云函数从上下文识别，不显示完整 OpenID。</li>
+<li>工单提交后页面编号与数据库记录同时核对。</li>
+<li>防重以后端请求编号方式复测通过。</li>
+</ol>
+<h2>十、约束说明</h2>
+<ol>
+<li>本篇素材取自 <code>stage-3/cross-platform/wechat-miniprogram-backend/index.md</code> 对应切片，范围自「1.3 小程序后端的几种做法」起，至「4.3 让第一张工单真正保存下来」止，本篇未越出此范围取材。</li>
+<li>篇中三条路线、四个工具分工、三个标识区分、免费环境额度、成长计划、各条提示词原话、防重测法等均照录切片原文，未作改动。</li>
+<li>「前台与后厨」「谁离数据近谁说话算数」「前端防手误后端防伪造」「先骨架再砍内容后磨表达」「选型三问」等为二次演绎添加的记忆框架，源文档只给出操作与原则，未给出这些口诀式总结。</li>
+<li>口播稿中价格、日期、数量等数字均按中文口播习惯转述，工具与产品名保留原术语。</li>
+<li>本内容为二次演绎配音版，若与源文档表述有出入，以源文档为准；云开发额度与活动时间具有时效性，以腾讯云当期文档为准。</li>
+</ol>
+<h2>十一、常见误区与纠正</h2>
+<table>
+<tr><th>误区</th><th>表现</th><th>纠正</th></tr>
+<tr><td>以为必须买云服务</td><td>卡在付费页不敢继续</td><td>免费额度够学习，先跑通再付费</td></tr>
+<tr><td>混淆三个标识</td><td>看不到环境或连错环境</td><td>AppID 身份、名称给人看、编号唯一</td></tr>
+<tr><td>把密钥粘进提示词</td><td>凭据泄露风险</td><td>走官方登录，密钥不进对话</td></tr>
+<tr><td>修改编译结果</td><td>重新运行后改动全丢</td><td>只改源项目</td></tr>
+<tr><td>不留基线就开工</td><td>出问题无法归因</td><td>先运行一次记住原样</td></tr>
+<tr><td>一上来堆功能</td><td>出错无法定位</td><td>一次一个小任务</td></tr>
+<tr><td>AI 另建项目</td><td>上下文丢失</td><td>及时制止，只改当前工作区</td></tr>
+<tr><td>身份信前端</td><td>伪造身份越权</td><td>云函数从上下文识别</td></tr>
+<tr><td>只看页面编号</td><td>假编号误判成功</td><td>页面与数据库双向核对</td></tr>
+<tr><td>前端防重当全部</td><td>构造请求仍重复提交</td><td>同一请求编号后端复测</td></tr>
+</table>
+<h2>十二、时间不够时怎么砍</h2>
+<p>只有半天预算时，按这张表砍，砍完仍是一条能讲清的链路。</p>
+<table>
+<tr><th>优先级</th><th>保留</th><th>砍掉</th><th>理由</th></tr>
+<tr><td>必须保留</td><td>三条路线、四个工具、开通环境、接通云函数</td><td>无</td><td>这是从选型到联调的主干</td></tr>
+<tr><td>尽量保留</td><td>身份识别、工单入库</td><td>防重复提交</td><td>先通再防，防可后补</td></tr>
+<tr><td>可以简化</td><td>页面迭代只做简化首页一次</td><td>表单拆分与多轮调整</td><td>骨架先行，细节后补</td></tr>
+<tr><td>可以跳过</td><td>成长计划报名</td><td>付费套餐对比</td><td>免费额度足够练习</td></tr>
+<tr><td>不要跳过</td><td>部署云函数与查看日志</td><td>无</td><td>不部署则链路从未真正验证</td></tr>
+</table>
+<h2>十三、能力自测</h2>
+<ol>
+<li>三条接后端路线分别适合什么现状？</li>
+<li>连接服务和网关的分工是什么？</li>
+<li>AppID、环境名称、环境 ID 混用会出什么事故？</li>
+<li>为什么不能把平台密钥粘进提示词？</li>
+<li>改动前为什么要先留基线？</li>
+<li>第一个指令为什么要给完整产品目标？</li>
+<li>连接测试一次验证了哪四件事？</li>
+<li>为什么可信身份必须由云函数识别？</li>
+<li>工单入库为什么要同时核对页面和数据库？</li>
+<li>为什么前端防重通过了还要后端再防？</li>
+</ol>
+<p>参考答案：一，原生能力适合零基础首次跑通，云托管适合多端与已有完整后端，接原有后端适合有后端团队的公司。二，连接服务把公司已有服务接进来，网关给云函数和云托管提供访问入口。三，身份错看不到环境，名称错找不到环境，编号错连到别的环境。四，提示词会进入对话与日志，凭据外泄且难以追回。五，没有基线就无法区分是新改动还是旧问题。六，先让 AI 搭出用户可见的第一版，再逐层深入，避免一上来陷入局部。七，页面能调起、部署成功、网络通、日志可查。八，前端提交内容可被篡改，只有后端从可信上下文取到的身份才可作数。九，编号可能来自缓存，记录可能配假编号，双向核对才排除这两种假成功。十，界面防不住直接构造的重复请求，防伪造是后端的责任。</p>
+<h2>十四、一页纸总结</h2>
+<table>
+<tr><th>主题</th><th>一句话要点</th></tr>
+<tr><td>总路线</td><td>小程序需要后端不等于必须买云服务</td></tr>
+<tr><td>三条路</td><td>云开发原生、云托管、接企业原有后端</td></tr>
+<tr><td>选型三问</td><td>多端、有现成后端、都没有，逐条对照</td></tr>
+<tr><td>四工具</td><td>Trae 代码、HBuilderX 构建、开发者工具页面、控制台数据</td></tr>
+<tr><td>三标识</td><td>AppID 身份、环境名称给人看、环境 ID 唯一编号</td></tr>
+<tr><td>免费额度</td><td>每月三千资源点够练习，先跑通再付费</td></tr>
+<tr><td>迭代次序</td><td>先搭骨架、再砍内容、后磨表达</td></tr>
+<tr><td>连接测试</td><td>页面、部署、网络、日志四件事全过</td></tr>
+<tr><td>身份</td><td>云函数从上下文识别，不显示完整 OpenID</td></tr>
+<tr><td>工单</td><td>页面编号与数据库记录双向核对</td></tr>
+<tr><td>防重</td><td>前端防手误，后端防伪造，请求编号复测</td></tr>
+<tr><td>一句话</td><td>一次只通一条链路，通了再扩展</td></tr>
+</table>
+<hr>
+<p>*配套文件：口播稿 <code>script.txt</code>、音频 <code>stage-3-cross-platform-wechat-miniprogram-backend-84-播客.mp3</code>、字幕 <code>stage-3-cross-platform-wechat-miniprogram-backend-84-播客.srt</code>。*</p>
+<p>**来源：Easy-Vibe（datawhalechina/easy-vibe）docs/zh-cn/stage-3/cross-platform/wechat-miniprogram-backend/index.md，本篇为二次演绎配音版，若与源文档表述有出入，以源文档为准。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
