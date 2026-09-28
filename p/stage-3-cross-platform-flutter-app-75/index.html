@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>如何开发 Flutter 跨平台应用 · Nubank：一个面向巴西用户的数字银行</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 8 · EP 75</span>
+<h1>如何开发 Flutter 跨平台应用 · Nubank：一个面向巴西用户的数字银行</h1>
+<p class="sub">第 8 章 · 第 75 讲 · 14:46</p>
+<div class="meta"><span>时长 <b>14:46</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>8</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-cross-platform-flutter-app-75-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-cross-platform-flutter-app-75-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-3-cross-platform-flutter-app-75/stage-3-cross-platform-flutter-app-75-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-3-cross-platform-flutter-app-75/stage-3-cross-platform-flutter-app-75-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-8.html">← 第 8 章目录</a>
+<a href="/p/stage-3-cross-platform-browser-ai-extension-73/">← 上一讲</a>
+<a href="/p/stage-3-cross-platform-godot-game-development-76/">下一讲 →</a>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:33</span></div>
+<div class="ch" data-t="93.744"><span class="t">1:33</span><span class="n">先认识要做的应用</span><span class="d">1:42</span></div>
+<div class="ch" data-t="195.936"><span class="t">3:15</span><span class="n">把环境和一个空白页跑起来</span><span class="d">1:30</span></div>
+<div class="ch" data-t="286.8"><span class="t">4:46</span><span class="n">首页与状态：先让人看懂</span><span class="d">1:37</span></div>
+<div class="ch" data-t="384.216"><span class="t">6:24</span><span class="n">表单、反馈与保存</span><span class="d">2:13</span></div>
+<div class="ch" data-t="517.776"><span class="t">8:37</span><span class="n">结构、自适应与平台能力</span><span class="d">2:09</span></div>
+<div class="ch" data-t="647.328"><span class="t">10:47</span><span class="n">测试、两端验证与发布</span><span class="d">2:41</span></div>
+<div class="ch" data-t="809.064"><span class="t">13:29</span><span class="n">收尾</span><span class="d">1:17</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>如何开发 Flutter 跨平台应用 · 从 Nubank 的选型到门店费用簿</h1>
+<h2>一、这篇在讲什么</h2>
+<p>这一节出自 Easy-Vibe 第三阶段「高级开发：多平台与 AI 进阶」的跨平台章节，主题是怎么用 Flutter 开发一个跨平台应用。全篇用一个具体应用「门店费用簿」把十三步链路完整走了一遍，并用 Nubank 的选型案例作为工程决策的样板。</p>
+<p>核心结论只有一句：<strong>Flutter 省下的是重复实现，不是产品判断、平台适配、测试和发布流程。</strong></p>
+<table>
+<tr><th>模块</th><th>内容</th><th>回答的问题</th></tr>
+<tr><td>Nubank 案例</td><td>十一项标准比较、一小时任务验证、逐步迁移</td><td>跨端框架该怎么选、怎么迁</td></tr>
+<tr><td>门店费用簿</td><td>六件小事定义的业务原型</td><td>一个小应用该做到什么程度</td></tr>
+<tr><td>十三步链路</td><td>环境、首页、状态、表单、持久化、结构、自适应、平台能力、测试、双端验证、发布</td><td>从零到可试用的完整路径</td></tr>
+</table>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>能力域</th><th>具体内容</th></tr>
+<tr><td>技术选型决策</td><td>多方案并行比较、开发者任务验证、分阶段迁移</td></tr>
+<tr><td>业务原型定义</td><td>状态先行、金额校验、保存反馈、离线可用、双状态同步、响应式布局</td></tr>
+<tr><td>环境与工程基线</td><td>环境逐项检查、空白页先行、错误归因</td></tr>
+<tr><td>状态可视化设计</td><td>本机与服务器双状态、最后同步时间、待同步数量</td></tr>
+<tr><td>表单与反馈设计</td><td>字段级错误提示、保存成功反馈、重复提交防护</td></tr>
+<tr><td>数据持久化选型</td><td>键值存储的边界、数据库与 Repository 分层</td></tr>
+<tr><td>项目结构拆分</td><td>View、ViewModel、Repository、Service 四层职责</td></tr>
+<tr><td>自适应布局</td><td>宽屏限宽、窄屏防溢出、自适应三步法</td></tr>
+<tr><td>平台能力接入</td><td>插件优先、平台通道补充原生代码</td></tr>
+<tr><td>分层测试</td><td>单元测试、组件测试、集成测试各自战场</td></tr>
+<tr><td>双端验证</td><td>六项逐端检查清单</td></tr>
+<tr><td>构建与发布</td><td>Web 生产构建、Android 应用包、iOS 审核流</td></tr>
+</table>
+<h2>三、Nubank 案例：先比较，再验证，再扩大</h2>
+<p>Nubank 是巴西数字银行。它没有因为 Flutter 热门就直接迁移，而是先用十一项标准比较 Kotlin Native、React Native 和 Flutter，并让不同经验的开发者分别完成一小时任务、收集反馈。选定 Flutter 后，新功能逐步采用、旧功能按计划迁移，随后建立自己的设计系统，把单元测试、组件测试和端到端测试纳入日常开发。官方案例还记录了合并成功率、合并时间和新人上手速度等实际指标。</p>
+<p>这个案例给费用簿的直接借鉴是工程做法而非界面风格：整页颜色由主题统一；汇总卡、预算、费用行和同步提示拆成小组件；表单规则有单独的可见反馈；最常用的「打开首页和录入表单」写成组件测试。项目开始多人维护时，再按官方可扩展应用架构建议调整目录和测试边界。</p>
+<p>三个大厂案例（My BMW、Google Pay、Nubank）放在一起，方向很明确：跨端框架省下的是重复实现，产品判断、平台适配、测试和发布流程一项都省不掉。</p>
+<h3>提示一 · 选型先过「一小时任务」关</h3>
+<p>评估跨端框架时，不要只比参数表。让团队里不同经验水平的开发者各自用候选框架完成同一个一小时任务，记录完成时间、卡点和代码 review 结论。一小时任务暴露的是真实学习成本和工程摩擦，比任何对比文档都直接。</p>
+<h2>四、门店费用簿：六件小事定义的业务原型</h2>
+<p>成品定义：店长打开首页能看到本月已记录金额和备用金，点「记一笔」新增一笔临时费用；网络不好时先存本机，并明确显示哪些记录还没有同步。</p>
+<p>这个题目装着企业应用经常遇到的六件小事：</p>
+<ol>
+<li>首页先回答「现在是什么状态」；</li>
+<li>金额和费用说明必须校验；</li>
+<li>保存后要告诉用户结果；</li>
+<li>关闭或刷新以后，刚才的记录不能丢；</li>
+<li>离线记录和服务器同步要分成两个状态；</li>
+<li>同一个页面要能适应窄屏手机和较宽窗口。</li>
+</ol>
+<p>选这个小题目做教学是有道理的：企业应用的难点从来不在功能多，而在这六件小事每一件都做到位。demo 能跑起来很容易，把这六件事都做对，才是一个同事真正敢用的工具。门店场景信号未必稳定，仓库角落、地下库房都可能没网，离线可用不是加分项，是基本功。</p>
+<h3>提示二 · 用「六问」检验原型是否可用</h3>
+<p>接手任何小工具原型时，用这六问过一遍：打开第一眼能否看到状态？关键字段是否有校验？保存是否有明确结果？刷新后数据是否还在？离线与在线是否分成两个状态？窄屏宽屏是否都可用。六问全过，原型才算具备交付给真实用户试用的资格。</p>
+<h2>五、十三步链路的关键决策</h2>
+<h3>5.1 环境与空白页：先归因，再动手</h3>
+<p>安装 Flutter 后运行环境检查命令，逐项确认框架本身、Android 工具链、iOS 工具链和编辑器状态；把结果交给智能编程工具，一次只修第一个必须修的问题。常见陷阱是「检查通过不代表全绿」：Web 旁出现对勾，不代表 Android 与 iOS 环境就绪。教程实测环境为 Flutter 3.44.9、Dart 3.12.2、Chrome 151，当时本机缺 Android SDK，Xcode 已装但没有可用的 iOS Simulator Runtime，CocoaPods 也未安装，因此后续演示全部使用实际运行的 Flutter Web 构建，不冒充模拟器或真机截图。</p>
+<p>创建项目后先跑空白计数器模板，确认能运行再写业务。这样出错时能区分「业务修改的问题」和「环境配置的问题」。启动失败时只把第一段有效错误交给工具，要求只修启动、不加功能。</p>
+<h3>5.2 首页顺序与状态：先产品，后技术</h3>
+<p>第一轮只用演示数据：本月金额、备用金、最近费用加一个「记一笔」按钮。信息顺序的原则是店长打开就能看见总额、预算和最近几笔，主要按钮只有一个；颜色字号可调，但不要用五六种卡片抢注意力。太挤时就删到只剩总额、预算、最近记录和新增按钮。</p>
+<p>离线和同步状态要摆到页面上：首页顶部显示最后同步时间和待同步数量，费用行也标记待同步，而不是只在控制台打印日志。「待同步数量」回答的是用户心里最不安的问题——我刚记的这笔到底存下来没有。必须说明：当前版本没有真实服务器，「待同步」只是产品状态的清晰表达，不等于云端同步已完成。接服务器前要先决定读取以本机还是远端为准、失败怎样重试、何时改变同步状态。</p>
+<h3>5.3 表单、反馈与持久化</h3>
+<p>最小表单从底部弹出，只填费用说明和金额。底部弹层适合短任务，因为用户还能看见原页面；字段变多、要拍照或审批时换完整页面。校验规则：费用说明不能为空，金额必须大于零，失败时把原因写在对应字段下面——写在出错字段旁是告诉用户改哪里，统一弹一个马上消失的提示是让用户自己找。</p>
+<p>实测数据：输入「打印纸」和 56 后，本月金额从 890.50 元变为 946.50 元，待同步数量从 1 变为 2，列表顶部出现新记录，底部提示「已保存在本机，联网后再同步」。保存反馈能避免用户因不确定连续点五次；接真实后端后还要让服务端识别重复提交，因为连点、网络重试、页面重复加载都可能让同一笔费用出现两次。</p>
+<p>持久化第一步用键值存储（序列化费用列表存本机），验证方式是重新加载整个 Web 应用后记录仍在。但这种存储只适合设置和少量简单值，不适合大量费用、附件、查询和事务；产品扩大后应换数据库，并把数据层放进 Repository。</p>
+<h3>5.4 结构拆分、自适应与平台能力</h3>
+<p>原型跑通后再拆结构：View 负责显示和交互，ViewModel 保存界面状态与操作，Repository 作为数据来源入口，Service 封装本机数据库、REST API 或平台能力。拆分的信号是职责真的产生了差异，不是目录看起来专业——不要一开始创建几十个空目录。先让工具只提拆分方案，确认后再拆第一项，功能和界面保持不变。分层的好处是测试费用计算不必打开页面，测试页面时可以替换掉服务器。</p>
+<p>自适应不等于把手机页面横向拉长：宽窗口限制内容宽度，避免汇总卡和表单从屏幕左边拉到右边；窄屏不能横向溢出。官方自适应三步法是先抽出共用信息、再测量当前可用空间、最后选择布局；不要按「这是手机还是平板」写死页面。平板要同屏列表和明细时，再把底部导航改成侧边导航或双栏。</p>
+<p>平台能力分别接入：先查维护正常、支持目标平台的插件，用最小原型验证权限、异常和生命周期；插件覆盖不了的，用平台通道调用 Kotlin、Java、Swift 或 Objective-C。跨平台不是禁止原生代码，而是把原生代码控制在真正需要的位置。</p>
+<h3>5.5 测试、双端验证与发布</h3>
+<p>测试用户真正会走的路径：先跑静态分析和现有测试，再补一条组件测试——打开首页、点击「记一笔」、确认费用说明、金额和保存按钮出现；表单稳定后再测空表单不能保存且能看到两个错误提示。教程实测 <code>flutter analyze</code> 无问题、组件测试通过 1 项；空表单提示和本机恢复经浏览器实际操作验证，但未写成完整自动化测试，教程明确不冒充已覆盖。项目扩大后：费用计算与 ViewModel 适合单元测试，页面状态适合组件测试，登录、上传、离线恢复和同步适合集成测试——单元测试查算得对不对，组件测试查点不点得动，集成测试查整条路走不走得通。</p>
+<p>双端六项检查：中文、金额和大字体是否溢出；底部表单是否被软键盘遮住；返回手势能否正常关闭表单；彻底关闭再打开后本机记录是否恢复；相机、照片和通知权限被拒绝时会发生什么；断网、恢复网络和重复重试会不会丢单或生成重复记录。教程如实记录该步当时未完成（缺 Android SDK、无可用 iOS Simulator Runtime），移动端截图不能用 Web 截图替代。</p>
+<p>构建发布是两条独立流水线：Web 生产构建生成于 <code>build/web</code>，需经本地静态服务器打开复验（不双击 HTML）；Android 上架一般生成 App Bundle，需 SDK、应用编号、版本号、发布签名和 Play Console 配置，并至少在无开发环境的手机上安装测试；iOS 在 Mac 上生成 IPA 只是开始，后续还有 Validate、TestFlight、提交审核。两个商店的隐私说明、截图、审核规则、账号及推送、内购、登录政策都不同——一套 Dart 代码不会生成同时提交两个商店的万能安装包。</p>
+<h3>提示三 · 把「待同步数量」当成信任指标运营</h3>
+<p>待同步数量、最后同步时间这类状态字段，是离线功能用户信任的来源。建议为它们设定验收标准：任何一笔记录从保存到出现在列表，用户不需要猜；待同步数量在恢复网络后必须归零，归零前用户能看到进度。宁可多做一步状态展示，也不要用一个转圈图标代替所有状态。</p>
+<h3>提示四 · 保存反馈的三件套</h3>
+<p>一个可靠的保存动作要同时给出三样东西：结果（成功或失败）、位置（新记录去哪了）、后续（已存本机还是已同步）。教程实测的「关闭表单、新记录置顶、底部提示已保存在本机，联网后再同步」就是三件套齐备的样板。缺任何一件，用户就会用连续点击来消除不确定。</p>
+<h3>提示五 · 错误提示写在出事现场</h3>
+<p>字段级错误提示的原则：提示出现在出错的字段旁边，说明缺什么、怎么改。不要只写「参数错误」，也不要弹一个马上消失的统一提示。需要自己实现时，可对照官方表单校验示例。</p>
+<h2>六、审查清单</h2>
+<ul>
+<li>已用多标准加一小时任务的方式评估过跨端框架，而非只看热度</li>
+<li>迁移策略是新功能逐步采用、旧功能按计划迁移，不是一次性切换</li>
+<li>首页第一屏能回答「现在是什么状态」，主要按钮只有一个</li>
+<li>已区分「存在本机」与「到达服务器」两种状态，并有最后同步时间与待同步数量</li>
+<li>接服务器前已决定读取以本机还是远端为准、失败怎样重试、何时改变同步状态</li>
+<li>金额与说明字段有校验，错误提示写在对应字段下方</li>
+<li>保存成功有明确反馈，新记录立即可见</li>
+<li>已评估键值存储的数据量边界，扩大时换数据库并分层 Repository</li>
+<li>项目结构按 View、ViewModel、Repository、Service 拆分，且拆分时机以职责差异为准</li>
+<li>宽屏限制内容宽度，窄屏无横向溢出，未按设备类型写死页面</li>
+<li>平台能力先查插件再走平台通道，原生代码控制在真正需要的位置</li>
+<li>有覆盖主路径的组件测试，且不把手动验证冒充成自动化覆盖</li>
+<li>Android 与 iOS 分别完成六项检查，不用 Web 截图替代移动端验证</li>
+<li>发布流水线区分 Web、Android、iOS 三条，未幻想一个万能安装包</li>
+</ul>
+<h2>七、约束说明</h2>
+<ol>
+<li>本篇素材取自 <code>stage-3/cross-platform/flutter-app/index.md</code> 对应切片，范围自「Nubank：一个面向巴西用户的数字银行」案例起，至篇末「一笔费用能够保存和恢复，原型才算跑通」止。该页前半部分「Flutter 和 Dart 分别是什么」「My BMW」「Google Pay」三节不在本篇切片内（位于上一切片的尾部），<strong>未纳入</strong>本篇口播稿与解读稿。</li>
+<li>教程中的原始命令（环境检查、设备列表、静态分析、构建命令等）在口播稿中以功能描述方式转述，未逐字朗读；解读稿保留了关键命令名（如 <code>flutter analyze</code>）供对照。</li>
+<li>篇中所有数据均照录切片原文：十一项选型标准、一小时任务、Flutter 3.44.9 与 Dart 3.12.2 与 Chrome 151 的实测组合、金额 890.50 元变为 946.50 元、待同步数量从 1 变为 2、组件测试通过 1 项，未作改动。</li>
+<li>「六问检验原型」「保存反馈三件套」「待同步数量当信任指标运营」「一小时任务关」等为演绎添加的操作性方法，源文档只给出做法与实测记录，未给出这些自检框架。</li>
+<li>本内容为二次演绎配音版，若与源文档表述有出入，以源文档为准。</li>
+</ol>
+<h2>八、常见误区与纠正</h2>
+<table>
+<tr><th>误区</th><th>表现</th><th>纠正</th></tr>
+<tr><td>因为框架热门就迁移</td><td>选型依据是热度不是任务</td><td>多标准比较加一小时任务验证</td></tr>
+<tr><td>检查通过就当环境就绪</td><td>只在 Web 上跑，冒充双端</td><td>逐项检查，模拟器分别出现才算数</td></tr>
+<tr><td>一上手就接数据库</td><td>信息顺序没排对，存什么都不知道</td><td>先演示数据排顺序，再谈存储</td></tr>
+<tr><td>用转圈图标代替所有状态</td><td>用户不知道记录存没存</td><td>分清本机与服务器两个状态</td></tr>
+<tr><td>错误提示只写参数错误</td><td>用户不知道改哪里</td><td>提示写在出错字段旁边</td></tr>
+<tr><td>保存后毫无反馈</td><td>用户连续点五次，产生重复记录</td><td>结果、位置、后续三件套齐备</td></tr>
+<tr><td>键值存储硬扛全部数据</td><td>数据量上来后丢数据、卡顿</td><td>设边界，扩大即换数据库并分层</td></tr>
+<tr><td>一开始建几十个空目录</td><td>看起来企业级，职责并不清</td><td>职责真的不同了再拆</td></tr>
+<tr><td>把手机页面横向拉长</td><td>宽屏上表单拉到屏幕尽头</td><td>宽屏限宽，自适应三步法</td></tr>
+<tr><td>因为跨平台就禁止原生代码</td><td>平台能力做不了或做得很别扭</td><td>插件优先，平台通道补充</td></tr>
+<tr><td>用手动验证冒充自动化测试</td><td>回归时问题复发</td><td>主路径先写组件测试</td></tr>
+<tr><td>幻想一个万能安装包</td><td>以为一套代码直接提交两商店</td><td>三条发布流水线分别走</td></tr>
+</table>
+<h2>九、一页纸总结</h2>
+<table>
+<tr><th>主题</th><th>一句话要点</th></tr>
+<tr><td>核心结论</td><td>Flutter 省重复实现，不省产品判断、适配、测试与发布</td></tr>
+<tr><td>选型方法</td><td>多标准比较、一小时任务、新功能逐步迁移</td></tr>
+<tr><td>原型标准</td><td>六件小事全对，才是同事敢用的工具</td></tr>
+<tr><td>工作方法</td><td>每次只给一个任务，完成即运行即验证</td></tr>
+<tr><td>首页原则</td><td>先回答状态，主要按钮只有一个</td></tr>
+<tr><td>状态设计</td><td>本机与服务器两状态，待同步数量要可见</td></tr>
+<tr><td>保存反馈</td><td>结果、位置、后续三件套，防重复提交</td></tr>
+<tr><td>持久化</td><td>键值存储有边界，扩大换数据库加 Repository</td></tr>
+<tr><td>项目结构</td><td>View、ViewModel、Repository、Service 按职责拆</td></tr>
+<tr><td>自适应</td><td>宽屏限宽窄屏防溢出，不按设备写死</td></tr>
+<tr><td>平台能力</td><td>插件优先，平台通道补原生</td></tr>
+<tr><td>测试分层</td><td>单元查计算、组件查交互、集成查链路</td></tr>
+<tr><td>双端验证</td><td>六项检查分别过，不用 Web 截图替代</td></tr>
+<tr><td>发布</td><td>Web、Android、iOS 三条独立流水线</td></tr>
+<tr><td>验收线</td><td>一笔费用能保存和恢复，原型才算跑通</td></tr>
+</table>
+<hr>
+<p>*配套文件：口播稿 <code>script.txt</code>、音频 <code>stage-3-cross-platform-flutter-app-75-播客.mp3</code>、字幕 <code>stage-3-cross-platform-flutter-app-75-播客.srt</code>。*</p>
+<p><strong>来源：Easy-Vibe（datawhalechina/easy-vibe）docs/zh-cn/stage-3/cross-platform/flutter-app/index.md</strong></p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
