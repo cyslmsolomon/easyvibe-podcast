@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>收敛方案（双钻模型）</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 6 · EP 92</span>
+<h1>收敛方案（双钻模型）</h1>
+<p class="sub">第 6 章 · 第 92 讲 · 15:15</p>
+<div class="meta"><span>时长 <b>15:15</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>6</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-1-appendix-double-diamond-92-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-1-appendix-double-diamond-92-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-1-appendix-double-diamond-92/stage-1-appendix-double-diamond-92-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-1-appendix-double-diamond-92/stage-1-appendix-double-diamond-92-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-6.html">← 第 6 章目录</a>
+<a href="/p/stage-1-complete-project-practice-91/">← 上一讲</a>
+<a href="/p/stage-2-ai-capabilities-dify-knowledge-base-18/">下一讲 →</a>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:31</span></div>
+<div class="ch" data-t="91.968"><span class="t">1:31</span><span class="n">材料和取舍的难题</span><span class="d">2:24</span></div>
+<div class="ch" data-t="236.448"><span class="t">3:56</span><span class="n">三句自问与投入陷阱</span><span class="d">2:26</span></div>
+<div class="ch" data-t="382.728"><span class="t">6:22</span><span class="n">第一个钻石 先 Discover</span><span class="d">2:31</span></div>
+<div class="ch" data-t="534.096"><span class="t">8:54</span><span class="n">第一个钻石 再 Define</span><span class="d">2:14</span></div>
+<div class="ch" data-t="668.448"><span class="t">11:08</span><span class="n">第二个钻石 Develop</span><span class="d">2:21</span></div>
+<div class="ch" data-t="810.12"><span class="t">13:30</span><span class="n">收尾与使用边界</span><span class="d">1:44</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe · 收敛方案：双钻模型，先把问题想清楚再动手 — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-1/appendix-double-diamond/index.md</code>），为<strong>二次演绎配音版</strong>。本文在原文基础上做了口语化改写、结构重组与实践补充，观点与例子由演绎方添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>stage-1-appendix-double-diamond-92</code></li>
+<li>所属章节：第 6 章</li>
+<li>源切片覆盖范围：章节导读、1 两次发散与收敛、2 为什么要把问题和方案分开、3 第一个钻石（3.1 Discover、3.2 Define）、4 第二个钻石（4.1 Develop）。源切片在 4.1 处结束，原文后续小节未包含在本切片内</li>
+<li>对应音频：<code>stage-1-appendix-double-diamond-92-播客.mp3</code></li>
+<li>字幕：<code>stage-1-appendix-double-diamond-92-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>需求分析做完了，用户访谈也做完了，手里材料一大堆，真正的困难才刚开始，怎么取舍。不同用户的经历、现有工具的问题、若干个看起来都能做的改进方向堆在一起，新的问题不是没东西可做，而是不知道先做哪个、放弃哪个。更麻烦的是，团队开会时每个人都能为自己的偏好找到理由，会议开完，立场没变，问题还在原地。</p>
+<p>双钻模型给这件事提供了一个结构。它是英国 Design Council 推广的设计流程框架，名字来自两个相连的钻石，用两次发散加两次收敛，把理解问题和设计方案这两件最容易被混在一起的工作彻底分开。前两个阶段 Discover 和 Define 处理问题空间，后两个阶段 Develop 和 Deliver 处理方案空间，顺序不能反。</p>
+<p>这一集要传递的核心判断是一句，投入是成本，不是证据。原型证明的是团队做出了什么，用户访谈、现场观察和真实使用证明的才是问题是否存在。听懂这个区分，就听懂了整套框架的用法，也拿到了进入下一个阶段之前的三把尺子。</p>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>阶段</th><th>所属空间</th><th>核心动作</th><th>产出</th><th>常见错误</th></tr>
+<tr><td>Discover</td><td>问题空间</td><td>广泛调研，理解人与场景</td><td>大量保留差异的原始材料</td><td>把多看资料当成理解人；太早收拢</td></tr>
+<tr><td>Define</td><td>问题空间</td><td>聚类、比较、排优先级</td><td>一句清晰的问题定义</td><td>挑最顺耳的说法；定义写成十条</td></tr>
+<tr><td>Develop</td><td>方案空间</td><td>围绕同一问题发散方案</td><td>多个可比较的候选方案</td><td>问题没定义清楚就脑暴；功能乱飞</td></tr>
+<tr><td>Deliver</td><td>方案空间</td><td>筛选、原型、测试、交付</td><td>更合适的方案</td><td>把原型完整当成用户需要</td></tr>
+</table>
+<p>两个钻石的顺序不能反，第一个钻石的产出是问题定义，不是产品原型。流程也不是单行道，Design Council 特别说明过，测试中发现问题时可以回到前面的阶段，方案不成立可能说明问题定义错了，问题定义错了可能说明调研漏了。把双钻当成一次性直线，是初学者最常犯的错。</p>
+<p>能力地图的用法是定位。动手之前先问自己此刻在哪颗钻石的哪一段，迷茫几乎都来自位置不清，而不是方法不够。两个钻石各有一段发散和一段收敛，发散负责把可能性找齐，收敛负责把范围收窄，缺了哪一半，另一边就会替它付出代价，发散不够的收敛是拍脑袋，收敛不够的发散是功能乱飞。</p>
+<h2>三、逐节解读</h2>
+<h3>3.1 材料和取舍的难题</h3>
+<p>源文档开篇描述了访谈之后的典型困境，经过需求分析和用户访谈，人们往往会得到很多材料，材料变多之后，新的困难是如何取舍。如果不区分理解问题和设计方案，人们很容易一边访谈，一边为自己偏好的功能寻找理由，访谈从打开视野退化成收集弹药，视野还没打开，立场先坐死了。</p>
+<p>源文档在这里列出一条常见翻车路线，想到一个点子、觉得这个方向很酷、马上开始画原型、做着做着功能越来越多、最后不知道自己到底在解决什么问题。口播稿把这一诊断展开成团队开会的具体场景，每个人都能为自己的偏好找到理由，会议纪要写着继续调研，谁心里都没底，并补充了团队不敢开口否决方向的隐性成本分析。</p>
+<h3>3.2 三句自问与投入陷阱</h3>
+<p>源文档在此给出三句检查，不要因为想法顺手就默认问题已经成立，不要因为方案能做出来就默认它值得做，不要因为原型看起来完整就默认用户会真的需要。三句话针对的是同一个错误，把已经投入了多少当成方向是否正确的证据。源文档同时点明分工的道理，原型只能证明团队做出了什么，用户访谈、现场观察和真实使用，才能说明问题是否存在。</p>
+<p>口播稿把三把尺子逐条展开。顺手是工程直觉不是用户证据，能做是技术判断、值得是价值判断，页面越完整越容易骗过自己，因为做出来这件事本身就会产生成就感，而成就会伪装成信心。演绎部分补充了两个源文档没有的场景，用户不为辛苦付费只为省事付费，以及再给他一次机会如何持续消耗下一版预算。</p>
+<h3>3.3 第一个钻石与 Discover</h3>
+<p>第一个钻石关注的是问题本身，而不是解决方案，它的产出是问题定义，而不是产品原型。这是两个钻石之间最大的分工，很多人做了三个月交出一堆原型，却说不出自己定义的问题是什么，就是把两个钻石的活干反了。</p>
+<p>Discover 的核心任务是广泛调研，而不是快速下结论。源文档列了通常要做的五件事，看用户在真实场景里怎么做、访谈潜在用户最近一次遇到问题是什么时候、观察他们现在怎么凑合解决、看竞品和替代方案都在怎么处理、收集市场流程约束上下游信息。源文档特别强调，很多人误以为 Discover 就是多看点资料，其实更关键的是理解人和场景，而不只是搜一堆信息。</p>
+<p>会议纪要工具的例子贯穿全篇。Discover 阶段该问的不是用户要不要纪要功能，而是用户开完会后到底哪里最痛苦，是记录难、整理难还是同步难，他们现在是自己写、让实习生写、录音回听还是干脆不整理，哪些会议场景最需要纪要。这些问题没有一个提到产品，但每一个都通向产品。这一步最重要的目标不是得出答案，而是别太早以为自己已经知道答案。</p>
+<p>Creative Commons 二零一八年可用性研究是发散纪律的真实样本，八十一次新访谈加三十六次既有访谈，每张纸对应一个问题，团队先保留差异，没有急着把材料压成一个答案。</p>
+<h3>3.4 Define 与问题定义的四个要素</h3>
+<p>如果说 Discover 是把视野打开，Define 就是开始收束。这个阶段要做的不是把所有观察都保留下来，而是问三个问题，真正最值得优先解决的问题是哪一个，哪个问题最常出现、最痛、最有价值，第一版到底只盯住哪一个场景。本质是把一个宽泛话题收敛成一个清晰的问题定义。</p>
+<p>源文档用会议纪要例子演示了收敛前后的差别。从我想做一个提高开会效率的 AI 工具，收敛到我们先解决项目型团队在三十到六十分钟协作会议结束后，无法在十分钟内输出带待办、责任人和截止时间的纪要这个问题。口播稿把后一句拆成四个要素，用户是谁、场景是什么、卡点是什么、成功标准是什么，四要素齐全，方案该长什么样就有了一大半答案。</p>
+<p>Creative Commons 案例中，团队把一百一十七次访谈汇总、聚类并寻找重复模式，最后提炼出九条洞察。Define 不是挑一句最顺耳的话，而是从原始回答走向主题和优先级的中间过程。演绎部分补充了第一版只解决一个场景的劝告，扎扎实实解决一个具体场景，好过罗列十个半解决的场景，前者能验证，后者只能演示。</p>
+<h3>3.5 Develop 与两颗钻石的分界</h3>
+<p>完成第一个钻石之后，才真正适合进入第二个钻石，因为这时解决的不是一个模糊方向，而是一个被收敛过的具体问题。Develop 的重点是围绕同一个问题探索多种可能方案。源文档特别提醒，这里的发散和 Discover 不一样，Discover 发散在问题空间，Develop 发散在解决方案空间。</p>
+<p>源文档列出会议纪要的五个选项维度，是做网页工具还是会议插件、上传录音后处理还是实时记录、只做摘要还是重点做待办提取、强调个人效率还是强调团队同步、给用户自由编辑还是直接输出结构化模板。这一步适合脑暴，也适合和团队一起把方案拉开。严格前提是所有方案都必须服务同一个已定义的问题，如果问题没定义清楚，Develop 很容易又重新变成功能乱飞。</p>
+<p>口播稿补充了两条演绎内容。一是脑暴纪律，先写下来不评判，一眼不顺眼的方案也先留在板上，它的零件可能正好拆给别的方案用。二是分辨口诀，此刻脑子里冒出来的每一条，是在回答用户有什么问题，还是在回答这个问题可以怎么解，前者属于 Discover，后者属于 Develop。</p>
+<h3>3.6 四步总览与流程的可逆性</h3>
+<p>四个阶段总览。Discover 广泛了解用户、问题、环境和市场，Define 从大量信息里提炼真正值得解决的核心问题，Develop 围绕核心问题发散多种解决方案，Deliver 筛选、原型、测试并交付更合适的方案。前两步在问题空间，后两步在方案空间。整套流程的名字来自两个相连的钻石，左边从 Discover 发散到 Define 收敛，右边从 Develop 再次发散到 Deliver 收敛。</p>
+<p>源文档通过官方图例说明，这不是只能向前走一次的直线流程，测试中发现问题时可以回到前面的阶段。口播稿把这条可逆性落到两条具体回退路径，发现方案不成立，可能说明问题定义错了，回到 Define，发现问题定义错了，可能说明调研漏了，回到 Discover。</p>
+<h3>3.7 桌上的最小版本</h3>
+<p>口播稿给零基础听众留了一个可以立即执行的动作。拿一张纸，中间画一条竖线，左边写这个问题不成立会怎样，右边写这个问题成立会怎样。写不出右边，说明还在 Discover，写得出一堆右边但互相冲突，说明缺一次 Define，左右都清楚了，再进 Develop。这是把双钻模型压缩成一张纸的用法，它不替代完整流程，只用来在动手前定位。</p>
+<h2>四、审查清单</h2>
+<p>进入下一个阶段之前，逐条对照，任何一条答不上来就停在该阶段：</p>
+<ul>
+<li>我现在的动作是在理解问题，还是在设计方案，能用一句话说清</li>
+<li>我偏好某个功能，是因为用户证据，还是因为它做起来顺手</li>
+<li>我说方案值得做，是因为价值成立，还是因为它能做出来</li>
+<li>我的问题定义里有用户、场景、卡点、成功标准四要素，且只有一个</li>
+<li>我手上的候选方案，全部服务同一个已定义的问题</li>
+<li>我保留过差异，没有在 Discover 阶段就把材料压成一个答案</li>
+<li>最近一次用户提问，问的是上周发生的事，不是去年的概括</li>
+<li>我知道什么情况下该回到 Define 或 Discover，而不是硬着头皮往下推</li>
+<li>我说再改一版之前，说得清这一版到底在验证什么</li>
+</ul>
+<h2>五、实践提示</h2>
+<h3>提示1 · 把三句话贴在显示器边上</h3>
+<p>三句自问是整套框架里性价比最高的自检工具。想法顺手不等于问题成立，方案能做不等于值得做，原型完整不等于用户需要。每次进入下一阶段之前念一遍，比临时抱佛脚的评审会管用。念的时候重点想那句，我是不是又把投入当成证据了。</p>
+<h3>提示2 · 问题定义只写一句，且必须四个要素齐全</h3>
+<p>用户是谁、场景是什么、卡点是什么、成功标准是什么。写不出成功标准的定义，通常是卡点没挖到，回去看用户最近一次是怎么凑合解决的。定义写成十条等于没有定义，第一版只盯一个场景，这句话对新手反直觉，但罗列十个半解决的场景只能演示，不能验证。</p>
+<h3>提示3 · 用最近一次提问，别用概括性提问</h3>
+<p>访谈时问用户最近一次遇到这个问题是什么时候、当时怎么处理的、用了什么凑合办法。上周的经验含金量远高于去年的概括，凑合办法里藏着真正的痛点，用户已经在用行动投票。问完把原话记下来，不要急着归纳，归纳是 Define 的活，不是 Discover 的活。</p>
+<h3>提示4 · 脑暴先立规矩，先写下来不评判</h3>
+<p>Develop 阶段把选项全部摆上板再比较，一眼不顺眼的方案也先留着。它的价值可能要到比较的时候才出现，它的零件可能正好拆给别的方案用。一上来就毙掉不顺眼的选项，发散就白做了。比较的目的不是选出最炫的那个，而是看清每条路的代价。</p>
+<h3>提示5 · 拿不准在哪颗钻石，就问那句咒语</h3>
+<p>此刻冒出的是用户有什么问题，还是这个问题可以怎么解。前者归 Discover，后者归 Develop。觉得混的时候就问这一句，比反复开会管用。问完再把当前材料归到一边，归完类，位置就清楚了。</p>
+<h2>六、约束说明</h2>
+<ul>
+<li>本篇源切片仅覆盖到 4.1 Develop，源切片文件在 Develop 小节处结束，原文后续小节未包含在本切片内。口播稿对 Deliver 仅按切片内已有的四步概述一句带过，未对未包含部分展开，也未参考切片外的任何材料。</li>
+<li>通读核对，本篇切片未发现串页污染，全文锚点与标题均与 sourcePage 指向的附录页相符，无需排除内容。</li>
+<li>Creative Commons 二零一八年可用性研究数据，八十一次新访谈、三十六次既有访谈、合计一百一十七次、聚类后九条洞察，均来自源文档图注，非演绎方添加。</li>
+<li>口播稿中的团队开会场景、再给他一次机会陷阱、纸张竖线自问、第一版只解决一个场景的劝告、脑暴不评判纪律等，均为二次演绎添加的表达与例子，源文档无对应原文，用于帮助零基础听众理解，不代表原文观点。</li>
+<li>源切片净可读素材约一千八百字，低于单集成稿下限。双钻模型属于机制型内核，可按规程用类比与分步讲解做正当扩写，口播稿最终正文约四千七百字，所有事实性内容均未超出切片范围。</li>
+<li>口播稿中数字统一改写为中文读法，源文档中的英文阶段名 Discover、Define、Develop、Deliver 保留原名并附中文释义，与原文一致。</li>
+<li>解读稿与口播稿的对应关系为，口播稿七段分别对应本文 3.1 到 3.7，审查清单与五条实践提示用于听完之后的落地自查。</li>
+</ul>
+<h2>七、这一集在整条链路上的位置</h2>
+<p>本篇是 stage-1 附录篇，讲的是收敛方案的方法论。它不教任何工具操作，补的是前面所有实践篇共同缺失的一环，动手之前先分清问题与方案。建议在学完需求判断类篇目之后收听，把访谈、观察、原型的动作放回四步流程里重新定位。听完这一集，你手里不是新功能，是一把尺子，往后的每一次动手之前，都先用它量一遍。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
