@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>如何构建微信小程序 · 3.5 出现问题时怎样描述</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 8 · EP 86</span>
+<h1>如何构建微信小程序 · 3.5 出现问题时怎样描述</h1>
+<p class="sub">第 8 章 · 第 86 讲 · 15:29</p>
+<div class="meta"><span>时长 <b>15:29</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>8</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-cross-platform-wechat-miniprogram-86-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-3-cross-platform-wechat-miniprogram-86-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-3-cross-platform-wechat-miniprogram-86/stage-3-cross-platform-wechat-miniprogram-86-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-3-cross-platform-wechat-miniprogram-86/stage-3-cross-platform-wechat-miniprogram-86-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-8.html">← 第 8 章目录</a>
+<a href="/p/stage-3-cross-platform-wechat-miniprogram-backend-85/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:46</span></div>
+<div class="ch" data-t="106.368"><span class="t">1:46</span><span class="n">问题描述三要素</span><span class="d">2:08</span></div>
+<div class="ch" data-t="234.96"><span class="t">3:54</span><span class="n">迭代纪律与回退</span><span class="d">2:29</span></div>
+<div class="ch" data-t="384.096"><span class="t">6:24</span><span class="n">小程序编号的完整走法</span><span class="d">1:58</span></div>
+<div class="ch" data-t="502.128"><span class="t">8:22</span><span class="n">上传版本与体验版</span><span class="d">2:15</span></div>
+<div class="ch" data-t="637.8"><span class="t">10:37</span><span class="n">正式发布五步</span><span class="d">3:03</span></div>
+<div class="ch" data-t="821.616"><span class="t">13:41</span><span class="n">三条红线与收尾</span><span class="d">1:47</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe · 出现问题时怎样描述到正式发布：小程序上线最后一公里 — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-3/cross-platform/wechat-miniprogram/index.md</code>），为<strong>二次演绎配音版</strong>。本文在原文基础上做了口语化改写、结构重组与实践补充，观点与例子由演绎方添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>stage-3-cross-platform-wechat-miniprogram-86</code></li>
+<li>所属章节：第 8 章</li>
+<li>原文覆盖小节：3.5 出现问题时怎样描述、4.1.1 在微信公众平台确认 AppID、4.1.2 在项目中填写 AppID、4.1.3 在微信开发者工具中上传一个版本、4.1.4 在管理后台中把版本设为体验版、4.2.1 进入小程序发布流程、4.2.2 填写小程序基本信息、4.2.3 选择小程序服务类目、4.2.4 完成小程序备案信息、4.2.5 提交审核并等待正式发布、5 从贪吃蛇走到第一个真实小程序</li>
+<li>对应音频：<code>stage-3-cross-platform-wechat-miniprogram-86-播客.mp3</code></li>
+<li>字幕：<code>stage-3-cross-platform-wechat-miniprogram-86-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>贪吃蛇能在模拟器里跑了，很多教程到这里就结束。但一个只能在自己电脑上运行的小程序，本质上还是作业，不是产品。这一集处理的是<strong>从作业到产品的最后一公里</strong>，而且恰好是教程最少、坑最多的一段：问题怎么描述得让 AI 修得准，编号怎么从后台对到项目，版本怎么上传和设为体验版，正式发布的五步流程怎么走，以及三条一碰就出事的安全红线。</p>
+<p>音频稿按七段展开：</p>
+<ol>
+<li><strong>问题描述三要素</strong> —— 什么时候发生、看到什么、正确结果是什么，附两个原文提示词实例；</li>
+<li><strong>迭代纪律与回退</strong> —— 改完必须重新操作，结果更差先回退再换描述；</li>
+<li><strong>小程序编号的完整走法</strong> —— 后台确认、项目填写、两个安全习惯；</li>
+<li><strong>上传版本与体验版</strong> —— 版本号与备注的正确用法、两台真机测试清单；</li>
+<li><strong>正式发布五步</strong> —— 信息、类目、备案、审核、确认发布；</li>
+<li><strong>三条红线</strong> —— 类目与功能一致、证件信息不进 AI、编号遮住密钥藏好；</li>
+<li><strong>收尾</strong> —— 从贪吃蛇到第一个真实小程序的复用节奏。</li>
+</ol>
+<hr>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>能力项</th><th>原文怎么说的</th><th>演绎方的解读</th><th>所属环节</th></tr>
+<tr><td>描述三要素</td><td>什么时候发生、看到什么、正确结果是什么</td><td>时机、现象、预期，三缺一即瞎猜</td><td>报问题</td></tr>
+<tr><td>范围护栏</td><td>只修复这个问题、不要修改游戏逻辑</td><td>没有刹车的修复会顺手重构</td><td>报问题</td></tr>
+<tr><td>复现与验收</td><td>告诉我怎样复现和验证</td><td>修没修好，验收标准要在提示词里</td><td>报问题</td></tr>
+<tr><td>小屏例子</td><td>页面在小屏手机上太拥挤，增加上下留白</td><td>同一个句式换个战场照样成立</td><td>报问题</td></tr>
+<tr><td>重新操作</td><td>每次修改后都重新操作一次</td><td>AI 说完成不等于真的完成</td><td>迭代纪律</td></tr>
+<tr><td>继续反馈</td><td>把实际现象和开发者工具的相关错误继续发给 AI</td><td>只贴时间对得上的那一条</td><td>迭代纪律</td></tr>
+<tr><td>先回退</td><td>结果更差时先回退，再换一种描述</td><td>同一个问题换个切口，方向可能相反</td><td>迭代纪律</td></tr>
+<tr><td>风格参考图</td><td>功能稳定后可提供有权使用的参考图</td><td>有权使用四个字是版权底线</td><td>迭代纪律</td></tr>
+<tr><td>确认编号</td><td>公众平台开发管理里的开发者编号区域</td><td>编号是小程序在微信里的身份证</td><td>上传准备</td></tr>
+<tr><td>填写编号</td><td>清单配置文件里的微信小程序配置栏</td><td>原样粘贴，多一个空格都白忙</td><td>上传准备</td></tr>
+<tr><td>编号与密钥</td><td>截图遮住编号，密钥不截图不入库不给 AI</td><td>编号防混淆，密钥是真正的钥匙</td><td>安全习惯</td></tr>
+<tr><td>版本号</td><td>例如一点零点零，只允许数字和小数点</td><td>版本号是用户反馈的共同语言</td><td>上传版本</td></tr>
+<tr><td>项目备注</td><td>写一段简短说明</td><td>备注是写给三个月后的自己</td><td>上传版本</td></tr>
+<tr><td>编译观察</td><td>输出区域全绿并提示上传完成</td><td>提交成功只是到了服务器</td><td>上传版本</td></tr>
+<tr><td>设为体验版</td><td>版本管理开发版本里选设为体验版</td><td>先补主营类目再回来操作</td><td>体验版</td></tr>
+<tr><td>真机测试</td><td>两台不同尺寸手机测摇杆、重开、切后台、分享</td><td>模拟器装作看不见的问题只在真机暴露</td><td>体验版</td></tr>
+<tr><td>发布流程</td><td>信息、类目、运营信息备案、微信认证</td><td>进度条自动推进，一步一保存</td><td>正式发布</td></tr>
+<tr><td>信息诚信</td><td>截图只放真实存在的页面</td><td>货不对板轻则退回重则投诉</td><td>正式发布</td></tr>
+<tr><td>类目一致</td><td>类目必须和实际功能一致</td><td>为过审把游戏描述成教育工具是红线</td><td>正式发布</td></tr>
+<tr><td>备案核验</td><td>主体类型、负责人信息、证明材料</td><td>短信或工信部核验有过期时限</td><td>正式发布</td></tr>
+<tr><td>提交审核</td><td>进度接近百分之百再提交，按退回原因修改</td><td>退回原因是一次免费的产品评审</td><td>正式发布</td></tr>
+<tr><td>确认发布</td><td>通过后仍要确认是否手动点发布</td><td>审核通过不等于用户搜得到</td><td>正式发布</td></tr>
+<tr><td>证件安全</td><td>身份证、手机号、验证码、证件照不给 AI</td><td>AI 是工具，不是档案室</td><td>安全红线</td></tr>
+<tr><td>复用节奏</td><td>一次只改一件事，改完马上回工具里试</td><td>从贪吃蛇到预约、报名、内部工具通用</td><td>总结</td></tr>
+</table>
+<hr>
+<h2>三、逐节解读</h2>
+<h3>3.1 问题描述三要素：时机、现象、预期</h3>
+<p>原文的描述公式只有一句话，把什么时候发生、看到什么、正确结果是什么说清楚，提示词就够了。三个要素可以记成时机、现象、预期。大多数人只会说蛇又不动了，这对 AI 是废话，它不知道你点了什么、屏幕显示什么、本来该发生什么，只能猜。</p>
+<p>原文的两个实例值得逐字拆。摇杆偶尔失效对应的提示词是，摇杆偶尔会让蛇停住。请只修复这个问题，并告诉我怎样复现和验证。偶尔是时机，停住是现象，只修复这个问题是范围，怎样复现和验证是验收，一句话四层信息。小屏拥挤对应的提示词是，页面在小屏手机上太拥挤。请增加上下留白，不要修改游戏逻辑。小屏手机是时机，太拥挤是现象，增加上下留白是方向，不要修改游戏逻辑是护栏。</p>
+<p>演绎方补三层。其一，为什么预期不可少：AI 修问题靠对目标，只说坏了它只能猜；说清本来该怎样，它才知道往哪修。其二，范围词是刹车：没有只修复这个问题，AI 修摇杆时可能顺手重构计分逻辑。其三，偶发问题要把触发条件说细，连续点击之后、切后台再回来、玩到第几分钟，多说一句，AI 少猜十次。会报问题的人一次对话解决，不会报问题的人十次对话制造三个新问题，差别不在 AI，在描述。</p>
+<h3>3.2 迭代纪律与回退</h3>
+<p>句式之外是两条纪律。第一条，每次修改后都重新操作一次。把 AI 说完成了当成真的完成，是新手最常见也最贵的一个错觉。第二条，问题没解决，就把实际现象和开发者工具里的相关错误继续发给 AI，一轮一轮磨。注意是相关错误，不是把整个控制台几百行全贴过去，重点越突出，AI 越容易抓准；只贴和当前现象时间对得上的那一条。</p>
+<p>这一节真正值钱的是第三条，结果更差时先回退，再换一种描述。很多人遇到 AI 越改越糟，第一反应是让它继续改，在错误版本上叠加功能，最后整个项目面目全非。正确做法是立刻回退到上一个能跑的版本，换一种方式描述同一个问题。同一个问题，描述的角度不同，AI 给的方向可能完全相反；死磕一种描述，不如换个切口。回退功能是后悔药，平时就要养成随手可退的习惯，绳在手，才敢让它大胆改。</p>
+<p>原文还补了一个进阶做法：功能稳定以后，可以提供一张有权使用的风格参考图，让 AI 只调整颜色、背景和按钮。注意有权使用四个字，网上的图、字体、音效都不是随便能用的，用之前确认授权。让 AI 学配色和布局思路可以，把别人的按钮图标直接搬过来不行。原型阶段追求顺眼，发布阶段追求如实，两个阶段对参考图的要求完全不同。</p>
+<h3>3.3 小程序编号的完整走法</h3>
+<p>上传第一步是确认编号。打开浏览器访问微信公众平台，登录后台，左侧菜单进开发管理、开发设置，页面上方开发者编号区域里那一行小程序编号，就是小程序在微信里的唯一身份证。项目里的编号必须和后台一致，不一致，上传找不到目标，或者传进另一个项目。</p>
+<p>第二步把编号填进项目。打开编辑器载入项目，在左侧文件树找到清单配置文件，下拉到微信小程序配置这一栏，输入框提示类似微信小程序编号，请在微信开发者工具中获取，把后台看到的编号原样粘贴，保存，重新构建。原样粘贴这四个字值得抠，多一个空格、少一位字符都是白忙。清单文件在项目根目录，不在页面文件夹里，找不到时用文件名搜，比一层层点开快。这一步做完，开发工具上传时才有靶子；很多人跳过这一步直接点上传，然后对着报错发呆，根子就在编号没配对。</p>
+<p>安全习惯有两个，分量差别极大。第一，截图给别人看时，像原文示范的那样把编号具体值遮住，编号本身不是密钥，遮住是防混淆防误用。第二，小程序密钥不要截图、不要提交到公开仓库、不要发给 AI。密钥是真正的钥匙，泄露了别人就能以你的名义操作小程序。编号在天上，密钥在地下，别混着对待。密钥一旦怀疑泄露，第一件事是去后台重置，不是先改代码，钥匙丢了先换锁。</p>
+<h3>3.4 上传版本与体验版</h3>
+<p>编号就位，在微信开发者工具顶部工具栏右侧点上传，弹出的窗口填两个关键字段。版本号，例如一点零点零，只允许数字和小数点。它不是乱填的，是用户反馈的共同语言：用户说上一版好的这一版坏了，你问哪一版，他说一点零点零，你立刻知道该回退到哪；没有清晰版本号，反馈就是糊涂账。项目备注写一段简短说明，比如完成基本功能的开发，这是写给三个月后的自己，光看编号想不起任何事，看备注一眼就知道这一版干了什么。版本管理的尽头是信任，用户信任你的版本，你信任自己的记录，两边都从这两个字段开始。</p>
+<p>检查无误点上传，输出区域显示编译过程，所有步骤变绿并提示上传完成，这一版才提交到微信服务器。注意这只是提交，还不是体验版，更不是发布。</p>
+<p>下一步回公众平台后台，进管理下面的版本管理，在开发版本一栏应该能看到刚上传的版本，版本号、备注、上传时间都对得上。在这一行右侧选设为体验版；如果后台要求先补充主营类目，按实际功能选完再回来操作。设为体验版后生成体验二维码，把测试同事加入体验成员。测试至少用两台不同尺寸的手机，把摇杆、重新开始、前后台切换和分享入口都过一遍。小屏和大屏的布局差异、切后台再回来的状态恢复、分享出去的卡片长相，只在真机上暴露，模拟器一律装作看不见。体验版二维码有时效，过期重新生成；同事说扫不开、白屏、进去是旧版本，分别指向二维码过期、权限没加、版本没更新，三种现象三种药。</p>
+<h3>3.5 正式发布五步</h3>
+<p>体验版测稳才轮到正式发布。发布不是点一个按钮，是五步流程。回公众平台后台，找版本管理发布相关入口，展开能看到小程序发布流程，界面上方是进度条，下面依次列着小程序信息、小程序类目、运营信息和备案、微信认证。一开始进度是零，每完成一步系统自动往前推；账号主体需要微信认证的，按后台实际显示走，不同主体类型要求不一样。</p>
+<p>第一步填小程序信息。准备名称、简介、图标、页面截图和后台要求的其他资料。名称和简介要准确描述当前功能；截图只放真实存在的页面，不要放没做完的排行榜、联机或奖励功能。这是诚信线，审核看截图，用户也看截图，货不对板轻则退回，重则上线后被投诉。图标和截图尺寸以后台当前提示为准，图片、字体和音效同样要确认有权公开使用。填完保存，第一步完成。</p>
+<p>第二步选服务类目。类目决定平台按什么业务审核，也影响要提交的资质，必须和实际功能一致。点添加类目，选中保存，页面提示创建类目成功并在列表看到那一项，这一步才算完。</p>
+<p>第三步完成备案信息。填运营信息和小程序备案，确认主体与负责人。选择与注册账号一致的主体类型，按提示填主体和负责人信息，上传当前页面要求的证明材料并完成核验。需要短信或工信部核验时，按官方通知在有效期内完成，过期作废又得重来。</p>
+<p>第四步提交审核。回发布流程总览，确认每一项显示已完成、进度条接近百分之百，点提交审核，把开发版本送交微信团队。版本管理里状态变审核中，通过后变已发布或可选择上线。审核要求补充操作视频、页面截图或资质，按退回原因改完重新提交，不要原样再赌一次。每次退回都当一次免费的产品评审，它指出的往往正是你自己没当回事的地方。</p>
+<p>第五步确认发布。通过以后仍要在版本管理里确认是否需要手动点发布，不要只看到审核通过就以为用户已经搜得到。这一步每年坑一批人，流程走完九十九，倒在这最后一厘米。发布不是终点，是另一场考试的开始，用户会用真实流量给你打分。</p>
+<h3>3.6 三条红线与收尾</h3>
+<p>三条红线每条都人命关天。第一，类目必须与功能一致：准备公开运营游戏，先确认要不要用小游戏账号、对应类目和额外规则，不要为通过审核把游戏描述成教育工具。类目造假是审核红线，被发现是下架加整改，不是退回重填这么客气。第二，身份证、手机号、验证码和证件照片不要发给 AI，也不要出现在教程截图里。AI 是工具，不是档案室，个人证件信息进去容易出来难。第三，截图遮住编号、密钥藏好，前面说过这里再钉一遍。安全习惯不怕重复，怕的是第一次说的时候你没在意；建议写在便利贴上贴在显示器旁边，比记在心里可靠。</p>
+<p>收尾回头看，贪吃蛇本身并不复杂，真正重要的是已经完整走过一次：创建项目、让 AI 修改、在模拟器里找问题、拿手机体验、上传版本、走发布流程。以后换成预约、活动报名或内部工具，仍然是同一个节奏，一次只改一件事，改完马上回开发者工具里试，不要把 AI 说完成了当成真的完成。等页面需要保存用户身份、云端数据或图片时，再继续做带后端的小程序。功能会升级，节奏不会变。</p>
+<hr>
+<h2>四、审查清单</h2>
+<ul>
+<li>报问题时报全三要素，什么时候发生、看到什么、正确结果是什么</li>
+<li>提示词里有范围护栏，只修复这个问题、不要修改游戏逻辑</li>
+<li>要求 AI 说明怎样复现和验证，验收标准写在提示词里</li>
+<li>每次修改后都重新操作验证过，没有把 AI 说完成当成真完成</li>
+<li>贴错误只贴和当前现象时间对得上的相关那条</li>
+<li>结果更差时先回退到上一个能跑版本，再换一种描述重试</li>
+<li>用风格参考图前确认过有权使用，且只让 AI 调颜色、背景和按钮</li>
+<li>小程序编号在公众平台确认过，且和项目里填写的一致</li>
+<li>编号是原样粘贴的，没有多余空格或错字符</li>
+<li>截图遮住编号具体值，密钥未截图、未入公开仓库、未发 AI</li>
+<li>上传时填了清晰版本号和能看懂的项目备注</li>
+<li>输出区域全绿确认上传完成后，才去后台设体验版</li>
+<li>用两台不同尺寸的手机测过摇杆、重新开始、前后台切换和分享入口</li>
+<li>体验二维码是有效的，同事已加入体验成员</li>
+<li>发布流程五步都走过，信息、类目、备案、审核、确认发布</li>
+<li>名称简介和截图只描述真实存在的功能</li>
+<li>类目与实际功能一致，没有为过审造假</li>
+<li>备案核验在有效期内完成</li>
+<li>审核通过后在版本管理里确认过是否需手动发布</li>
+<li>身份证、手机号、验证码、证件照没有发给 AI 或出现在截图里</li>
+</ul>
+<hr>
+<h2>五、实践提示</h2>
+<h3>提示1 · 报问题四层信息，一层都不能少</h3>
+<p>时机、现象、范围、验收。偶尔是时机，停住是现象，只修复这个问题是范围，怎样复现和验证是验收。会报问题的人一次对话解决，不会报问题的人十次对话制造三个新问题。把四层信息凑齐再发，比发十句都管用。</p>
+<h3>提示2 · 回退是安全绳，不是失败</h3>
+<p>结果更差时先回退，再换一种描述。同一个问题换个切口，AI 的方向可能完全相反。在错误版本上叠加功能，是新手最贵的错觉。绳在手，才敢让 AI 大胆改。</p>
+<h3>提示3 · 版本号和备注是写给未来的信</h3>
+<p>用户报问题时，版本号是你们的共同语言；三个月后回来看版本列表，备注是你唯一的记忆。这两个字段填得越认真，后期维护越省事。版本管理的尽头是信任。</p>
+<h3>提示4 · 审核通过不等于发布成功</h3>
+<p>第五步确认发布，每年坑一批人。流程走完九十九，倒在这最后一厘米。每次退回原因都认真读，那是一次免费的产品评审，指出的往往正是你没当回事的地方。</p>
+<h3>提示5 · 红线写在便利贴上，比记在心里可靠</h3>
+<p>编号遮住、密钥藏好、证件不进 AI、类目不造假。安全习惯不怕重复，怕的是第一次说的时候你没在意。贴在显示器旁边，每次上传前过一遍。</p>
+<hr>
+<h2>六、约束说明</h2>
+<ol>
+<li><strong>本集内容全部来自原文 <code>stage-3/cross-platform/wechat-miniprogram/index.md</code>，未跨文件取材。</strong> 3.5 至第 5 节各小节内容均按原文转述，未虚构工具、数据、案例或结论；两个提示词实例、上传字段说明、发布流程步骤、红线要求均为原文明确写到的内容。</li>
+<li><strong>切片串页污染已排除。</strong> 本篇切片文件自「个人学术主页的定义」起的后半部分（个人学术主页定义、建站四种方式、为马斯克做主页案例、工具清单、Trae 下载等，净字约二千五百字）经核对属于另一来源页（个人网站与博客篇），与本篇 <code>sourcePage</code> 不符，<strong>已整段排除，未在音频与本文中使用</strong>，该部分内容归入个人网站篇对应篇目。</li>
+<li><strong>原文以编号列表给出的操作步骤做了口语化转述。</strong> 包括公众平台确认编号的四步、项目填写编号的四步、上传版本的三步、设为体验版的四步、备案三步、提交审核三步等，音频保留全部操作要点与顺序，具体界面文字以原文档为准。</li>
+<li><strong>原文中提到的具体标识做了口语化替换。</strong> 例如 AppID 统一说成小程序编号、AppSecret 说成小程序密钥、manifest.json 说成清单配置文件、macOS 与 Windows 等系统名按原文保留；音频未朗读任何真实编号或密钥值。</li>
+<li><strong>演绎方添加的内容限于四类</strong>：判断口诀（时机现象预期、编号在天上密钥在地下、版本管理的尽头是信任、发布不是终点是另一场考试）、类比说明（身份证、共同语言、写给三个月后的自己、便利贴）、批注性解释（为什么预期不可少、为什么先回退、为什么贴错误只贴一条、三种现象三种药）以及结构重组（七段音频结构、五步流程编号化、三条红线归纳）。这些内容属于实践补充，不等同于原文观点。</li>
+<li><strong>安全声明。</strong> 本集不涉及任何真实编号、密钥、证件信息或账号；文中所有截图遮值、密钥保管、证件保密要求均为管理要求陈述，未出现任何真实值。</li>
+</ol>
+<hr>
+<h2>七、这一集在整条链路上的位置</h2>
+<p>在微信小程序支线上，本集处在<strong>从练习到上线的收口位置</strong>：</p>
+<ul>
+<li>前面的篇目解决了「把页面做出来、把后端接起来」；</li>
+<li>本集解决「交出去之前的所有手续」——描述问题的纪律、编号与密钥的分际、体验版验证、发布五步、三条红线；</li>
+<li>后面的篇目（带后端的小程序、预约报名等真实场景）都建立在这套手续已经跑通一遍的基础上。</li>
+</ul>
+<p>送给读者的完整地图其实是一条节奏：<strong>一次只改一件事，改完马上回到开发者工具里试，不要把 AI 说完成了当成真的完成。</strong> 贪吃蛇的意义从来不是蛇，是让你用最低的成本，把创建项目、AI 修改、模拟器找问题、真机体验、上传版本、发布流程这条完整链路走通一次。下次换成预约、活动报名或内部工具，你走的还是这条路，只是风景换了。功能会升级，节奏不会变。</p>
+<hr>
+<p><strong>来源</strong>：Easy-Vibe（datawhalechina/easy-vibe）<code>docs/zh-cn/stage-3/cross-platform/wechat-miniprogram/index.md</code>。本音频与本文为二次演绎配音版，非原文照读。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
