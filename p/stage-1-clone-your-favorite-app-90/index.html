@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>从截图复刻：第一次模仿练习</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 6 · EP 90</span>
+<h1>从截图复刻：第一次模仿练习</h1>
+<p class="sub">第 6 章 · 第 90 讲 · 15:01</p>
+<div class="meta"><span>时长 <b>15:01</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>6</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-1-clone-your-favorite-app-90-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-1-clone-your-favorite-app-90-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-1-clone-your-favorite-app-90/stage-1-clone-your-favorite-app-90-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-1-clone-your-favorite-app-90/stage-1-clone-your-favorite-app-90-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-6.html">← 第 6 章目录</a>
+<a href="/p/stage-1-appendix-mom-test-17/">← 上一讲</a>
+<a href="/p/stage-2-ai-capabilities-dify-knowledge-base-18/">下一讲 →</a>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:29</span></div>
+<div class="ch" data-t="89.328"><span class="t">1:29</span><span class="n">先选一个想做的作品</span><span class="d">2:05</span></div>
+<div class="ch" data-t="214.8"><span class="t">3:34</span><span class="n">跟着老师做一个网页</span><span class="d">2:17</span></div>
+<div class="ch" data-t="352.56"><span class="t">5:52</span><span class="n">自己动手试一遍</span><span class="d">2:06</span></div>
+<div class="ch" data-t="478.8"><span class="t">7:58</span><span class="n">换个方向也能做</span><span class="d">2:50</span></div>
+<div class="ch" data-t="649.752"><span class="t">10:49</span><span class="n">第一版不好看怎么办</span><span class="d">2:01</span></div>
+<div class="ch" data-t="771.312"><span class="t">12:51</span><span class="n">课堂检查与收尾</span><span class="d">2:09</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe · 从截图复刻：一张图、一句话、一轮一改 — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-1/clone-your-favorite-app/index.md</code>），为<strong>二次演绎配音版</strong>。本文在原文基础上做了口语化改写、结构重组与实践补充，观点与例子由演绎方添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>stage-1-clone-your-favorite-app-90</code></li>
+<li>所属章节：第 6 章</li>
+<li>原文覆盖小节：本章导读、1 先选一个想做的作品、2 跟着老师做一个网页（2.1 把参考图交给 Trae、2.2 先看第一版、2.3 第一版先做到能看）、3 自己动手试一遍、4 换个方向也能做（数据看板、方块小游戏、三维版本）、5 第一版不好看怎么办、6 课堂检查、本章作业、本章小结</li>
+<li>对应音频：<code>stage-1-clone-your-favorite-app-90-播客.mp3</code></li>
+<li>字幕：<code>stage-1-clone-your-favorite-app-90-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>前面几集练习的是用一句话让 AI 写程序，这一集换成更直观的做法：<strong>先找一张喜欢的截图，再让 AI 看着它做</strong>。它解决的问题是新手的第一个真实恐惧，我不会描述需求，怎么写提示词。这一课的答案是，截图替你描述了大半，你只需要补一句想做什么。</p>
+<p>整节课只练习一件事：找一张喜欢的截图，把它交给 AI，再用自己的话说一句想做什么。音频稿按七段展开：</p>
+<ol>
+<li><strong>开场</strong> —— 像照着图片搭积木，四步流程总览；</li>
+<li><strong>先选一个想做的作品</strong> —— 三种作品、选图三标准、几成自测、只做一个页面；</li>
+<li><strong>跟着老师做一个网页</strong> —— 锚点提示词、第一版看什么、能看就行；</li>
+<li><strong>自己动手试一遍</strong> —— 四步操作、不补技术细节、换内容那句、十秒检查；</li>
+<li><strong>换个方向也能做</strong> —— 数据看板、二维方块游戏、三维版本、参考图只是起点；</li>
+<li><strong>第一版不好看怎么办</strong> —— 一轮一个问题、照着现象说、不会说就再截一张图；</li>
+<li><strong>课堂检查与收尾</strong> —— 四项检查、作业、四步小结。</li>
+</ol>
+<hr>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>能力项</th><th>原文怎么说的</th><th>演绎方的解读</th><th>所属环节</th></tr>
+<tr><td>核心方法</td><td>先找截图，再让 AI 看着做</td><td>截图是最精准的需求文档</td><td>总纲</td></tr>
+<tr><td>类比</td><td>像小时候照着图片搭积木</td><td>图片替你说清颜色间距位置</td><td>总纲</td></tr>
+<tr><td>四步流程</td><td>选截图、丢给 AI、说一句话、继续改</td><td>最难的是第四步</td><td>总纲</td></tr>
+<tr><td>今日目标</td><td>能打开、能看懂、能简单操作的页面</td><td>范围越小第一次越容易成功</td><td>选题</td></tr>
+<tr><td>三种作品</td><td>产品官网、数据看板、简单小游戏</td><td>选真正想要的</td><td>选题</td></tr>
+<tr><td>选图三标准</td><td>看得清主要内容、有喜欢的地方、做完看得出像不像</td><td>第三点是验收器</td><td>选题</td></tr>
+<tr><td>几成自测</td><td>五成、七成还是九成</td><td>模仿精度就是细节观察力</td><td>选题</td></tr>
+<tr><td>范围纪律</td><td>第一次只做一个页面</td><td>不碰登录支付聊天后台</td><td>选题</td></tr>
+<tr><td>锚点提示词</td><td>照着这张图帮我做一个网页，做好后帮我打开看看</td><td>图片管样子，文字管动作</td><td>示范</td></tr>
+<tr><td>空文件夹开局</td><td>新建空文件夹用 Trae 打开</td><td>白纸才能看清从零到一</td><td>示范</td></tr>
+<tr><td>耐心等待</td><td>先让它做完，不要连续发送</td><td>催只会让它乱</td><td>示范</td></tr>
+<tr><td>第一版判据</td><td>不像但抓住结构和气氛</td><td>合格的第一版不追求完美</td><td>示范</td></tr>
+<tr><td>最小修改</td><td>中间的标题再大一点</td><td>一次只找一个最明显问题</td><td>示范</td></tr>
+<tr><td>平常话</td><td>不是参加提示词考试</td><td>人话是刻意训练的能力</td><td>示范</td></tr>
+<tr><td>四步操作</td><td>找图、选图、确认、发送</td><td>点聊天框旁边图片按钮</td><td>实操</td></tr>
+<tr><td>放手细节</td><td>框架文件代码先让 AI 处理</td><td>越早放手越早体到爽点</td><td>实操</td></tr>
+<tr><td>换内容句</td><td>样子参考这张图，名字和内容换成新的</td><td>样子可学，内容要诚实</td><td>实操</td></tr>
+<tr><td>启动句</td><td>帮我把这个项目启动起来</td><td>没自动打开就主动要</td><td>实操</td></tr>
+<tr><td>十秒检查</td><td>打开、主要内容、按钮</td><td>第一版最小合格线</td><td>实操</td></tr>
+<tr><td>看板案例</td><td>侧边栏、数据卡片和图表</td><td>数据可假，结构要真</td><td>拓展</td></tr>
+<tr><td>二维游戏</td><td>人物走动、放方块</td><td>手指能动比看着像重要</td><td>拓展</td></tr>
+<tr><td>三维版本</td><td>加三维二字，走动加转视角</td><td>话说不到结果就到不了</td><td>拓展</td></tr>
+<tr><td>二维三维</td><td>没有谁更好</td><td>AI 默认保守，信息要补全</td><td>拓展</td></tr>
+<tr><td>参考图是起点</td><td>换颜色主题文字玩法</td><td>从复刻到创作隔的是勇气</td><td>拓展</td></tr>
+<tr><td>修改节奏</td><td>每一轮只找一个最明显问题</td><td>人肉版版本控制</td><td>排错</td></tr>
+<tr><td>照着现象说</td><td>卡片太高、图太小、背景太暗</td><td>页面不对照着说</td><td>排错</td></tr>
+<tr><td>功能不对</td><td>按钮点不了、方向键没反应</td><td>用起来不对也照着说</td><td>排错</td></tr>
+<tr><td>万能招</td><td>再截一张图，你看看哪里不像</td><td>把看不懂换成图</td><td>排错</td></tr>
+<tr><td>不用术语</td><td>太挤了、字看不清、手机上乱了</td><td>平常话是普通人的武器</td><td>排错</td></tr>
+<tr><td>四项检查</td><td>能打开、看得懂、能操作、不混乱</td><td>用户视角四道关</td><td>验收</td></tr>
+<tr><td>作业</td><td>参考图加作品图放一起，说改了什么</td><td>从瞎玩到有意识迭代</td><td>验收</td></tr>
+</table>
+<hr>
+<h2>三、逐节解读</h2>
+<h3>3.1 为什么从截图开始：截图是最精准的需求文档</h3>
+<p>这一课的方法论核心只有一句，截图负责告诉 AI 看起来是什么样，你的话负责告诉 AI 想把它做成什么。以前学编程，第一关就是把想法翻译成文字需求，卡死了九成新手。现在截图替你翻译了大半，颜色、间距、每个按钮的位置，图里都有。一千句描述比不上一个画面，这就是从截图开始的全部理由。</p>
+<p>课程把过程压成四步，选截图、丢给 AI、说一句话、继续改。演绎方给四步各贴了一个标签，选截图考眼光，丢给 AI 考操作，说一句话考表达，继续改考耐心。四步里最难的恰恰是最后一步，大部分人第一版之后就弃疗了，能熬过一轮轮修改的人才能看到第二集、第三集。这一集训练的与其说是做网页，不如说是把从想到做的距离走完一遍。</p>
+<h3>3.2 选题与选图：范围越小，第一次越容易成功</h3>
+<p>今天的目标不是功能齐全的大产品，而是一个能打开、能看懂、能简单操作的页面。三种作品任选，产品官网、数据看板、简单小游戏，选你真正想要的，兴趣是第一次能走完的唯一动力。</p>
+<p>选图三标准值得逐条过。第一，截图能不能看清主要内容，糊成一片的图 AI 也救不了，它看不清的东西没法猜着补。第二，页面里有没有你真正喜欢的地方，喜欢才会愿意改。第三，做完以后能不能马上看出它像不像，这一条最容易被忽略，却是整个练习的验收器，没有对照标准，改起来全是瞎猜，改到最好也不知道停。喜欢某个官网的大标题和配色就截首屏，喜欢方块世界就截最有代表性的画面。</p>
+<p>课程还埋了一个自测，做完把作品和参考图放一起，看能模仿到五成、七成还是九成。模仿得越接近，说明你越看得出画面里的细节，也越会告诉 AI 哪里要改，这正是氛围编程的重要能力。最后是一条硬规矩，第一次只做一个页面，不碰登录、支付、聊天、后台和手机应用。能把眼前这一张图做出来，比开十个头一个都没完成强。</p>
+<h3>3.3 跟老师走一遍：锚点提示词与合格的第一版</h3>
+<p>老师的示范从空文件夹开始。新建空文件夹，用编辑器打开，项目里没有网页也没有代码。空文件夹是有意的，桌上越干净，越能看清 AI 从零到一的过程，这个眼见为实比任何讲解都重要。</p>
+<p>参考图是某建站工具的官网页面，大标题、导航栏、紫色山景、几个小按钮，主要内容很清楚。图片拖进聊天框后，老师只说了一句话，照着这张图帮我做一个网页，做好后帮我打开看看。这句话是整个课程的锚点提示词，图片管样子，文字管动作，各司其职。发送以后 AI 开始创建文件，可能要等一会儿，先让它做完，不要连续发送很多条新消息，催只会让它乱。</p>
+<p>第一版出来后先别研究代码，只看页面。紫色的天空和山景保留下来了，页面中央仍是醒目的大标题，顶部有导航，底部有一排操作入口，文字、按钮和图片组成了完整首屏。它和原图不完全一样，但抓住了最明显的结构和气氛，这就是一个合格的第一版。第一次生成不要因为字体差一点、按钮偏一点就推倒重来，先确认能打开，再找一个最明显的问题改，比如中间的标题再大一点。改完重新看，只要比上一版更接近想法，这一轮就有用。你是在和 AI 一起做东西，不是参加提示词考试，平常话不是将就，是这一课刻意训练的能力。</p>
+<h3>3.4 自己动手：放手细节与十秒检查</h3>
+<p>轮到自己时，打开编辑器，新建空文件夹再打开，按四步操作，找一张喜欢的截图，点聊天框旁边的图片按钮选图，确认图片出现在输入框里，输入锚点提示词发送。这里不需要补充用什么框架、文件怎么分、代码写在哪里，第一次练习这些先让 AI 自己处理。编辑器的默认选择对新手通常够用，等默认选项真的挡住你那天再回头学，那时你已经有问题意识，学什么都快。</p>
+<p>如果只想参考样子、不想用原来的名称和文案，多说一句，样子参考这张图，名字和内容换成新的。这一句是版权意识的第一课，样子可以学，名字和内容要换成自己的。第一份作品可以不像样，但第一份作品就要诚实，这个习惯比任何技巧都值钱。</p>
+<p>发送后耐心等完成，AI 询问是否创建文件或运行项目，确认即可。网页没自动打开，就告诉它，帮我把这个项目启动起来，我想看看效果。看到网页后用十秒钟快速检查，页面有没有打开、主要内容有没有出现、按钮能不能点，这三件事对应课堂检查的前三项，是第一次练习的最小合格线。暂时不要同时修改五六个地方，第一版的任务是跑起来，不是做到一百分。十秒检查省的是时间，保住的是兴致，第一次就把自己看烦了，就没有第二次了。</p>
+<h3>3.5 换个方向：从官网到看板到方块世界</h3>
+<p>同样的方法不只能做官网。为确认可行，老师又新建两个空项目。第一个做数据看板，左边导航右边看板列表，结构清楚。提示词是，帮我做一个像这样的数据看板，数据可以先随便写。AI 做出了侧边栏、数据卡片和图表。数据不是真实业务数据，但没有关系，第一次的重点是把结构做出来，等页面稳定再把标题、数字和图表内容换成自己的。</p>
+<p>第二个做方块小游戏，参考一张方块世界截图，提示词是，帮我做一个像这样的方块小游戏，人物可以走动，也可以放方块。AI 做出了能玩的网页小游戏，人物能移动，能放置和破坏方块。页面打开后先按方向键走一走，再点画面试放方块，人物能走、方块能放，二维小游戏的第一版就算做好。手指头能动，比眼睛看着像更重要，能玩的原型才有人愿意帮你继续改。</p>
+<p>但要注意，这个结果是二维横版游戏，人物只在平面里移动，没有前后远近，因为提示词只说了方块小游戏，没告诉 AI 一定要做三维，它选了比较简单的做法。想做第一人称画面，就在那句话里加上三维，人物可以走动，可以转动视角，也可以放方块。这次 AI 做出了真正的三维方块世界，能前后走动、转动视角，左键破坏、右键放置、数字键更换方块。二维和三维没有谁更好，第一次做游戏二维更容易完成，想在方块世界里前后走动，就要直接告诉 AI 我要三维的。话说不到，结果就到不了。顺带记住一个规律，AI 默认会挑简单的做，这不是偷懒，是信息不足时的保守策略，你的任务就是把关键信息补全。</p>
+<p>最后，参考图只是一个起点。可以换一种颜色、换一个主题，加入自己喜欢的文字、图片和玩法。每个人选的内容不同，做出来的作品也应该不一样。从复刻到创作之间隔的不是技术，是勇气，第一版敢动手改的人，后面才能真正拥有自己的作品。</p>
+<h3>3.6 第一版不好看：一轮只改一个</h3>
+<p>AI 第一次做得不够像，或者按钮暂时没反应，都很正常。做项目不是一句话结束，而是看一遍、改一点，再看一遍。新手最容易犯的错误，是一次把所有问题写进一条消息，要求太多时，你自己也很难判断 AI 到底改好了哪一项。更简单的办法是每一轮只找一个最明显的问题。这不是将就，是人肉版版本控制，一次改五处，就算全改好了你也说不清哪句起了作用；一次改一处，每句提示词的效果都看得见，描述能力就这么一轮轮练出来。</p>
+<p>页面看起来不对就照着说，卡片太高就说上面的卡片太高了矮一点，图太小就说中间的图太小了放大一点，颜色不喜欢就说背景太暗了换成浅一点的颜色。页面用起来不对也照着说，按钮没反应就说这个按钮点不了帮我修一下，游戏不能移动就说方向键按了没有反应帮我修好。再补一个高频场景，手机上乱了，直接说手机上乱了帮我调一下，不用先研究断点和视口，把现象说清就是合格的提示词。</p>
+<p>不知道问题怎么说时有一招万能，把现在的页面再截一张图，然后说，这是现在的效果，你看看哪里不像，再帮我改一下。这一招几乎万能，因为它把你看不明白的问题，换成了 AI 看得懂的图。你不需要知道边距、响应式布局这些专业词，说太挤了、字看不清、手机上乱了，AI 也能理解。改好一个问题再下一个，这就是最适合初学者的修改节奏。专业术语是懒人的借口，平常话才是普通人的武器，你描述的精度会随着作品数量自己长出来，急不得也省不掉。</p>
+<h3>3.7 课堂检查与收尾</h3>
+<p>作品生成以后不要只看一眼截图，要真的打开页面，自己点一遍、玩一遍。四项检查，能打开，刷新后不空白不报错；看得懂，别人一眼知道这是官网、看板还是游戏；能操作，主要按钮能点，小游戏基本操作能用；不混乱，窗口缩窄后文字图片没有严重挤在一起。哪项没过，就把现象告诉 AI，请它只修这个问题。四项全过，今天的作品就完成。四项检查的本质是用户视角，能打开是技术关，看得懂是表达关，能操作是功能关，不混乱是适配关，四关全过说明做的不是自嗨玩具，是别人也能用的东西。</p>
+<p>作业是找一个喜欢的网页或游戏画面，把截图交给 AI，只复刻一个页面，保存参考截图，让 AI 做页面，再针对一处不满意继续修改，保存修改后的作品截图。展示时把参考图和作品图放一起，再说一句你改了什么。别小看这一句，能说清自己改了什么，就从瞎玩进步到了有意识的迭代，展示也是给自己的正反馈，第一次的作品值得被认真对待，哪怕只有五成。</p>
+<p>小结四步，截图、丢给 AI、说一句话、哪里不像就改哪里。第一版出现以后，再通过点击、观察和截图，一点点把问题说清楚。提示词不需要像说明书，先说一句简单的话，让作品跑起来，再根据眼前的结果继续聊。做到这里你会发现，做项目并没有想象中那么远。</p>
+<hr>
+<h2>四、审查清单</h2>
+<ul>
+<li>选了三种作品里真正想要的一个，范围小到一页能装下</li>
+<li>参考图过三关，看得清、有喜欢处、做完看得出像不像</li>
+<li>存好了参考图，准备和作品放一起对比</li>
+<li>第一次只做一个页面，没碰登录支付聊天后台</li>
+<li>新建了空文件夹，用编辑器打开</li>
+<li>用了锚点提示词，照着这张图帮我做一个网页，做好后帮我打开看看</li>
+<li>发送后耐心等完成，没有连续催消息</li>
+<li>第一版先看页面，没有一上来就研究代码</li>
+<li>没有因为小瑕疵推倒重来，先确认能打开再找最明显的问题</li>
+<li>用了换内容句，样子参考这张图，名字和内容换成新的</li>
+<li>网页没自动打开时，主动要求启动项目</li>
+<li>看完网页做了十秒检查，打开、主要内容、按钮</li>
+<li>试过数据看板或方块小游戏至少一个方向</li>
+<li>做游戏时想清楚要二维还是三维，并把三维说进了提示词</li>
+<li>每轮只改一个问题，没有一次提五六个需求</li>
+<li>会用再截一张图这招描述看不清的问题</li>
+<li>全程用平常话，没有硬凑专业术语</li>
+<li>按四项检查验收过，能打开、看得懂、能操作、不混乱</li>
+<li>作业三件套完成，存参考图、改一处、存作品图</li>
+<li>展示时说清了自己改了什么</li>
+</ul>
+<hr>
+<h2>五、实践提示</h2>
+<h3>提示1 · 锚点提示词先背下来</h3>
+<p>照着这张图帮我做一个网页，做好后帮我打开看看。图片管样子，文字管动作，这一句几乎能起步所有复刻练习。想换内容就加一句，样子参考这张图，名字和内容换成新的。两句话覆盖第一课的全部场景。</p>
+<h3>提示2 · 第一版的合格线是结构，不是像素</h3>
+<p>抓住主要结构和气氛就算合格，字体差一点、按钮偏一点都别推倒重来。先确认能打开，再一轮改一个最明显的问题，一版一版接近，比幻想一步到位靠谱得多。</p>
+<h3>提示3 · 每轮只改一个问题</h3>
+<p>一次提五六个需求，你也判断不出 AI 改好了哪项。一次改一处，每句提示词的效果都看得见，描述能力就这么练出来了。这是人肉版版本控制，也是初学者最该养成的协作纪律。</p>
+<h3>提示4 · 不会描述就再截一张图</h3>
+<p>这是现在的效果，你看看哪里不像，再帮我改一下。把你看不明白的问题换成 AI 看得懂的图，这一招几乎万能。平常话比专业术语好用，太挤了、字看不清、手机上乱了，AI 都懂。</p>
+<h3>提示5 · 话说到，结果才到</h3>
+<p>AI 默认挑简单的做，信息不足时它保守。想要三维就直接说三维，想要转动视角就加转动视角。关键信息漏一句，结果就跑偏一半，这不是 AI 的问题，是提示词的功课。</p>
+<hr>
+<h2>六、约束说明</h2>
+<ol>
+<li><strong>本集内容全部来自原文 <code>stage-1/clone-your-favorite-app/index.md</code>，未跨文件取材。</strong> 从本章导读到本章小结的各小节内容均按原文转述，未虚构工具、数据、案例或结论；三个案例（官网、数据看板、方块小游戏含三维版）的提示词、结果描述、操作步骤均为原文明确写到的内容。</li>
+<li><strong>原文以代码块给出的提示词做了口语化转述。</strong> 包括锚点提示词、换内容句、启动句、看板与游戏提示词、各类修改句式，音频保留其完整措辞要点，具体文本以原文档为准。</li>
+<li><strong>原文中的图片与动图未在音频中描述细节。</strong> 老师示范用的参考图、生成结果图、看板与游戏动图等，音频只转述其内容要点（保留了哪些元素、结构如何），具体画面以原文档为准。</li>
+<li><strong>原文中的具体标识做了口语化替换。</strong> 编辑器与平台名称按原文保留，课程案例所引用的第三方产品名（建站工具、看板产品、方块游戏）按原文指代，音频未展开其背景介绍。</li>
+<li><strong>演绎方添加的内容限于四类</strong>：判断口诀（截图是最精准的需求文档、合格的第一版是结构不是像素、一轮一个问题、话说到结果才到、从复刻到创作隔的是勇气）、类比延伸（搭积木、需求文档、人肉版版本控制、验收器、四道关）、批注性解释（为什么空文件夹开局、为什么不要连续催、为什么 AI 默认保守、为什么十秒检查保住兴致）以及结构重组（七段音频结构、四步流程贴标签、三项检查与四项检查的对应）。这些内容属于实践补充，不等同于原文观点。</li>
+<li><strong>安全声明。</strong> 本集为方法教学，不涉及任何真实凭据、仓库地址或可执行配置；文中换内容句的提醒属于版权意识陈述，未出现任何真实素材。</li>
+</ol>
+<hr>
+<h2>七、这一集在整条链路上的位置</h2>
+<p>在新手入门支线上，本集处在<strong>从一句话到一张图的过渡位置</strong>：</p>
+<ul>
+<li>前面的篇目解决了敢对 AI 开口（一句话写程序）；</li>
+<li>本集解决会描述样子（截图加一句人话），并把第一版之后的修改节奏立起来；</li>
+<li>后面的篇目（原型、完整项目实战）都建立在这套复刻与迭代节奏已经熟练的基础上。</li>
+</ul>
+<p>送给读者的完整地图是四步，<strong>截图、丢给 AI、说一句话、哪里不像就改哪里。</strong> 第一版之后不弃疗，是这一集真正的毕业标准。截图负责样子，你的话负责意图，点击观察和截图负责把问题说清楚，三轮下来，做项目就没有想象中那么远了。</p>
+<hr>
+<p><strong>来源</strong>：Easy-Vibe（datawhalechina/easy-vibe）<code>docs/zh-cn/stage-1/clone-your-favorite-app/index.md</code>。本音频与本文为二次演绎配音版，非原文照读。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
