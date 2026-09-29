@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>用 LLM 和 Skills 让界面变好看：提示词与插件实战 · 用 LLM …</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 10 · EP 12</span>
+<h1>用 LLM 和 Skills 让界面变好看：提示词与插件实战 · 用 LLM …</h1>
+<p class="sub">第 10 章 · 第 12 讲 · 16:46</p>
+<div class="meta"><span>时长 <b>16:46</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>10</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/s3-12-llm-skills-beautiful-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/s3-12-llm-skills-beautiful-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/s3-12-llm-skills-beautiful/s3-12-llm-skills-beautiful-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/s3-12-llm-skills-beautiful/s3-12-llm-skills-beautiful-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-10.html">← 第 10 章目录</a>
+<a href="/p/s3-11-nft-minting/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:41</span></div>
+<div class="ch" data-t="101.424"><span class="t">1:41</span><span class="n">为什么 AI 生成的界面总有股 AI 味</span><span class="d">1:31</span></div>
+<div class="ch" data-t="192.648"><span class="t">3:12</span><span class="n">五个维度，把审美方向说清楚</span><span class="d">2:11</span></div>
+<div class="ch" data-t="324.504"><span class="t">5:24</span><span class="n">普通提示词与美化提示词的差别</span><span class="d">1:37</span></div>
+<div class="ch" data-t="422.376"><span class="t">7:02</span><span class="n">方法一，用提示词模板</span><span class="d">2:46</span></div>
+<div class="ch" data-t="588.528"><span class="t">9:48</span><span class="n">方法二，前端技能插件</span><span class="d">2:11</span></div>
+<div class="ch" data-t="719.904"><span class="t">11:59</span><span class="n">三种安装方式与一个真实例子</span><span class="d">1:33</span></div>
+<div class="ch" data-t="813.072"><span class="t">13:33</span><span class="n">两种方法怎么配合</span><span class="d">1:59</span></div>
+<div class="ch" data-t="932.256"><span class="t">15:32</span><span class="n">收尾</span><span class="d">1:13</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe · 让 AI 生成的界面摆脱「AI 味」：提示词与 Skills 实战 — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-2/frontend/llm-skills-beautiful/index.md</code>），为<strong>二次演绎配音版</strong>。原文作者与贡献者来自开源社区。本文在原文基础上做了口语化改写、结构重组与实践补充，观点与例子由演播者添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>s3-12-llm-skills-beautiful</code></li>
+<li>所属章节：第 10 章 · s3 重切复活篇</li>
+<li>对应音频：<code>s3-12-llm-skills-beautiful-播客.mp3</code></li>
+<li>字幕：<code>s3-12-llm-skills-beautiful-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>一个很具体也很常见的尴尬：<strong>同样的需求，AI 生成的页面总觉得差点意思。</strong></p>
+<p>字体永远是那几款，配色永远是紫色渐变，布局永远是对称的卡片网格——整个页面散发着一股能被一眼认出来的「AI 味」。</p>
+<p>原文的比喻很妙：去理发店只说「帮我剪个头发」，得到的是安全但平庸的结果；说清「日系慵懒卷、八字刘海、长度到锁骨、层次感明显」，才能得到真正符合期待的效果。<strong>AI 也一样，它需要你描述出清晰的审美方向。</strong></p>
+<p>这一集教两种方法：<strong>精心设计的提示词模板</strong>（用自然语言描述美学风格）与<strong>前端 Skills 插件</strong>（让 AI 自动加载专业设计规范），最后给出一条三阶段工作流。</p>
+<p>一句话概括：<strong>AI 不是不会设计，而是默认回到「统计平均」——你要做的不是教它设计，而是给它一个偏离平均值的方向。</strong></p>
+<hr>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>能力项</th><th>原文怎么说的</th><th>演播者的解读</th><th>所属环节</th></tr>
+<tr><td>识别 AI 味根因</td><td>训练数据里大量「安全」选择</td><td>审美不该取平均值，方向必须你给</td><td>懂原理</td></tr>
+<tr><td>维度一 字体</td><td>标题展示体 + 正文易读体</td><td>Space Grotesk / Playfair Display / JetBrains Mono</td><td>会描述</td></tr>
+<tr><td>维度二 颜色</td><td>主色 + 点缀色，避免均匀分布</td><td>点缀要少而锐利，主色要稳</td><td>会描述</td></tr>
+<tr><td>维度三 布局</td><td>不对称、重叠、打破网格</td><td>五个维度里最见效的一个</td><td>会描述</td></tr>
+<tr><td>维度四 动画</td><td>精心编排的加载与微交互</td><td>让页面有节奏，而不是一次摊开</td><td>会描述</td></tr>
+<tr><td>维度五 细节</td><td>背景、阴影、边框、纹理</td><td>脱离塑料感的关键层</td><td>会描述</td></tr>
+<tr><td>方法一 提示词</td><td>灵活、每次可调整</td><td>适合一次性页面与风格实验</td><td>会用</td></tr>
+<tr><td>方法二 Skills</td><td>一次安装、持续生效</td><td>适合有固定风格要求的项目</td><td>会用</td></tr>
+<tr><td>UI/UX Pro Max</td><td>67 风格 / 96 配色 / 57 字体 / 100+ 规则</td><td>给的是<strong>具体数值</strong>而不是风格名</td><td>会选型</td></tr>
+<tr><td>frontend-design</td><td>Anthropic 官方，避开审美套路</td><td><strong>黑名单比白名单更有效</strong></td><td>会选型</td></tr>
+<tr><td>SuperDesign</td><td>IDE 插件，一次生成多个变体</td><td>适合还拿不定主意时对比</td><td>会选型</td></tr>
+<tr><td>三阶段工作流</td><td>探索 → 固化 → 自建规范</td><td>重复写到第三次就该固化</td><td>懂流程</td></tr>
+</table>
+<p><strong>这张表怎么用</strong>：上半部分是「把审美翻译成指令」的五个抓手，下半部分是「让规范自动生效」的三条路径。两者不是二选一，而是先后的关系。</p>
+<hr>
+<h2>三、逐段拆解</h2>
+<h3>3.1 为什么会有「AI 味」</h3>
+<p>训练数据里海量的前端代码，大多使用「安全」选择：</p>
+<table>
+<tr><th>维度</th><th>AI 的默认选择</th><th>问题</th></tr>
+<tr><td>字体</td><td>Inter、Roboto、Arial</td><td>太常见，没有个性</td></tr>
+<tr><td>颜色</td><td>紫色渐变、蓝色主色</td><td>科技圈过度使用，视觉疲劳</td></tr>
+<tr><td>布局</td><td>对称网格、卡片堆叠</td><td>预测性强，缺乏惊喜</td></tr>
+<tr><td>动画</td><td>淡入淡出、简单 hover</td><td>不够精致，缺乏层次</td></tr>
+<tr><td>背景</td><td>纯色、简单渐变</td><td>单调，缺少质感</td></tr>
+</table>
+<p><strong>关键洞察：AI 不是不会设计，而是默认回到「统计平均」。</strong> 往深想一层——统计平均意味着它在回答一道没有标准答案的题时，选了出现次数最多的答案。而审美恰恰不该取平均值。所以你要做的不是教它设计，而是<strong>给它一个方向，让它从这个方向上重新采样</strong>。</p>
+<p>这也解释了为什么光说「要好看」没用：<strong>好看不是方向，它是评价。</strong> 方向必须是具体的、可被对照检查的。</p>
+<h3>3.2 五个维度</h3>
+<ol>
+<li><strong>字体</strong>：标题用有展示感的粗体，正文用易读的正文字体。</li>
+<li><strong>颜色</strong>：主色 + 点缀色，避免均匀分布。点缀少而锐利，主色要稳。</li>
+<li><strong>布局</strong>：不对称、重叠、打破网格。<strong>五个维度里最见效的一个</strong>——同样的内容从左对齐改成错位排布，气质立刻不同。</li>
+<li><strong>动画</strong>：精心编排的页面加载与微交互（错峰揭示、滚动触发），让页面有节奏。</li>
+<li><strong>细节</strong>：背景、阴影、边框、纹理（噪点、几何图案、渐变网格）。很多人只顾排版忽略这一层，结果干净是干净了，但空。</li>
+</ol>
+<p>用法：<strong>当成检查表</strong>，每次写提示词前过一遍，缺哪一项结果就会在哪一项上回到平均值。</p>
+<p>两条补充经验：</p>
+<ul>
+<li><strong>性价比排序</strong>：时间有限只描述两项时，优先<strong>布局和颜色</strong>——视觉收益最大。动画和纹理属于耐看层面，有余力再加。</li>
+<li><strong>五项要互相呼应</strong>：粗重展示体配柔和浅背景会打架，霓虹配色配极简布局也会打架。<strong>风格是整体，气质要一致。</strong></li>
+</ul>
+<h3>3.3 普通提示词 vs 美化提示词</h3>
+<p>普通提示词给的是<strong>结构</strong>（标题、副标题、功能介绍、注册按钮）；美化提示词给的是<strong>结构 + 风格</strong>——把五个维度全部填进去。</p>
+<p>真正的差别不在字数，而在<strong>有没有提供可判定的信息</strong>。AI 擅长处理结构（它见过太多），而风格必须由你指定，因为那是偏离平均值的部分。</p>
+<p><strong>一句话总结：写提示词不是在提要求，是在描述一张你已经看见的图。</strong></p>
+<p>一个自检方法：把你写的风格描述拿给别人看——如果他能在脑子里大致画出页面样子，说明够具体了；如果他只能说「听起来挺好看」，说明你写的还是形容词，不是方向。</p>
+<h3>3.4 方法一：提示词模板</h3>
+<p><strong>优点</strong>灵活、每次可调整；<strong>缺点</strong>需要重复写。适合一次性页面和风格实验。</p>
+<p>原文附录给了三张表，用法是「先定方向 → 再定颜色 → 最后拿现成英文关键词写提示词」。</p>
+<p><strong>表一：风格速查（8 种）</strong></p>
+<table>
+<tr><th>风格</th><th>关键词</th><th>适用场景</th></tr>
+<tr><td>极简主义</td><td>留白、单色、简洁</td><td>高端产品、个人作品集</td></tr>
+<tr><td>玻璃拟态</td><td>毛玻璃、渐变、模糊</td><td>科技产品、SaaS 落地页</td></tr>
+<tr><td>新野兽派</td><td>粗边框、硬阴影、纯色</td><td>潮流品牌、艺术类网站</td></tr>
+<tr><td>Bento Grid</td><td>网格、拼贴、卡片</td><td>信息展示、仪表盘</td></tr>
+<tr><td>复古未来</td><td>霓虹、渐变、合成器波</td><td>游戏类、音乐类</td></tr>
+<tr><td>手绘风格</td><td>不规则、圆润、插画</td><td>教育类、儿童产品</td></tr>
+<tr><td>杂志风</td><td>大字体、不对称、留白</td><td>内容型网站、博客</td></tr>
+<tr><td>暗色奢华</td><td>深色、金色、精致</td><td>高端产品、奢侈品</td></tr>
+</table>
+<p><strong>表二：配色方案（6 套）</strong>——日落、海洋、森林、浆果、咖啡、单石，每套标注了传达的气质。</p>
+<p><strong>表三：风格 × 英文关键词（9 种）</strong>——波普艺术（大胆撞色、黑色轮廓线、网点纹理）、极简主义、抽象表现主义、复古风、赛博朋克（高对比霓虹、故障艺术、暗黑背景）、新拟态、生成式艺术、酸性设计、沉浸式 3D。</p>
+<p>两条经验：</p>
+<ul>
+<li><strong>英文关键词往往更有效</strong>：设计领域的风格词在英文语境下训练数据更密集，先写中文说清需求、再附一段英文关键词，效果通常更好。</li>
+<li><strong>别一次塞太多</strong>：风格堆得越多越容易折回平均值。<strong>一次只选一种风格，把它描述透。</strong></li>
+</ul>
+<h3>3.5 方法二：前端 Skills 插件</h3>
+<p><strong>优点</strong>一次安装、持续生效；<strong>缺点</strong>需要安装配置。适合有固定风格要求的项目（如品牌站）。</p>
+<p>三个插件：</p>
+<table>
+<tr><th>Skills</th><th>特点</th></tr>
+<tr><td><strong>UI/UX Pro Max</strong></td><td>67 种 UI 风格、96 种配色、57 种字体搭配、100+ 条设计规则（间距/圆角/阴影）</td></tr>
+<tr><td><strong>frontend-design</strong></td><td>Anthropic 官方，专门解决「AI 审美套路」</td></tr>
+<tr><td><strong>SuperDesign</strong></td><td>IDE 插件，一次生成多个设计变体</td></tr>
+</table>
+<p><strong>frontend-design 的思路很聪明</strong>：它不告诉 AI 要做什么，而是告诉它<strong>不要做什么</strong>——避开 Inter/Roboto/Arial、紫色渐变、对称网格、过淡阴影；倾向于独特字体组合、大胆主色 + 锐利点缀、不对称重叠布局、有质感的背景（噪点、几何图案）。</p>
+<p><strong>为什么黑名单比白名单更有效</strong>：白名单会限制创造力，黑名单只切除最平庸的那部分。</p>
+<p><strong>一个真实例子</strong>：任务「做一个深色仪表盘」，装好插件后 AI 自动应用规范——深灰背景（#1A1A2E）、高对比度卡片（#16213E）、鲜艳的数据颜色、玻璃拟态悬浮卡片。</p>
+<p><strong>选插件的判断标准：看它给的是「名字」还是「数值」。</strong> 只给一堆风格名字的，本质和你的提示词没区别；真正有用的是给出<strong>具体间距、具体圆角、具体色值</strong>的插件——因为设计里最容易出错的部分，恰恰就是这些数值。</p>
+<h3>3.6 两种方法怎么配合</h3>
+<table>
+<tr><th>方法</th><th>优点</th><th>缺点</th><th>适用场景</th></tr>
+<tr><td>提示词描述</td><td>灵活、每次可调整</td><td>需要重复写</td><td>一次性页面、实验不同风格</td></tr>
+<tr><td>Skills 插件</td><td>一次安装、持续生效</td><td>需要安装配置</td><td>有固定风格要求的项目</td></tr>
+</table>
+<p><strong>三阶段工作流（可直接照做）</strong>：</p>
+<ol>
+<li><strong>探索阶段</strong>——用不同风格提示词实验，找到真正喜欢的美学方向。<strong>这个阶段不要装插件</strong>，你要的是尽可能多看不同可能性。</li>
+<li><strong>确定风格后</strong>——安装对应插件，让这套风格变成默认值，省掉重复描述的成本。</li>
+<li><strong>品牌项目</strong>——创建自己的设计系统 Skill，定义品牌颜色、字体、间距、圆角，统一整个项目的设计语言。</li>
+</ol>
+<p>两条补充：</p>
+<ul>
+<li><strong>什么时候从第一阶段进入第二阶段</strong>：当你发现自己<strong>第三次写同一段风格描述</strong>的时候。重复到第三次，说明方向已经稳定，该固化了。</li>
+<li><strong>第三阶段不是可选项</strong>：长期维护的产品一定会发生<strong>风格漂移</strong>——今天这个圆角，明天换另一个，三个月后整个产品像几个人做的。而且当团队里不止一个人、也不止一个 AI 会话在产出界面时，<strong>一份共享规范是唯一能保证一致性的东西，它在产出之前就起作用，而不是产出之后再纠正。</strong></li>
+</ul>
+<hr>
+<h2>四、约束</h2>
+<p><strong>约束一：「好看」不是方向。</strong> 只说要好看，等于把题又还给 AI，它仍会回到统计平均。方向必须具体、可对照检查。</p>
+<p><strong>约束二：一次只选一种风格。</strong> 风格堆得越多，越容易折回平均值。</p>
+<p><strong>约束三：五个维度的气质要一致。</strong> 字体、配色、布局互相打架，比全都平庸还糟。</p>
+<p><strong>约束四：不要过早装插件。</strong> 探索期要的是可能性，插件会提前把你锁定在一种风格上。</p>
+<p><strong>约束五：长期项目必须自建规范。</strong> 否则风格漂移无法避免，多人多会话协作时尤其明显。</p>
+<hr>
+<h2>五、与 Easy-Vibe 其他章节的关系</h2>
+<p>在 <strong>Easy-Vibe</strong> 的脉络里，这一集处在「能用」到「好用」之间。</p>
+<p>前面的章节解决的是把需求变成可运行的界面；这一集解决的，是让那个界面有辨识度。它也是前面几集方法的又一次复用——<strong>给 AI 一个清晰的方向，而不是让它替你做判断。</strong></p>
+<p>和上一集的平台选型放在一起看，两集讲的是同一件事的两面：<strong>平台决定容器，风格决定气质。</strong> 容器选错会变贵，风格没定会变平庸——两者都要在动手之前想清楚，而不是等生成出来再补救。</p>
+<p>还有一点可以迁移：这一集讲到的「把一整套已验证的决策打包成默认值」，和前面讲到的「把任务描述与验收标准存成文件」是同一个套路——<strong>把一次性的判断固化成可复用的资产。</strong></p>
+<hr>
+<h2>六、审查清单</h2>
+<p>动手之前逐条打勾：</p>
+<ul>
+<li>已确认自己要的是「方向」而不是「好看」这个评价</li>
+<li>五个维度（字体/颜色/布局/动画/细节）都已想清楚</li>
+<li>五个维度之间气质一致，没有互相打架</li>
+<li>本次只选了一种风格，没有堆砌关键词</li>
+<li>已附上该风格对应的英文关键词</li>
+<li>已用「别人能否据此画出页面」检验描述的具体程度</li>
+<li>若已重复第三次写同一段风格描述，已考虑改为安装插件</li>
+<li>若选插件，已确认它提供的是具体数值而非仅风格名</li>
+<li>长期项目已规划自建设计规范</li>
+</ul>
+<hr>
+<h2>七、实践提示</h2>
+<h3>提示1 · 用「能否画出页面」检验你的描述</h3>
+<p>把风格描述拿给别人看。他能在脑子里大致画出页面 → 够具体；只能说「听起来挺好看」→ 你写的还是形容词。</p>
+<h3>提示2 · 时间不够就只描述布局和颜色</h3>
+<p>五个维度有性价比排序。布局决定第一眼印象，颜色决定整体气质，这两项改动视觉收益最大。</p>
+<h3>提示3 · 中文说需求，英文给关键词</h3>
+<p>先写中文把需求说清楚，再附一段该风格的英文关键词。设计风格词在英文语境下训练数据更密集，触发更准。</p>
+<h3>提示4 · 选插件看「数值」不看「名字」</h3>
+<p>给出具体间距、圆角、色值的插件才真正有用。只给风格名字的，本质和普通提示词没区别。</p>
+<h3>提示5 · 重复到第三次就固化</h3>
+<p>发现自己第三次写同一段风格描述时，说明方向已稳定——装插件，或写成自己的设计规范文件。</p>
+<hr>
+<h2>八、收尾</h2>
+<p>这一集真正想留下的不是那张风格表——表随时能查。而是那句判断：<strong>AI 不是不会设计，而是默认回到统计平均。</strong></p>
+<p>你要做的不是教它设计，而是给它一个偏离平均值的方向。而「方向」和「好看」的区别，就在于前者能被画出来、能被对照检查，后者只是一个评价。</p>
+<p>最后那个练习值得真的做一次：<strong>挑一个你之前做过的项目，换一套风格描述重新生成，然后对比两个版本。</strong> 那一次对比，比任何讲解都能让你明白——风格到底改变了什么。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s3.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
