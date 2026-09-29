@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>如何让 Claude Code 长时间工作 · 方法三：增强版 Ralph</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 10 · EP 9</span>
+<h1>如何让 Claude Code 长时间工作 · 方法三：增强版 Ralph</h1>
+<p class="sub">第 10 章 · 第 9 讲 · 18:00</p>
+<div class="meta"><span>时长 <b>18:00</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>10</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/s3-09-long-running-tasks-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/s3-09-long-running-tasks-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/s3-09-long-running-tasks/s3-09-long-running-tasks-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/s3-09-long-running-tasks/s3-09-long-running-tasks-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-10.html">← 第 10 章目录</a>
+<a href="/p/s3-08-long-running-tasks/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:27</span></div>
+<div class="ch" data-t="87.288"><span class="t">1:27</span><span class="n">方法三，增强版 Ralph 的四道保险</span><span class="d">2:31</span></div>
+<div class="ch" data-t="238.392"><span class="t">3:58</span><span class="n">怎么装与怎么配</span><span class="d">1:59</span></div>
+<div class="ch" data-t="358.008"><span class="t">5:58</span><span class="n">方法四，多代理并行</span><span class="d">2:05</span></div>
+<div class="ch" data-t="483.336"><span class="t">8:03</span><span class="n">后台任务，最轻量的那一个</span><span class="d">1:48</span></div>
+<div class="ch" data-t="592.104"><span class="t">9:52</span><span class="n">三道硬限制与两个智能保护</span><span class="d">2:08</span></div>
+<div class="ch" data-t="721.08"><span class="t">12:01</span><span class="n">实战，用循环构建一个论坛系统</span><span class="d">2:47</span></div>
+<div class="ch" data-t="888.504"><span class="t">14:48</span><span class="n">四种方法怎么选</span><span class="d">2:00</span></div>
+<div class="ch" data-t="1008.912"><span class="t">16:48</span><span class="n">收尾</span><span class="d">1:10</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe · 增强版 Ralph、多代理并行与安全兜底 — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-3/core-skills/long-running-tasks/index.md</code>），为<strong>二次演绎配音版</strong>。原文作者与贡献者来自开源社区。本文在原文基础上做了口语化改写、结构重组与实践补充，观点与例子由演播者添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>s3-09-long-running-tasks</code></li>
+<li>所属章节：第 10 章 · s3 重切复活篇</li>
+<li>对应音频：<code>s3-09-long-running-tasks-播客.mp3</code></li>
+<li>字幕：<code>s3-09-long-running-tasks-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>上一集讲的是「让它别提前收工」——五行脚本与停止钩子。但一旦把循环搬进真实项目，立刻会撞上下一批问题：<strong>它会烧多少钱？会不会跑进死循环？关键时刻能不能叫停？</strong></p>
+<p>原文这一章的后半部分正好回答这批问题，分五块：<strong>方法三 增强版 Ralph</strong>（四道额外保险）、<strong>方法四 Agent Teams 多代理并行</strong>、<strong>后台任务</strong>（最轻量的非阻塞执行）、<strong>硬性限制与智能检测</strong>（三道限制 + 两个保护）、<strong>一个完整实战</strong>（用 Ralph Loop 构建 BBS 论坛系统）。</p>
+<p>音频稿按「增强版四道保险 → 安装与配置 → 多代理并行 → 后台任务 → 硬限制与智能保护 → BBS 实战 → 四选一 → 收尾」重排。</p>
+<p>一句话概括：<strong>上一集解决的是「让它做完」，这一集解决的是「让它安全地做完」。</strong></p>
+<hr>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>能力项</th><th>原文怎么说的</th><th>演播者的解读</th><th>所属环节</th></tr>
+<tr><td>双重退出条件</td><td>完成标记 + 显式 EXIT_SIGNAL 同时成立才停</td><td>堵死「嘴上说做完了，其实还有话没说完」</td><td>加保险</td></tr>
+<tr><td>速率限制</td><td>默认 100 次/小时</td><td>不是提质量，是防止一夜烧穿账单</td><td>加保险</td></tr>
+<tr><td>智能熔断器</td><td>连续 5 次检测到完成标记则强制退出</td><td>防的是「原地打转式完成」</td><td>加保险</td></tr>
+<tr><td>实时仪表盘</td><td>显示迭代次数、进度、预估成本</td><td>长时运行最折磨人的是信息黑洞</td><td>加保险</td></tr>
+<tr><td>配置文件</td><td><code>.claude/ralph-config.json</code> 五个字段</td><td>把配置当基础设施，别每次改</td><td>会配置</td></tr>
+<tr><td>多代理并行</td><td>多实例 + 共享任务列表协调依赖</td><td>放大效率的同时也放大混乱</td><td>懂边界</td></tr>
+<tr><td>后台任务</td><td>组合键推后台，<code>/tasks</code> 查看</td><td>解决的是「别让我干等」，不是「一定做完」</td><td>会用</td></tr>
+<tr><td>三道硬限制</td><td>迭代次数 / 时间上限 / 金额预警</td><td>三个维度，缺一个笼子就有一个缺口</td><td>守安全</td></tr>
+<tr><td>死循环检测</td><td>最近 5 次提交差异极小则报警</td><td>还要看是不是反复改同一批文件</td><td>守安全</td></tr>
+<tr><td>人工检查点</td><td>每 10 次迭代暂停等确认</td><td>在自动化链条上保留几个可下车的站</td><td>守安全</td></tr>
+<tr><td>BBS 实战</td><td>40–60 人时 vs 3–10 机时</td><td>差距来自「测试先行 + 人工兜底」</td><td>会落地</td></tr>
+<tr><td>四选一</td><td>While True / Ralph / 增强版 / 后台任务</td><td>三个维度排序，不要一上来就上最复杂的</td><td>会选型</td></tr>
+</table>
+<p><strong>这张表怎么用</strong>：上半部分是「给不确定的过程装上限和报警器」，中间是「怎么让它跑得更宽」，下半部分是「跑起来之后怎么盯」。如果你的配置里上半部分一项都没有，说明你还在裸奔。</p>
+<hr>
+<h2>三、逐段拆解</h2>
+<h3>3.1 增强版 Ralph：四道保险</h3>
+<p>社区增强版（<code>frankbria/ralph-claude-code</code>，2.1k 星）在官方机制之上加了四样东西：</p>
+<ol>
+<li><strong>双重退出条件</strong>：官方只看完成标记，增强版要求完成标记 + 显式退出信号同时成立。少了任何一个，循环继续。</li>
+<li><strong>速率限制</strong>：默认 100 次/小时，按预算可调。</li>
+<li><strong>智能熔断器</strong>：连续 5 次检测到完成标记即强制退出。听上去像「惩罚完成」，其实防的是循环卡在某状态反复输出同样的完成句却毫无推进。</li>
+<li><strong>实时仪表盘</strong>：命令行显示当前轮次、进度、预估成本。</li>
+</ol>
+<p>这四道保险的共性：<strong>都不提升 AI 的能力，都只是给不确定的过程装上限和报警器。</strong> 往深一层看，它们其实对应四种失败模式——双重退出防「假完成」，速率限制防「频率失控」，熔断器防「原地打转」，仪表盘防「信息黑洞」。这份清单可以复用到任何自动化流程的设计里。</p>
+<p>配置建议：不是越多越好，而是按风险选。给一个跑 10 轮的小任务配全套，配置时间就超过任务本身了。</p>
+<h3>3.2 安装与配置</h3>
+<p>两步：<code>ralph-setup</code> 初始化 → <code>ralph loop</code> 启动。</p>
+<p>配置文件 <code>.claude/ralph-config.json</code> 有五个字段：<code>maxIterations</code>、<code>rateLimitPerHour</code>、<code>completionPromise</code>、<code>exitSignal</code>、<code>costAlertThresholds</code>（金额列表，触达即告警）。</p>
+<p>两条经验：</p>
+<ul>
+<li>第一次配置就把成本阈值填上 <strong>10 和 50</strong> 两个档位。多数人不是被一次大额账单吓到，是被连续几天的小额消耗拖垮。</li>
+<li><strong>完成标记不要设成任务主题词</strong>（比如就叫「论坛系统」）。主题词会在思考过程中反复出现，循环可能第一轮就误判完成。标记要生僻、要唯一。</li>
+<li>增强版要求双条件退出，所以提示词里必须明确写清「做完后除了输出完成标记，还要显式写出退出信号」。少这一句，循环会永远差一个条件而停不下来。</li>
+</ul>
+<h3>3.3 多代理并行</h3>
+<p>机制：多个实例并行工作，用共享任务列表协调依赖（谁先谁后、谁的输出是谁的输入）。</p>
+<p>标志性实验：Nicholas Carlini 用 <strong>16 个并行 Agent，2 周，10 万+ 行代码</strong>，构建出能编译 Linux 内核的 C 编译器。</p>
+<p>判读：瓶颈有时不在单个模型多聪明，而在同时能有多少条线推进。但协调成本极高——任务拆分、依赖管理、冲突合并，每件都不轻松。原文也把它定位给超大型项目。</p>
+<p>判断标准：<strong>说不清能拆成哪几块、块与块谁依赖谁，就别上并行。</strong> 更能落地的角度是——并行真正适合边界清晰、接口稳定、彼此几乎不碰同一批文件的任务；让十个实例同时改同一个核心文件，得到的不是并行，是合并灾难。</p>
+<p>还要算一笔账：速度不是线性增长，协调成本增长更快，超过某个拐点加人只会变慢。</p>
+<h3>3.4 后台任务：最轻的一个</h3>
+<p>用法：任务跑起来后按组合键推到后台，然后继续下一条指令。查看有三条路——<code>/tasks</code> 命令（编号/状态/启动时间）、快捷键看摘要、从列表拉回前台看实时输出。</p>
+<p>适用四类：长测试套件、大型构建、批量文件处理、任何不想干等的事。</p>
+<p>边界很清楚：它只是挪到后台，没有循环、没有完成检测，跑完就结束。<strong>解决的是「别让我干等」，不是「让它一定做完」。</strong></p>
+<p>真正的价值不在省时间，而在改变工作方式——把耗时活先发出去，自己继续推主线，一天下来被打断的次数明显变少。另外它也会花钱，而且因为看不见更容易忘，推后台时随手记个时间是好习惯。</p>
+<h3>3.5 三道硬限制与两个智能保护</h3>
+<p><strong>三道硬限制</strong>分别管三个维度：</p>
+<table>
+<tr><th>限制</th><th>管什么</th><th>典型取值</th></tr>
+<tr><td>最大迭代次数</td><td>轮数</td><td>必设，无商量余地</td></tr>
+<tr><td>时间上限</td><td>墙钟</td><td>如最长 4 小时</td></tr>
+<tr><td>金额预警</td><td>成本</td><td>10 / 50 / 100 美元</td></tr>
+</table>
+<p>只设其中一个，另外两个方向仍可能失控；三个都设才算把笼子围起来。</p>
+<p><strong>两个智能保护</strong>：</p>
+<ul>
+<li><strong>死循环检测</strong>：检查最近几次提交的代码差异，连续 5 次改动极小即判定卡住并报警。一个脚本就能实现，成本极低、收益极高。进阶做法——同时记下改动的文件名，<strong>反复改同一批文件</strong>比「行数变化小」是更强的告警信号。</li>
+<li><strong>人工检查点</strong>：每 10 次迭代暂停一次等确认。牺牲全自动，换来关键时刻人在场。</li>
+</ul>
+<p>取舍的本质：自动化程度越高，人的介入点越少，出问题时反应距离越远。<strong>人工检查点就是在自动化链条上保留几个可以下车的站点。</strong></p>
+<p>排序建议：只能设一个就设次数；能设两个加金额；三个都设才谈得上安心。</p>
+<h3>3.6 实战：用循环构建 BBS 论坛系统</h3>
+<p><strong>范围</strong>：用户端（注册/登录/退出、帖子列表分页、详情、发新帖、评论、个人中心）+ 管理后台（管理员登录、用户封禁解封、帖子删除置顶、评论管理、系统统计）。技术栈为 Node + Express + SQLite / React + 路由 + 请求库 / JWT 令牌 / 原子化样式框架。</p>
+<p><strong>时间账</strong>：人工 40–60 小时（含数据库设计、认证、联调、测试）；用循环基础版 3–5 小时、完整版 6–10 小时。</p>
+<p><strong>监控三信号</strong>：当前轮次与最大轮数（估剩余时间）、日志（看它在做什么）、<strong>测试状态</strong>（通过数在涨、失败数在减）——第三条最可靠，因为它是唯一客观的那一条。</p>
+<p><strong>完成后人工验证八步</strong>：注册 → 登录 → 浏览 → 发新帖 → 发评论 → 个人中心 → 退出用管理员登录 → 测后台功能。</p>
+<p><strong>五条注意事项</strong>：提示词越详细越好；迭代次数要够（这种复杂度建议 ≥100）；TDD 是推荐方式；最终必须人工验证（模型可能漏边界，尤其安全相关）；数据库设计要多留几轮。</p>
+<p>最该强调的是最后两条：<strong>测试保证过程中有客观信号，人工验证保证结果有人兜底。</strong> 少任何一条，时间优势都可能被一次线上事故抵消。</p>
+<p>还有一个容易忽略的看点——原文那张功能清单本身就是最好的提示词素材。<strong>写提示词的功夫大部分花在拆功能上，而不是措辞上。</strong></p>
+<h3>3.7 四选一</h3>
+<table>
+<tr><th>方案</th><th>上手成本</th><th>完成保障</th><th>说明</th></tr>
+<tr><td>While True Loop</td><td>低</td><td>最弱</td><td>几行代码，无完成检测，靠轮数兜底</td></tr>
+<tr><td>后台任务</td><td>最低</td><td>无</td><td>一个组合键，但没有循环机制</td></tr>
+<tr><td>Ralph Wiggum</td><td>中</td><td>够用</td><td>通用推荐，官方支持，文档完善</td></tr>
+<tr><td>增强版 Ralph</td><td>中高</td><td>最强</td><td>生产环境，四道额外保险</td></tr>
+<tr><td>Agent Teams</td><td>最高</td><td>视拆分质量</td><td>超大型项目，协调成本高</td></tr>
+</table>
+<p>三个维度并不一致，这正是选择依据：<strong>新手先挑上手成本低的跑通流程，等要为结果负责了再换到保障强的那一档。</strong> 不要反过来——一开始就上最复杂的方案，会让你在配置和结果两头同时失去判断力。</p>
+<p>原文那句总结很准：<strong>所有方法本质上都在做同一件事——给任务、让它工作、检查是否真的完成、没有就再来一轮。形式有四种，内核只有一个。</strong></p>
+<hr>
+<h2>四、约束</h2>
+<p>这一集的方法仍然不是万能钥匙，四条硬约束必须记住。</p>
+<p><strong>约束一：完成标记必须唯一且不常见。</strong> 用主题词当标记，等于让循环第一轮就可能误判完成。</p>
+<p><strong>约束二：三道限制必须覆盖三个维度。</strong> 次数、时间、金额，缺一个维度就有一个缺口。</p>
+<p><strong>约束三：并行前必须能说清拆分与依赖。</strong> 说不清就不要上并行——它放大的是混乱，不是效率。</p>
+<p><strong>约束四：最终结果必须人工验证。</strong> 尤其是安全相关功能，模型遗漏边界情况的概率不为零。测试的客观性与人的兜底，两者都要有。</p>
+<hr>
+<h2>五、与 Easy-Vibe 其他章节的关系</h2>
+<p>在 <strong>Easy-Vibe</strong> 的脉络里，这一集是上一集的纵深。上一集解决「会不会停」，这一集解决「停之前会不会出事」。</p>
+<p>把两集连起来看，完整的方法论是三层：<strong>底层是循环机制</strong>（让它别提前收工），<strong>中层是安全保险</strong>（让它在预算与轮数内运行），<strong>上层是客观验证</strong>（让「完成」这件事有可执行的判据）。三层缺任何一层，长时任务都不可靠——只有底层会烧钱，只有中层会空转，只有上层会停在原地。</p>
+<p>再往外看，这一集讲的「给自动化过程装上限和报警器」，可以直接迁移到 CI 流水线、定时脚本、数据同步任务上。只要你有一个会自己跑很久的东西，这四道保险就都适用。</p>
+<hr>
+<h2>六、审查清单</h2>
+<p>上手之前逐条打勾：</p>
+<ul>
+<li>已为循环设置最大迭代次数（且不是无上限）</li>
+<li>已设置时间上限（如最长 4 小时）</li>
+<li>已设置金额预警阈值（建议 10 与 50 两档）</li>
+<li>完成标记生僻唯一，不是任务主题词</li>
+<li>若用增强版，提示词已明确要求「除完成标记外还要显式给出退出信号」</li>
+<li>配置文件已作为项目基础设施固化，不随意改动</li>
+<li>已实现死循环检测（提交差异 + 改动文件名双重判断）</li>
+<li>重要任务已设置人工检查点（如每 10 轮暂停）</li>
+<li>若上并行，已能说清任务拆分与相互依赖</li>
+<li>实战任务已采用测试先行，且留有人工验证步骤</li>
+<li>后台任务推入后台时已记录启动时间，便于超时核查</li>
+</ul>
+<hr>
+<h2>七、实践提示</h2>
+<h3>提示1 · 四道保险按「失败模式」选，不要一次全上</h3>
+<p>假完成用双重退出，频率失控用速率限制，原地打转用熔断器，信息黑洞用仪表盘。先判断你最可能遇到哪一种，再配对应的一道。</p>
+<h3>提示2 · 成本阈值设两档，10 和 50</h3>
+<p>单档预警要么太吵要么太晚。两档的好处是：第一档让你知道它开始花钱了，第二档让你知道该踩刹车了。</p>
+<h3>提示3 · 死循环检测要记文件名，不只记行数</h3>
+<p>在同一个文件的同一段里来回改，行数看着有变化，实际一步没走。<strong>重复出现在同一批文件上，是最强的告警信号。</strong></p>
+<h3>提示4 · 用「功能清单」当提示词，别用形容词</h3>
+<p>把要做的每一条功能列出来，再给每条加一句「怎么算做完」。写提示词的功夫八成在拆功能，两成在措辞。</p>
+<h3>提示5 · 今天就检查一次金额上限</h3>
+<p>四道保险里最容易漏、也最容易一夜之间让你心疼的就是这道。打开你正在用的循环配置看一眼，花不了一分钟。</p>
+<hr>
+<h2>八、收尾</h2>
+<p>这一集真正想留下的，不是某个增强版项目的用法，而是一句工程判断：<strong>当一件事可以自动跑很久的时候，真正的难点早就不是怎么让它跑起来，而是怎么让它停得下来。</strong></p>
+<p>保险、限制、检查点，指向的都是同一件事。把它们配齐，你才有可能真正放心地让它过夜。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s3.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
