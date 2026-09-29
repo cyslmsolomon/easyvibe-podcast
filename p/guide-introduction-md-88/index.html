@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>项目介绍与学习地图 · 三阶段实战路径</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 9 · EP 88</span>
+<h1>项目介绍与学习地图 · 三阶段实战路径</h1>
+<p class="sub">第 9 章 · 第 88 讲 · 14:23</p>
+<div class="meta"><span>时长 <b>14:23</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>9</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/guide-introduction-md-88-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/guide-introduction-md-88-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/guide-introduction-md-88/guide-introduction-md-88-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/guide-introduction-md-88/guide-introduction-md-88-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-9.html">← 第 9 章目录</a>
+<a href="/p/stage-3-personal-brand-personal-website-blog-87/">← 上一讲</a>
+<a href="/p/vibe-stories-story-2-md-89/">下一讲 →</a>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场，这一集要解决什么问题</span><span class="d">1:32</span></div>
+<div class="ch" data-t="92.04"><span class="t">1:32</span><span class="n">卡点不在工具，在流程</span><span class="d">1:51</span></div>
+<div class="ch" data-t="203.35"><span class="t">3:23</span><span class="n">三阶段实战路径总览</span><span class="d">1:27</span></div>
+<div class="ch" data-t="291.21"><span class="t">4:51</span><span class="n">新手入门，先建立手感</span><span class="d">1:15</span></div>
+<div class="ch" data-t="366.91"><span class="t">6:06</span><span class="n">第一阶段，AI 产品经理的四章</span><span class="d">1:23</span></div>
+<div class="ch" data-t="450.79"><span class="t">7:30</span><span class="n">附录区，产品思维的地基</span><span class="d">1:49</span></div>
+<div class="ch" data-t="560.37"><span class="t">9:20</span><span class="n">前端部分，从素材到组件化界面</span><span class="d">1:38</span></div>
+<div class="ch" data-t="659.25"><span class="t">10:59</span><span class="n">后端部分与 AI 能力，把原型推上线</span><span class="d">1:38</span></div>
+<div class="ch" data-t="758.2"><span class="t">12:38</span><span class="n">收尾，三类学习者各自的走法</span><span class="d">1:44</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>guide-introduction-md-88 项目介绍与学习地图 · 解读与音频稿件</h1>
+<blockquote>本稿为音频配套解读，围绕 Easy-Vibe 的「项目介绍 / 学习地图」一页，拆解为什么多数人用 AI 写代码却停在玩具阶段，并逐段铺开三阶段实战路径、附录方法论与前后端章节，最后给出三类学习者各自的使用走法与审查清单。</blockquote>
+<hr>
+<h2>一、这一集在能力地图上的位置</h2>
+<p>这是整份教程的第一页，也是最容易被跳过的一页。它讲的是项目介绍和学习地图，听起来像前言，但要解决的问题很硬：<strong>为什么那么多人已经会用 AI 写代码了，做出来的东西却始终停留在玩具层面。</strong></p>
+<p>在 Easy-Vibe 的能力地图里，这一页承担的是「定位」职能。它不教你具体怎么写代码，而是告诉你整条路线长什么样、你现在站在哪一段、下一步该翻哪一章。没有这个定位，后面的章节就会变成一堆零散的知识点，学完也不知道自己练到了什么程度。</p>
+<p>一个很常见的现象是：很多人学完一整份教程，能说出每一章讲了什么，但说不出自己现在能交付什么。这就是缺定位的典型症状。知识点是散的，能力是整体的，中间缺的那层就是把知识点串起来的路线图。</p>
+<p>这一页还隐含了一个判断，值得单独拎出来：<strong>AI 已经把「写代码」这件事的门槛降到了很低，所以这份教程真正要教的不是怎么写代码，而是怎么组织一次完整的开发。</strong> 这决定了它的编排逻辑——按交付物复杂度递进，而不是按知识点难度递进。</p>
+<hr>
+<h2>二、卡点不在工具，在流程</h2>
+<p>原文把卡点说得很清楚，一共三件事：</p>
+<ol>
+<li>不知道如何用 Vibe Coding 组织开发流程</li>
+<li>不知道该选哪些工具</li>
+<li>不清楚从原型到上线中间还差哪些关键步骤</li>
+</ol>
+<p>这三件事里，<strong>只有第二件是关于工具的，而工具恰恰是最容易补的</strong>。搜索一下就有答案，花半天就能上手。真正难的是另外两件——流程和路径。</p>
+<p>流程没人告诉你，你就会一直在原地打转：今天做一个贪吃蛇，明天做一个待办清单，每一个都能跑，但每一个都走不到上线。这种「能跑但不成产品」的状态，就是原文说的「玩具层面」。</p>
+<p>所以这份教程的设计重点不在教你用哪个工具，而在给你一条能走通的路线，让你在每个阶段都知道自己在练什么、练完能拿到什么。</p>
+<hr>
+<h2>三、三阶段实战路径</h2>
+<table>
+<tr><th>阶段</th><th>目标</th><th>关键动作</th></tr>
+<tr><td>新手入门</td><td>建立手感与信心</td><td>通过小游戏快速上手 AI 编程</td></tr>
+<tr><td>第一阶段</td><td>掌握 Vibe Coding 工作方式</td><td>完成 Web 应用原型</td></tr>
+<tr><td>第二阶段</td><td>全栈开发与部署上线</td><td>把原型变成真正能访问的东西</td></tr>
+<tr><td>第三阶段</td><td>构建跨平台复杂应用</td><td>处理更真实、更复杂的场景</td></tr>
+</table>
+<p>这条路径是循序渐进的，不能跳。设计原则是<strong>每个阶段都配有完整项目实战</strong>——不是为了让你多做一个练习，而是因为 AI 编程光看学不会，必须在一个真实挑战里把整条链路走一遍，才会暴露出那些看教程时根本想不到的问题。</p>
+<p>这份教程的目标写得很直白：让你在真实挑战中从玩具走向产品，最终具备<strong>把任何想法落地为可用应用</strong>的能力。</p>
+<hr>
+<h2>四、新手入门（幼儿园）：两个章节</h2>
+<ul>
+<li><strong>学习地图</strong>：整体学习路径导览，先看清全貌再决定往哪走</li>
+<li><strong>AI 时代，会说话就会编程</strong>：通过贪吃蛇等案例初步感受 AI 编程的能力</li>
+</ul>
+<p>这一阶段的目标只有一个：<strong>建立手感</strong>。你不需要理解架构，不需要知道什么是接口，只需要反复体验一件事——把你想做的东西说出来，然后看它真的长出来。</p>
+<blockquote>这个体验积累够了，后面讲方法和流程时你才接得住。完全的新手不要跳过这一段，手感这件事省不掉。</blockquote>
+<hr>
+<h2>五、第一阶段（AI 产品经理）：四章闭环</h2>
+<ol>
+<li><strong>认识 AI IDE 工具</strong>：学会使用 IDE，掌握界面结构和高效提示方式</li>
+<li><strong>动手做出原型</strong>：从产品分析拆解，到多页面产品原型实现的完整闭环</li>
+<li><strong>给原型加上 AI 能力</strong>：理解并完成文本、图片、视频等常见 AI 能力的 API 接入</li>
+<li><strong>完整项目实战</strong>：模拟真实场景、接受用户反馈迭代并完成项目展示（含大作业）</li>
+</ol>
+<p>这四章合起来是一条完整的链：<strong>先会用工具，再会拆需求，再会接能力，最后在一个真实项目里把前三样串起来。</strong></p>
+<p>注意顺序不能乱。很多人直接从第 3 章开始，觉得接个大模型接口很酷，但因为不会拆需求（第 2 章），做出来的东西往往没有一个清晰的用户路径。</p>
+<hr>
+<h2>六、附录区：产品思维的地基</h2>
+<p>六块内容，目前全部是完成状态：</p>
+<ul>
+<li><strong>附录 A：产品思维补充</strong>——从想法评估到需求拆解与 MVP 的完整框架</li>
+<li><strong>附录 B：常见报错及解决方案</strong>——Vibe Coding 中的常见错误及排查方法（建议当工具书用）</li>
+<li><strong>从哪里找点子</strong>——从参考应用、趋势和 VC 清单里收出细分方向</li>
+<li><strong>双钻模型</strong>——先定义问题，再展开方案设计的完整节奏</li>
+<li><strong>Jobs to Be Done</strong>——用 JTBD 看清用户真正想完成的事</li>
+<li><strong>The Mom Test 用户访谈法</strong>——通过用户访谈验证需求</li>
+</ul>
+<p>这四块方法论看起来偏软，但它们决定的是<strong>你做出来的东西有没有人要</strong>，而不是能不能跑起来。这是两个完全不同维度的问题，而后者才是绝大多数玩具产品的死因。</p>
+<hr>
+<h2>七、前端部分：从素材到组件化界面</h2>
+<p>五个章节，目前在建设中：</p>
+<table>
+<tr><th>章节</th><th>关键内容</th></tr>
+<tr><td>使用 lovart 生产素材</td><td>批量生成人物、场景等视觉素材，为 UI 设计和前端开发提供素材基础</td></tr>
+<tr><td>Figma 与 MasterGo 入门</td><td>用设计工具梳理信息架构和页面结构</td></tr>
+<tr><td>构建第一个现代应用程序-UI 设计</td><td>基于设计稿完成组件化界面，实现从设计到代码的第一条链路</td></tr>
+<tr><td>参考 UI 设计规范设计页面和按钮</td><td>用主流设计规范组织页面结构与按钮层级，借助 AI 生成设计方案</td></tr>
+<tr><td>一起做霍格沃茨画像</td><td>从 0 到 1 做出接入 AI 能力的前端应用，串联设计与开发</td></tr>
+</table>
+<p>这一段的关键词是<strong>从设计到代码</strong>。重点不在写多少代码，而在让设计稿和最终页面对得上。</p>
+<hr>
+<h2>八、后端部分与 AI 能力：把原型推上线</h2>
+<p>八个章节，目前在建设中：</p>
+<ol>
+<li><strong>什么是 API</strong>——理解 HTTP 接口与请求响应模型</li>
+<li><strong>从数据库到 Supabase</strong>——落地数据库和 API，打通数据模型与前端页面</li>
+<li><strong>大模型辅助编写接口代码与接口文档</strong>——实现可读可测的后端</li>
+<li><strong>Git 工作流与 Zeabur 部署</strong>——管理代码并将应用部署上线</li>
+<li><strong>现代 CLI 开发工具</strong>——用 CLI 类 AI 编程工具加速开发与调试</li>
+<li><strong>如何集成 stripe 等收费系统</strong>——接入支付，完成收费链路与基础结算</li>
+<li><strong>构建第一个现代应用程序-全栈应用</strong>——综合前端、后端与支付模块</li>
+<li><strong>现代前端组件库 + Trae 实战</strong>——独立完成可登录注册并支持收费的产品</li>
+</ol>
+<p>AI 能力附录补充两块：<strong>Dify 入门与知识库集成</strong>（用 Dify Workflow 与基础 RAG 搭建工具类产品）、<strong>查询 AI 词典与集成多模态 API</strong>（查找合适的模型与 API，接入文本图像等多模态能力）。</p>
+<p>这一整段解决的是原文提到的第三个卡点——从原型到上线中间差的那些关键步骤。</p>
+<hr>
+<h2>九、三类学习者各自的走法</h2>
+<p>这份教程面向三类学习者：</p>
+<p><strong>新手（普通人 / 产品与运营侧）</strong>：帮助非技术背景角色和入门学习者听懂关键概念，完成第一个 AI 小工具或产品原型。建议严格按顺序走，从幼儿园开始，不要跳。</p>
+<p><strong>初中级开发者（有一定基础的学生和开发者）</strong>：系统掌握 vibe coding 与原生 AI 应用开发。可以直接进第一阶段，但附录那四块方法论建议补上，那通常正是这一类人缺的部分。</p>
+<p><strong>高级开发者（公司与初创、开源与独立开发者）</strong>：支持团队和个人快速搭建、验证与迭代原生 AI 应用。把这份材料当检索手册用，按需翻章节即可。</p>
+<p>地图上有两种状态标记：<strong>已完成</strong>（可以直接学）与<strong>建设中</strong>（还在更新，遇到问题时以仓库里的实际内容为准）。</p>
+<hr>
+<h2>十、如何判断自己是否已经脱离玩具阶段</h2>
+<p>「玩具」和「产品」的分界，其实有很具体的判据，不需要靠感觉。</p>
+<p>第一条是<strong>有没有别人在用</strong>。自己跑着玩的 demo，再精致也是玩具；哪怕只有一个真实用户每天打开一次，性质就变了。</p>
+<p>第二条是<strong>有没有部署到公网</strong>。本地能跑和能被别人访问，中间隔着环境变量、构建配置、域名、静态资源路径这一整串麻烦。跨不过去，就永远停在原型阶段。</p>
+<p>第三条是<strong>有没有数据落地</strong>。只有界面没有持久化数据的应用，本质上还是个演示稿。数据一旦要存，就会牵出用户体系、权限和备份这一系列真实问题。</p>
+<p>第四条是<strong>有没有被验证过需求</strong>。没人验证过的东西，做得越完整，沉没成本越高。</p>
+<p>这四条里只要有两条回答是「没有」，你就还在玩具阶段。对照着看，比凭感觉判断靠谱得多，也能直接告诉你该补哪一段。</p>
+<hr>
+<h2>十一、审查清单</h2>
+<p>在开始学习之前，用这份清单给自己做一次定位：</p>
+<ol>
+<li>我能不能说清楚「从原型到上线」中间到底有哪几步？说不清就说明卡在流程上。</li>
+<li>我最近做的三个东西，有没有任何一个能被别人真正用起来？全都没有，就还停在玩具层面。</li>
+<li>我属于三类学习者中的哪一类？走法是否匹配？</li>
+<li>我会不会拆需求？如果只会接接口不会拆需求，回第一阶段第 2 章补课。</li>
+<li>我的设计稿和最终页面能对得上吗？对不上就补前端那五章。</li>
+<li>我有没有把应用真正部署到公网过？没有就补 Git 工作流与部署那一章。</li>
+<li>我做的东西有没有人愿意付费？这决定了你要不要学支付集成那一章。</li>
+<li>我有没有验证过需求是真的？没验证过就补附录那四块方法论。</li>
+<li>我是否知道自己现在站在三阶段里的哪一段？不知道就先回来看学习地图。</li>
+<li>我学完的章节和能交付的东西，哪个更多？如果章节远多于交付物，进度其实被高估了。</li>
+</ol>
+<p>这十条不必一次全答。优先回答第 1、第 5 和第 9 条：能不能说清从原型到上线的步骤、设计稿和页面是否对得上、以及自己站在哪一段。这三条决定了你该往哪走，其余七条决定的是走得扎不扎实。</p>
+<hr>
+<h2>十二、约束与边界</h2>
+<p><strong>第一，状态标记会变。</strong> 地图上标着「建设中」的章节随时可能更新甚至重构，不要把它当成稳定承诺。遇到冲突以仓库实际内容为准。</p>
+<p><strong>第二，工具会过时。</strong> 教程里提到的 lovart、MasterGo、Zeabur、Trae、Dify 都是具体产品，它们的形态和定价会变。真正该带走的是「这类工具解决什么问题」，而不是某个产品的操作步骤。</p>
+<p><strong>第三，别指望跳阶段。</strong> 三阶段是循序渐进设计的，跳阶段省下的时间，通常会在后面以「反复返工」的形式还回来。</p>
+<p><strong>第四，这份教程的承诺有前提。</strong> 「一个人成为全能开发者」这句话成立的前提是系统化训练加足够多的项目实战，不是看完就会。这是约束，不是口号。</p>
+<p><strong>第五，路线图不是课程表。</strong> 你可以也应该在当前阶段做出一个完整交付物之后就开始往下一段摸，遇到卡点再回来补。把三阶段理解成必须串行完成的课程表，反而会让你在某一个阶段耗太久，失去对全局的感知。</p>
+<p><strong>第六，别用「学完了多少章」衡量进度。</strong> 正确的进度单位是交付物，不是章节数。读完十章但一个能用的东西都没交付，进度其实是零；只认真做完一个大作业，反而可能已经跨过一个阶段。</p>
+<hr>
+<h2>十三、一句话收束</h2>
+<p>如果这一整页只能带走一句话，那就带走这句：把「从原型到上线」中间差的那些步骤列出来，你会发现你缺的不是某个工具，而是其中某一段你从来没走过。</p>
+<p>这段话反过来也成立——你不需要学会所有工具，你只需要把那条线上你没走过的一段补上。剩下的，AI 已经替你解决了大半。</p>
+<p>最后补一句关于这一页本身的话。它是整份教程里唯一一页不含任何代码的页面，也正因为如此，它最容易被跳过。但如果你已经在 AI 编程上花了一段时间，却始终说不清自己还差哪一步，那么你要补的很可能不是又一个新的工具，而是回来把这一页认真读一遍。</p>
+<p>定位这件事，看起来最不技术，却往往决定了你后面所有技术投入的效率。方向对了，每一章学起来都会很快；方向错了，学得越多的工具，越容易变成另一次原地打转。</p>
+<hr>
+<h3>提示1 · 先判断你卡在三个卡点中的哪一个</h3>
+<p>卡住的时候先别急着找新工具。对照原文的三件事：是流程不会组织、工具不会选、还是不知道从原型到上线差什么。只有第二种值得去搜工具，另外两种都得回到路线图上来解决。</p>
+<h3>提示2 · 建立手感这一步不能省</h3>
+<p>完全没有基础的话，先做两个小游戏再谈方法。你需要反复体验「说出来它真的长出来」这件事，后面的流程讲解才接得住。直接跳到方法论章节，通常会学得很虚。</p>
+<h3>提示3 · 先会拆需求，再谈接 AI 能力</h3>
+<p>很多人跳过第一阶段的第 2 章直接学接接口，结果做出来的东西没有清晰的用户路径。顺序应该是：会用工具、会拆需求、会接能力、最后在真实项目里串起来。</p>
+<h3>提示4 · 把附录那四块方法论当必修课</h3>
+<p>找点子、双钻模型、JTBD、Mom Test 这四块看起来偏软，但它们决定的是有没有人要，而不是能不能跑。初中级开发者尤其容易缺这一块，建议补上。</p>
+<h3>提示5 · 用「能不能被别人用起来」检验自己是否脱离玩具阶段</h3>
+<p>给自己一个硬标准：最近做的东西里，有没有任何一个能被别人真正用起来。如果全都是自己跑着玩的 demo，那就还停在玩具层面，需要往部署和全栈那段走。</p>
+<h3>提示6 · 状态标建设中的章节，以仓库实际内容为准</h3>
+<p>地图上标着「建设中」的章节还在更新，可能和你看到的页面不一致。遇到冲突不要怀疑自己，直接去仓库看实际内容。</p>
+<h3>提示7 · 别把具体工具当成能力本身</h3>
+<p>lovart、Zeabur、Trae、Dify 这些都会过时。真正该带走的是「这类工具解决什么问题」——素材生成、部署上线、CLI 加速开发、工作流编排。工具换了，这个判断依然成立。</p>
+<hr>
+<blockquote>这份教程的最终承诺只有一句：掌握 Vibe Coding 并配合系统化训练，你一个人就能成为集前后端开发、AI 能力集成、产品设计于一身的全能开发者。</blockquote></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>

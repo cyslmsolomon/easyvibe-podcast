@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>学员故事 · 期末周我造了个校园二手平台</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 9 · EP 89</span>
+<h1>学员故事 · 期末周我造了个校园二手平台</h1>
+<p class="sub">第 9 章 · 第 89 讲 · 14:48</p>
+<div class="meta"><span>时长 <b>14:48</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>9</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/vibe-stories-story-2-md-89-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/vibe-stories-story-2-md-89-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/vibe-stories-story-2-md-89/vibe-stories-story-2-md-89-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/vibe-stories-story-2-md-89/vibe-stories-story-2-md-89-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-9.html">← 第 9 章目录</a>
+<a href="/p/guide-introduction-md-88/">← 上一讲</a>
+<a href="/p/s3-01-cloud-server-deployment/">下一讲 →</a>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场，这一集要讲一个什么样的故事</span><span class="d">1:36</span></div>
+<div class="ch" data-t="96.05"><span class="t">1:36</span><span class="n">第一幕，被大佬的三小时干烧了</span><span class="d">1:52</span></div>
+<div class="ch" data-t="208.92"><span class="t">3:28</span><span class="n">第二幕，进群第一天，她选择闭嘴</span><span class="d">1:30</span></div>
+<div class="ch" data-t="299.28"><span class="t">4:59</span><span class="n">第三幕，期末周摸鱼，反而学得更起劲</span><span class="d">1:34</span></div>
+<div class="ch" data-t="393.46"><span class="t">6:33</span><span class="n">第四幕，脑子一热，给自己挖了个坑</span><span class="d">1:56</span></div>
+<div class="ch" data-t="509.81"><span class="t">8:29</span><span class="n">第五幕，AI 功能到底该加在哪里</span><span class="d">1:43</span></div>
+<div class="ch" data-t="613.71"><span class="t">10:13</span><span class="n">第六幕，直播当差生，却收获了最宝贵的肯定</span><span class="d">1:26</span></div>
+<div class="ch" data-t="700.37"><span class="t">11:40</span><span class="n">第七幕，得到的远不止一个作品</span><span class="d">1:31</span></div>
+<div class="ch" data-t="791.91"><span class="t">13:11</span><span class="n">收尾，这个故事能提炼出什么</span><span class="d">1:36</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>vibe-stories-story-2-md-89 期末周的校园闲鱼 · 解读与音频稿件</h1>
+<blockquote>本稿为音频配套解读，围绕 Easy-Vibe 学员故事第二篇——一个非技术背景的学生，在期末周用 AI 做出校园二手交易平台——把六幕叙事拆成可复用的五步方法，并给出选题、AI 功能落点、展示反馈三个环节的审查清单。</blockquote>
+<hr>
+<h2>一、这个故事在能力地图上的位置</h2>
+<p>前面几集讲的是能不能做出来，这一集讲的是另一件事：<strong>一个本来不会写代码的人，是怎么真的把东西做出来的。</strong></p>
+<p>在 Easy-Vibe 的能力地图里，工具和流程是骨架，而心理门槛和环境是血肉。很多人卡住不是因为不会用工具，而是因为不敢开始、不敢提问、不敢把不完美的东西给人看。这三件事没有任何工具能替你解决，只能靠环境来托住。</p>
+<p>这个故事的主角自己用的词是「差生」。她进群第一天不敢做自我介绍，看到技术资料觉得像天书，答应上台演示的时候连要做什么都还没想好。但正是这样一个起点，最后交付出了一个能跑起来的产品。</p>
+<p><strong>这也是为什么这份教程要专门收录学员故事。</strong> 跑分和功能列表能证明工具强，但只有真实的人能证明门槛真的降下来了。</p>
+<p>故事里还有一个容易被跳过的细节：她收到大佬发来的资料后，是「每个字都认识，连起来却像天书」。这个状态其实非常有代表性——它说明在 AI 编程这件事上，真正的鸿沟往往不是单词和语法，而是<strong>把技术语言翻译成自己能用的话</strong>的能力。而这道鸿沟，一个允许追问的环境比任何文档都更容易填平。</p>
+<p>所以这一集虽然是个故事，它在能力地图上的位置其实很明确：<strong>它覆盖的是「心理门槛与环境」这一块，而这块恰恰是所有技术教程最容易漏掉的部分。</strong></p>
+<hr>
+<h2>二、六幕拆解</h2>
+<table>
+<tr><th>幕</th><th>发生了什么</th><th>起作用的机制</th></tr>
+<tr><td>第一幕</td><td>被大佬三小时做出的网站震惊，把术语偷偷转给 AI 翻译</td><td>缺一个可以安全提问的环境</td></tr>
+<tr><td>第二幕</td><td>大群里不敢自我介绍，三人小群里松弛下来</td><td>环境决定敢不敢开口</td></tr>
+<tr><td>第三幕</td><td>期末周没人催，反而更主动</td><td>自定节奏比外部压力续航更久</td></tr>
+<tr><td>第四幕</td><td>从宿舍群二手信息里找到选题</td><td>从身边真实场景找问题</td></tr>
+<tr><td>第五幕</td><td>AI 功能卡住，被朋友一句话点醒</td><td>选 AI 确实胜任且用户需要的交集</td></tr>
+<tr><td>第六幕</td><td>直播当差生，却得到具体建议</td><td>不完美也可以被认真对待</td></tr>
+</table>
+<hr>
+<h2>三、环境：为什么小群比大群有效</h2>
+<p>同一个人，在大群里删掉了打好的两行字，在三人小群里却能主动推进项目。<strong>差别不在能力，而在环境。</strong></p>
+<p>大群里满是「多年开发经验」「某大厂在职」这类标签，每一个标签都在抬高开口的成本。而三人小群里没人管你多大、什么职业、厉不厉害，遇到问题就平等交流。</p>
+<blockquote>不被标签定义、只凭兴趣一起往前冲——这种感觉在学校里很少遇到。</blockquote>
+<p>这里有一条可以直接迁移的经验：<strong>如果你在组织学习或带团队，把大群拆小，可能是比加内容更有效的一步。</strong> 敢不敢开口决定了能不能拿到反馈，能不能拿到反馈决定了进度，而这一切在内容开始之前就已经被环境决定了。</p>
+<hr>
+<h2>四、选题：从身边找问题，而不是凭空想方向</h2>
+<p>她的选题来源是宿舍楼群里刷到的二手交易信息。校园里的二手交易一直藏在各种临时群聊里，买东西直接约在宿舍楼或者食堂见面，很少有人特意用闲鱼。</p>
+<p>于是问题变得具体了：<strong>能不能有一个只属于校园的二手平台？</strong> 它不仅能精准展示本校或附近学校的二手物品，还能天然多一层信任，减少被骗的顾虑。</p>
+<p>这个选题方式值得记住，因为它和常见的「找灵感」完全不同：</p>
+<ul>
+<li>不是从技术出发想「我能做什么」</li>
+<li>而是从自己每天经历的场景里想「什么真的烦」</li>
+</ul>
+<p>前者容易做出没人要的东西，后者天然带着用户和场景。判断标准很简单：<strong>这个问题你是不是亲身经历过？</strong> 如果是，它通常比任何灵感清单都可靠。</p>
+<hr>
+<h2>五、AI 功能的落点怎么选</h2>
+<p>她真正卡住的不是页面设计——进去就是商品浏览页，顶部搜索栏，下面「我的」和「我要出售」，简单直接——而是 <strong>AI 该加在哪里</strong>。</p>
+<p>她先想做购物平台的 AI 推荐，但因为「性价比」根本没法统一衡量，放弃了。后来又冒出几个点子，也都经不起推敲。</p>
+<p>转折来自一位数码爱好者朋友的一句话：</p>
+<blockquote>大家卖二手物品只会写用了多久、哪里有瑕疵、功能有哪些，但不会像商家那样标参数。要是来个 AI，帮小白买家把商品介绍明白，不就省得他们到处查资料了？</blockquote>
+<p>方向一下子清晰了：<strong>AI 功能加在商品描述上</strong>，后来智能定价也跟着落地。</p>
+<h3>这里有一条可复用的判据</h3>
+<p>选 AI 功能的落点，本质上是在找两个圆的重叠区：</p>
+<ol>
+<li><strong>AI 确实胜任</strong>——推荐需要衡量性价比，而性价比无法统一定义，所以 AI 不该放这儿；把已有信息讲明白，AI 完全能做，所以适合放这儿。</li>
+<li><strong>用户确实需要</strong>——小白买家确实要到处查参数，这是真实痛点。</li>
+</ol>
+<p>只有落在交集里的功能才成立。<strong>把 AI 硬塞进每一个环节，是这一类项目最常见的浪费。</strong></p>
+<hr>
+<h2>六、展示：不完美也可以被认真对待</h2>
+<p>这是整个故事里最有分量的一幕。</p>
+<p>前面演示的作品都很精致，交互一个比一个流畅。本来信心满满的她，上台前心里只剩一句：「总要允许差生存在的。」讲完之后，脑海里炸开一连串自我否定——问题很傻、作品不完美、想法无聊、很多地方还没实现。</p>
+<p>但现场的老师不但没有否定，还给了很多具体可落地的建议。</p>
+<p><strong>请注意这里的因果链：如果环境只允许展示完美的东西，那么不完美的人就永远拿不到反馈，也就永远停在原地。</strong> 她能往前走，靠的正是这一次被认真对待。</p>
+<hr>
+<h2>七、能力地图：这个故事真正长出的能力</h2>
+<p>她自己总结的变化有两条：</p>
+<p><strong>第一，学习效率提高了。</strong> 学会了自己搭建小工具，比如 AI 日程表、个人博客。</p>
+<p><strong>第二，学习方式变了。</strong> 不再对着厚厚的教程一页页硬啃，而是直接动手设计自己的小项目，在干中学。不会代码没关系，AI 可以帮忙写；遇到问题就直接问 AI——这串什么意思、用了什么知识、报错怎么解决。</p>
+<blockquote>有了趁手的开发工具之后，从「想」到「做」之间那堵高墙，好像一下子矮了下去。</blockquote>
+<p>注意她最后的表述：<strong>「创造的门槛或许真的没有想象中那么高」，而不是「门槛消失了」。</strong> 这两者差别很大——前者承认仍然需要跨过去，后者会让人产生不切实际的期待。</p>
+<hr>
+<h2>八、五步方法：把故事提炼成流程</h2>
+<p>把整个故事拆开，能得到一条可复用的路径：</p>
+<ol>
+<li><strong>环境</strong>：找一个允许你不完美、也允许你不开口的场域。这决定了你敢不敢开始。</li>
+<li><strong>选题</strong>：从自己每天经历的真实场景里找问题，而不是凭空想方向。</li>
+<li><strong>设计</strong>：先把主干流程立住，页面要简单直接。</li>
+<li><strong>AI 落点</strong>：选一个 AI 确实胜任、用户确实需要的交集，而不是硬塞。</li>
+<li><strong>展示</strong>：把还不成熟的东西拿出来，换取真实反馈。</li>
+</ol>
+<p><strong>这五步里最难的其实不是第 3 步和第 4 步，而是第 1 步和第 5 步。</strong> 技术和方法都可以学，但敢不敢开始、敢不敢把不完美的东西给人看，这两件事没有工具能替你解决。</p>
+<p>把每一步再拆细一点：</p>
+<p><strong>第 1 步「环境」，判断标准是你能不能在里面问一个很傻的问题。</strong> 如果不能，换场域比换资料更有效。这条最容易被忽略，因为它看起来和学技术完全无关。</p>
+<p><strong>第 2 步「选题」，判断标准是你自己有没有亲身经历过。</strong> 亲身经历过的问题自带用户、自带场景，甚至自带一部分解决方案，这是灵感清单给不了的。</p>
+<p><strong>第 3 步「设计」，判断标准是主干流程能不能走通。</strong> 视觉细节在这个阶段不重要，先让核心路径跑起来，剩下的随时可以改。</p>
+<p><strong>第 4 步「AI 落点」，判断标准是 AI 是否胜任、用户是否需要、以及你现在有没有足够的数据喂它。</strong> 三个条件缺一个，这个功能大概率会变成摆设。</p>
+<p><strong>第 5 步「展示」，判断标准是你有没有拿到具体可落地的建议。</strong> 如果只收到了表扬，说明展示的场合选错了——真正有价值的反馈通常带着改进意见。</p>
+<p>这五步合起来，就是把这个故事从「一个人运气不错」变成「一条可被复制的路径」的关键。</p>
+<hr>
+<h2>九、审查清单</h2>
+<p>如果你想复制这条路径，用这份清单逐条对照：</p>
+<ol>
+<li>我所处的环境，允不允许我提出「很傻」的问题？不允许就先换环境。</li>
+<li>我的选题是不是自己亲身经历过的问题？不是的话，说服力会打折。</li>
+<li>我的主干流程立住了吗？还是还在纠结视觉细节？</li>
+<li>我要加的 AI 功能，是 AI 确实胜任的吗？有没有一个无法统一衡量的标准藏在里面？</li>
+<li>这个功能用户真的需要吗？还是我只是想用上 AI？</li>
+<li>我有没有在还没有反馈的时候，就因为不完美而放弃展示？</li>
+<li>我的学习节奏是自定的，还是被外部压力推着走的？</li>
+<li>我是不是在等「准备好了」才开始？实际上可能永远准备不好。</li>
+<li>我有没有把 AI 当成翻译官，用来补上不敢提问的缺口？如果是，先解决敢不敢问的问题。</li>
+<li>我衡量进度用的是交付物，还是学完的章节数？</li>
+<li>我有没有一个具体的人，可以在我卡住时直接问？没有的话，先去找这个人，再谈学什么。</li>
+</ol>
+<p>这十一条里，第 1、第 6 和第 11 条最值得先看。它们都指向同一件事——你有没有被一个环境托住。这件事没解决，后面八条做得再好，也很难走到交付那一步。</p>
+<hr>
+<h2>十、反馈速度：为什么做项目比啃教程快</h2>
+<p>她提到自己从「对着厚厚的教程一页页硬啃」转向「直接动手设计自己的小项目」。这个转变值得单独拆开看，因为它背后是一条很硬的学习规律。</p>
+<p><strong>两种方式的差别不在勤奋程度，而在反馈速度。</strong></p>
+<p>啃教程时，你读完了第一章、第二章、第三章，却始终没有一个东西能验证你到底懂没懂。反馈周期可能是几天甚至几周。而做项目时，你每改一次就能立刻看到页面变化、看到报错消失、看到功能跑通，反馈周期是分钟级的。</p>
+<p>反馈越快，越容易坚持；反馈越慢，越容易在看不到进展的时候停下来。这条规律在几乎所有技能学习上都成立，不只是编程。</p>
+<p>当然，这不意味着教程无用。正确的用法是<strong>把教程当字典而不是当小说</strong>——带着项目里遇到的具体问题回去查，而不是从头读到尾。这样你既拿到了项目带来的高频反馈，又没丢掉教程的系统性。</p>
+<hr>
+<h2>十一、约束与边界</h2>
+<p><strong>第一，这是个例，不是普遍规律。</strong> 一个故事能证明门槛降低了，但不能证明所有人都会走通。个体差异、基础差异、可用时间差异都真实存在。</p>
+<p><strong>第二，别把「门槛不高」理解成「不需要努力」。</strong> 原文说的是没有想象中那么高，不是消失了。主角依然花了大量时间，也依然在展示前紧张到想退缩。</p>
+<p><strong>第三，环境的作用被这个故事放大了，但它不可复制。</strong> 你未必能遇到一个毛小驴，也未必能进到一个氛围合适的小群。这时更现实的做法是主动构造——哪怕只找到一两个同频的人，也比独自在大群里沉默强。</p>
+<p><strong>第四，AI 只能补上执行层的缺口，补不上判断层的缺口。</strong> 她卡住的 AI 功能落点，最终是靠一位朋友的一句话点醒的，不是靠 AI 自己想到的。判断做什么、为什么做，仍然是人要承担的部分。</p>
+<p><strong>第五，别跳过展示这一环。</strong> 很多人的项目死在「还没准备好」上，而这个故事恰好证明了，不完美的展示才是拿到反馈最快的方式。</p>
+<p><strong>第六，五步的顺序不能随便换。</strong> 很多人一上来就卡在第三步和第四步，拼命学设计和调 AI，却始终没解决第一步「敢不敢开始」的问题。结果就是工具越学越多，东西越做越少。顺序错了，努力会全部落空。</p>
+<hr>
+<h2>十二、一句话收束</h2>
+<p>如果这个故事只能带走一句，那就带走这句：<strong>先把自己放进一个敢开口的环境里，剩下的步骤会自动跟上。</strong></p>
+<p>这句话听起来不够技术，但它解释了为什么同样聪明的两个人，一个几周就做出了产品，另一个学了一年还在收藏教程。差的不是工具，也不是智商，而是有没有一个地方，允许你不完美地开始。</p>
+<p>最后补一句关于这个故事本身的话。它是整份教程里少有的、完全不谈技术细节的一篇，也正因为如此，它最容易被当成闲篇跳过。但如果你已经学了一段时间，工具也换了好几个，却始终没有一个能拿出来给人看的东西，那么你要补的大概率不是又一门新技术，而是回来把这个故事认真读一遍。</p>
+<p>方法永远不缺，缺的是让你敢开始、也敢把半成品拿出来的那个场子。</p>
+<p>而一旦有了那个场子，你会发现故事里剩下的每一步都不难：选题来自你身边，设计先立主干，AI 加在它真能胜任的地方，最后把不完美的东西拿出来换一次真实的反馈。工具会一直变，这几步不会。</p>
+<hr>
+<h3>提示1 · 先找小群，再找课程</h3>
+<p>如果你总觉得学不动，先别急着换教程。检查一下你所处的环境：你能不能在里面问一个很傻的问题？如果不能，换个更小的、更平等的场域，可能比换任何资料都管用。</p>
+<h3>提示2 · 选题先问自己是否亲身经历过</h3>
+<p>判断一个选题靠不靠谱，最朴素的标准是这个问题你是不是真的遇到过。宿舍群里的二手信息、食堂门口的告示、每天要填的表——这些才是高价值的选题来源，比灵感清单可靠得多。</p>
+<h3>提示3 · 选 AI 落点时，先找无法统一衡量的标准</h3>
+<p>想给产品加 AI 功能时，先问一句：这个功能里有没有一个无法统一衡量的标准？比如「性价比」「好不好看」「值不值」。如果有，AI 大概率做不好，换一个它确实能胜任的环节。</p>
+<h3>提示4 · 主干流程立住之前，别纠结视觉</h3>
+<p>页面要简单直接：进去就是核心内容页，顶部搜索，下面主要入口。把主干跑通比把界面做精致重要得多，后者随时可以改，前者改起来要推倒重来。</p>
+<h3>提示5 · 不完美也要展示</h3>
+<p>「还没准备好」是项目最常见的死因。这个故事里最关键的转折，恰恰是她在最没信心的时候上台了。展示不成熟的作品换来的反馈，价值远高于独自打磨。</p>
+<h3>提示6 · 用交付物而不是章节数衡量进度</h3>
+<p>学完十章却一个能用的东西都没交付，进度其实是零。反过来，只认真做完一个大作业，可能就已经跨过一个阶段了。把进度单位换成交付物，你会对自己的位置有完全不同的判断。</p>
+<h3>提示7 · 别让 AI 只当翻译官</h3>
+<p>把不懂的术语偷偷转给 AI 翻译，能解一时之急，但它是个信号——说明你缺的是一个可以安全提问的环境，而不是一个更好的词典。真正要补的是前者。</p>
+<hr>
+<blockquote>这个故事讲的不是一个人怎么变强，而是一个环境怎么让一个本来不敢开口的人，最终走到了台上。</blockquote></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>

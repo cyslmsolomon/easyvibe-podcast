@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C 端场景灵感方向参考 · 十六类方向速览</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 6 · EP 11</span>
+<h1>C 端场景灵感方向参考 · 十六类方向速览</h1>
+<p class="sub">第 6 章 · 第 11 讲 · 14:30</p>
+<div class="meta"><span>时长 <b>14:30</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>6</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-1-appendix-consumer-scenarios-11-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-1-appendix-consumer-scenarios-11-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-1-appendix-consumer-scenarios-11/stage-1-appendix-consumer-scenarios-11-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-1-appendix-consumer-scenarios-11/stage-1-appendix-consumer-scenarios-11-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-6.html">← 第 6 章目录</a>
+<a href="/p/stage-1-appendix-articles-example0-1-vibe-coding-tools-snake-game-tutorial-md-10/">← 上一讲</a>
+<a href="/p/stage-1-appendix-idea-sources-12/">下一讲 →</a>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场，这一集要解决什么问题</span><span class="d">1:28</span></div>
+<div class="ch" data-t="88.32"><span class="t">1:28</span><span class="n">从功能到感受，两种思维的分野</span><span class="d">1:37</span></div>
+<div class="ch" data-t="185.33"><span class="t">3:05</span><span class="n">日常氛围与仪式感，五个高频方向</span><span class="d">1:41</span></div>
+<div class="ch" data-t="287.14"><span class="t">4:47</span><span class="n">情绪陪伴与自我接纳，五个高频方向</span><span class="d">1:35</span></div>
+<div class="ch" data-t="382.8"><span class="t">6:22</span><span class="n">娱乐沉浸与内容共创，五个高频方向</span><span class="d">1:38</span></div>
+<div class="ch" data-t="481.15"><span class="t">8:01</span><span class="n">成长记录、习惯养成与社交连接</span><span class="d">1:37</span></div>
+<div class="ch" data-t="578.73"><span class="t">9:38</span><span class="n">创意灵感、旅行探索与健康生活</span><span class="d">1:48</span></div>
+<div class="ch" data-t="686.75"><span class="t">11:26</span><span class="n">营造氛围的三个层次与四种心理暗示</span><span class="d">1:39</span></div>
+<div class="ch" data-t="786.06"><span class="t">13:06</span><span class="n">收尾，这份清单该怎么用</span><span class="d">1:23</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>stage-1-appendix-consumer-scenarios-11 C 端场景灵感方向参考 · 解读与音频稿件</h1>
+<blockquote>本稿为音频配套解读，围绕 Easy-Vibe 附录中「C 端场景灵感方向参考」这一整页内容，梳理十六个大类、八十个具体方向背后的共同结构，并给出一套可复用的氛围营造方法与审查清单，帮助你在设计一个面向普通用户的 AI 产品时，先定感觉，再倒推功能。</blockquote>
+<hr>
+<h2>一、这一集在能力地图上的位置</h2>
+<p>前面的章节大多在讲「能不能做出来」，这一页讲的是另一半问题：「做出来之后，用户愿不愿意再来」。</p>
+<p>在 Easy-Vibe 的整体能力地图里，工程能力决定下限，体验设计决定上限。一个产品可以功能完备、接口优雅、部署顺利，却依然没人用，原因往往就出在它没有回答「用户用完是什么感觉」这个问题。这一页提供的八十个方向，本质上是一份情绪需求样本库，值得反复翻阅，而不是读一遍就放下。</p>
+<p>需要提醒的是，这份清单的正确用法不是逐条实现。八十个方向里没有一个是「标准答案」，它们只是别人在满足某种情绪时的具体做法。真正该带走的是它们背后的分类逻辑和营造方法，以及那句反复出现的判断——感觉到位比功能完备更重要。</p>
+<p>如果你把这页和前面的工程章节对照着看，会发现一个有意思的张力：工程章节教你把不确定变成确定，这一页却在提醒你，C 端产品的核心价值恰恰留在不确定里。用户说不清自己要什么，但这不代表他没有需求，只代表这个需求需要用感受去接住，而不是用参数去满足。</p>
+<p>这也解释了为什么很多技术很强的团队做不好 C 端产品。他们习惯把问题拆清楚、把边界划清楚、把验收标准定死，这套方法在工程上无往不利，但在情绪面前会失效，因为情绪本身就不接受精确定义。你要做的不是把它定义清楚，而是给它留出一个可以被感受到的形状。</p>
+<p>所以这一页虽然看起来只是一份方向罗列，真正想传递的其实是一种工作方式的转换：从「我要解决什么问题」转向「我要让人处在什么状态」。前者导向功能，后者导向体验，而这两者的设计流程完全不同。</p>
+<hr>
+<h2>二、从功能到感受：两种思维的分野</h2>
+<p>这一页给出的对照非常锋利，值得完整记住：</p>
+<table>
+<tr><th>维度</th><th>B 端思维</th><th>C 端思维</th></tr>
+<tr><td>效率</td><td>提高处理效率</td><td>省下时间去做喜欢的事</td></tr>
+<tr><td>成本</td><td>降低运营成本</td><td>让每一分钱花得值得</td></tr>
+<tr><td>痛点</td><td>解决具体问题</td><td>创造一次美好体验</td></tr>
+<tr><td>完备性</td><td>功能齐全</td><td>感觉到位</td></tr>
+</table>
+<p>这组对照背后是一条判断标准：<strong>B 端价值可以被量化，C 端价值只能被感受。</strong></p>
+<p>你没法给用户看一张评分表，告诉他这个产品值八十七分。用户只会记住某个瞬间：深夜睡不着时有人回了一句温柔的话，早上醒来看到一句刚好说中自己心情的鼓励，或者在异地旅行时收到一条「这里往左走两百米有家店」。</p>
+<p>因此做 C 端产品时，你真正要设计的不是功能路径，而是<strong>情绪曲线</strong>。功能只是载体，情绪才是产品本身。</p>
+<p>一个很实用的自检方法：把你的产品介绍文案拿给一个完全不懂技术的朋友看。如果他问的第一句话是「它能干什么」，说明你还站在 B 端语境里；如果他问的是「用起来什么感觉」，你就已经挪到 C 端这一侧了。</p>
+<hr>
+<h2>三、十六类方向的能力地图</h2>
+<p>把八十个方向按底层情绪归拢，会得到一张清晰的地图。</p>
+<p><strong>第一类：日常氛围与仪式感。</strong> 晨间仪式感唤醒助手、独居生活氛围营造师、周末宅家治愈计划生成器、睡前心灵安抚电台、生活美学灵感捕手。共同点是解决模糊的情绪需求而非明确痛点；用户说不清自己要什么，但用完会觉得舒服。实现上的共同特征是都必须接入上下文——时间、天气、日程、历史偏好。缺了这些，模型再强也只能给出通用的漂亮话。</p>
+<p><strong>第二类：情绪陪伴与自我接纳。</strong> 深夜树洞倾听者、失恋疗愈陪伴师、焦虑缓解呼吸教练、自信心重建导师、情绪日记智能解读。共同红线是<strong>永远不要说教</strong>——用户来这里是为了被接住，不是为了被教育。回应的第一句应当先承认情绪的合理性。</p>
+<p><strong>第三类：娱乐沉浸与内容共创。</strong> 沉浸式剧本杀主持人、开放世界游戏灵魂 NPC、个性化播客生成、虚拟演唱会氛围组、互动小说共创伙伴。判断标准只有一个：参与感。用户是否觉得自己是故事的一部分，而不是在旁观别人写好的内容。工程上最考验记忆与一致性，通常需要额外维护状态。</p>
+<p><strong>第四类：成长记录与习惯养成。</strong> 个人成长见证者、习惯养成游戏化教练、技能学习搭子匹配、每日小确幸发现者、人生模拟体验器。关键词是<strong>被看见</strong>——用户需要的不是数据，而是有人见证自己的变化。注意别把激励做成压力，断签清零这类设计会把陪伴变成焦虑。</p>
+<p><strong>第五类：社交连接。</strong> 破冰话题生成器、朋友圈文案氛围师、约会氛围策划师、远程聚会气氛担当、社交能量管理助手。其中社交能量管理助手尤其值得注意，它服务的是内向者，核心是尊重边界、不要求改变性格。</p>
+<p><strong>第六至八类：创意灵感、旅行探索、健康生活。</strong> 灵感枯竭急救包、个人风格探索向导、摄影构图氛围指南、城市漫步探索向导、独自旅行陪伴助手、目的地氛围预览、运动动力唤醒师、睡眠质量优化氛围师等。共同点是<strong>都不以效率为卖点</strong>——灵感急救包不承诺更快出方案，运动唤醒师也不计算卡路里，它们卖的是过程中的状态。</p>
+<p><strong>第九至十六类：</strong> 知识探索与语言学习、亲密关系与家人关怀、宠物陪伴、消费与理财心态、职业发展、居家空间、一人食与餐桌、穿搭风格。这一组覆盖面广，但底层需求一致，落点都不是效率而是某种具体的情绪状态。</p>
+<p>把这张地图再压缩一层，所有方向背后其实只有四种底层需求：<strong>被陪伴、被理解、被见证、被取悦。</strong></p>
+<hr>
+<h2>四、营造氛围的三个层次</h2>
+<p>这一页给出的方法可以拆成三层，缺任何一层都会导致「好看但记不住」。</p>
+<p><strong>感官层</strong>负责视觉、听觉、触觉：温暖的颜色、舒缓的声音、流畅的动效。这是最容易做的一层，也是绝大多数产品止步的地方。</p>
+<p><strong>情感层</strong>负责共鸣与引导：理解用户当下的心情、提供情感支持、创造正向情绪。要做到这一层，产品必须能感知上下文，而不能每次都从零开始生成。</p>
+<p><strong>意义层</strong>负责认同与归属：让用户感到被理解、产生归属感、给自己的行动赋予意义。这是最难的一层，也是唯一能带来长期留存的一层。</p>
+<p>判断是否缺层的办法很简单：问用户「你上次用完这个产品是什么时候、什么心情」，如果答不上来，就说明情感层没建立起来。</p>
+<p>把这三层和后面要讲的四类暗示合起来，其实就是一句话：先让用户感到安全，再让用户感到被理解，最后让用户感到自己正在变好。顺序不能颠倒。</p>
+<hr>
+<h2>五、心理暗示与句式替换规则</h2>
+<p>贯穿三层的核心手法是心理暗示，原文给了三类句式：</p>
+<ul>
+<li><strong>正向暗示</strong>：你已经做得很好了，慢慢来没关系。</li>
+<li><strong>归属暗示</strong>：很多人和你一样，你并不孤单。</li>
+<li><strong>成长暗示</strong>：每一次尝试都是进步，你在变得更好。</li>
+</ul>
+<p>还有一组非常实用的句式替换规则：</p>
+<ul>
+<li>不说「你应该……」，改说「你可以……」</li>
+<li>不说「你必须……」，改说「如果你想要……」</li>
+<li>不说「你还不够……」，改说「你已经……」</li>
+</ul>
+<p>这些看起来只是措辞调整，但它决定了产品的姿态是居高临下还是并肩同行。对 C 端产品而言，姿态往往比内容更容易被感知——用户可能记不住你说了什么，但一定会记住你说话时的态度。</p>
+<p>建议在产品上线前做一次批量检查：把所有面向用户的文案导出来，逐一搜这三类措辞，有就按替换规则改掉。这是成本最低、见效最快的一次体验优化。</p>
+<hr>
+<h2>六、审查清单</h2>
+<p>设计或评审一个 C 端 AI 产品时，可以逐条对照：</p>
+<ol>
+<li>用户用完走出门时，我希望他心里是什么感觉？这个感觉是否被显式写了下来？</li>
+<li>产品是停在感官层，还是建立了情感层与意义层？</li>
+<li>文案里是否存在说教句？第一句回应是否先承认情绪合理性？</li>
+<li>是否存在「你应该」「你必须」这类居高临下的措辞？</li>
+<li>用户是否感到被看见——成长、变化、坚持是否被记录和回应？</li>
+<li>用户是否感到自己是参与者，而不是旁观者？</li>
+<li>激励设计是否变成了压力？断签清零是否会让用户不敢停下来？</li>
+<li>核心卖点是效率，还是过程中的状态？如果是效率，那它其实是个 B 端产品。</li>
+<li>十六类方向里，你的产品对应哪一类？那一类的设计红线你是否守住了？</li>
+<li>情绪曲线是否有低谷兜底——用户最差的那个瞬间，产品如何应对？</li>
+<li>是否接入了足够的上下文？没有时间、天气、历史偏好的产品只能说套话。</li>
+<li>记忆与一致性是否成立？第二次打开时，产品还记得上次发生什么吗？</li>
+</ol>
+<p>这十二条不必一次全过。如果你的时间和资源有限，优先守住第 1、第 3 和第 8 条：先写清楚感觉，回应的第一句别讲道理，以及确认你卖的到底是效率还是状态。这三条决定了产品的方向，剩下的九条决定的是完成度。方向错了，完成度再高也没有意义。</p>
+<hr>
+<h2>七、约束与边界</h2>
+<p>这一页的方法并非万能，有几条边界需要明确：</p>
+<p><strong>第一，情绪需求不等于刚需。</strong> 深夜树洞这类方向用户黏性高但付费意愿低，商业化路径与 B 端完全不同，不要拿同一套指标去衡量。用日活去要求一个工具产品，或者用付费率去要求一个陪伴产品，都会得出错误的结论。</p>
+<p><strong>第二，陪伴型产品有责任边界。</strong> 涉及情绪、焦虑、失恋等话题时，产品不能替代专业心理干预。设计上需要明确能力边界，并在必要时引导用户寻求专业帮助，这是硬约束而非建议。</p>
+<p><strong>第三，隐私是陪伴类产品的高压线。</strong> 倾听型产品天然会收集大量私密内容，安全感和隐私保护不是加分项而是前提。一旦这条失守，前面所有的氛围营造都会瞬间归零。</p>
+<p><strong>第四，游戏化不等于操纵。</strong> 习惯养成、储蓄激励这类方向使用游戏化机制时，目标是帮助用户成为想成为的自己，而不是诱导更长时间的使用。判断标准很朴素：用户关掉产品时，是满足还是空虚。</p>
+<hr>
+<h2>八、如何在 Easy-Vibe 的能力地图里定位你的产品</h2>
+<p>把这一页和 Easy-Vibe 其他章节串起来，可以得到一个很实用的定位方法。</p>
+<p>先在横轴上确认你服务的是组织还是个人，这决定你用 B 端思维还是 C 端思维。再在纵轴上确认你卖的是结果还是过程，这决定你的核心指标是效率还是状态。两个维度交叉，会分出四个象限，而这一页覆盖的是「个人加过程」这一象限。</p>
+<p>一旦定位清楚，很多纠结会自然消失。你不会再纠结要不要加强大的批量处理，因为那不是这一象限的用户要的；你也不会再纠结为什么留存数据好看却收不到钱，因为陪伴型产品的商业路径本来就长。</p>
+<p>最后提醒一次：这一页给的八十个方向不是八十个选题。真正适合你的可能只有一两个，选多了反而会稀释。产品的力量来自克制，来自你敢于只服务一种情绪，并把那一种做到别人做不到的程度。</p>
+<hr>
+<h2>九、三个常见误区</h2>
+<p>把这一页的内容拿去落地时，有三个坑几乎人人都会踩一次。</p>
+<p><strong>误区一，把「感觉到位」当成可以后期补的装饰。</strong> 很多团队的开发顺序是先跑通功能链路，最后再找人润色文案和视觉。但这一页的逻辑恰好相反：感觉是判据，功能是推导结果。后期补的那些温暖文案，贴在一条本来就不是为这种情绪设计的链路上，会显得格外违和，用户一眼就能看出这是包装而不是设计。</p>
+<p><strong>误区二，认为情绪类产品不需要工程能力。</strong> 实际上陪伴类产品对工程的要求往往更高：记忆要跨会话保持一致，上下文要实时接入天气和日程，语气要在几十轮对话里不漂移。这些都不是换个提示词就能解决的，需要实打实的状态管理和一致性设计。</p>
+<p><strong>误区三，用 B 端的指标去考核 C 端产品。</strong> 最常见的错误是用任务完成率去衡量一个树洞产品，或者用打开频次去衡量一个工具产品。指标选错，团队就会朝着错误的方向优化，最后做出一个既不够有用也不够动人的四不像。正确的做法是先回到象限定位，再选那一象限真正该看的指标。</p>
+<p>避开这三个误区，这一页的价值才真正能被拿到手。</p>
+<hr>
+<h3>提示1 · 先写感觉，再倒推功能</h3>
+<p>打开需求文档准备列功能清单之前，先写下这句话：「用户用完这个功能走出门时，我希望他心里是 ______ 感觉」。把空格填完，再倒推需要哪些功能承载它。顺序错了，后面所有的功能讨论都会失去判据，团队会陷入无休止的优先级争吵。</p>
+<h3>提示2 · 回应情绪时，第一句不要给建议</h3>
+<p>陪伴类产品的第一句回应，优先级应该是「承认情绪合理性」，而不是「给出解决方案」。用户来这里是为了被接住。先说「这很正常，换谁都会难受」，再谈下一步，接受度会高出很多。直接甩方案会让人觉得被打发。</p>
+<h3>提示3 · 用句式替换表批量检查文案</h3>
+<p>把产品里所有面向用户的文案导出来，逐一检查三类措辞：有没有「你应该」「你必须」「你还不够」。有就按替换规则改掉。这是成本最低、见效最快的一次体验优化，通常一小时就能跑完一轮。</p>
+<h3>提示4 · 判断一个方向属于哪一类，再找它的红线</h3>
+<p>选定方向后，先在十六类里定位它属于哪一类，然后把那一类的设计红线抄下来当成约束。比如情绪陪伴类的红线是「不要说教」，娱乐类的红线是「参与感」，成长类的红线是「被看见」，激励类的红线是「别把激励做成压力」。</p>
+<h3>提示5 · 别把这份清单当选题库</h3>
+<p>八十个方向不是八十个待实现的选题。正确用法是当镜子：先确定用户此刻处在什么情绪里，再回来找对应方向，看别人是怎么满足这种情绪的。直接照抄一个方向去实现，通常会得到一个没有灵魂的仿品，因为它缺了最重要的那一步——你自己真的处在那个情绪里。</p>
+<h3>提示6 · 商业化前先想清楚这是陪伴还是工具</h3>
+<p>陪伴型产品黏性高、付费低，工具型产品付费高、打开频次低。这两条曲线的运营逻辑完全不同。在 Easy-Vibe 的能力地图里，先定位清楚你的产品落在哪一端，再决定指标和商业化路径，否则会一直用错误的尺子量自己，越量越焦虑。</p>
+<h3>提示7 · 先补上下文，再怪模型不行</h3>
+<p>如果你的 C 端产品听起来总像在说套话，先别急着换模型。检查一下它有没有拿到时间、天气、日程、历史偏好这些上下文。绝大多数「不够懂我」的抱怨，根因不是模型能力，而是你根本没给它足够的信息去懂。</p>
+<hr>
+<blockquote>记住：C 端用户买的不是功能，是感觉；不是工具，是陪伴；不是服务，是理解。</blockquote>
+<hr>
+<h2>十、一句话收束</h2>
+<p>如果这一整页只能带走一句话，那就带走这一句：在设计任何面向普通人的 AI 产品之前，先把用户用完之后的那个感觉写下来，然后再倒推需要哪些功能去承载它。</p>
+<p>顺序一旦反了，你做出来的会是一个功能齐全、情绪缺位的产品。它会通过所有的测试用例，却通不过用户第二次打开的那一刻。而这一页列出的八十个方向，全部都在提醒同一件事：让人愿意再来一次的东西，从来不是功能清单的长度。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s2.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
