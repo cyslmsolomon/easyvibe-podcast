@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>把网站发到网上（进阶方式）：自己买台 VPS 服务器搭建发布 · 域名注册 /…</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 10 · EP 3</span>
+<h1>把网站发到网上（进阶方式）：自己买台 VPS 服务器搭建发布 · 域名注册 /…</h1>
+<p class="sub">第 10 章 · 第 3 讲 · 15:41</p>
+<div class="meta"><span>时长 <b>15:41</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>10</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/s3-03-cloud-server-deployment-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/s3-03-cloud-server-deployment-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/s3-03-cloud-server-deployment/s3-03-cloud-server-deployment-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/s3-03-cloud-server-deployment/s3-03-cloud-server-deployment-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-10.html">← 第 10 章目录</a>
+<a href="/p/s3-02-cloud-server-deployment/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:43</span></div>
+<div class="ch" data-t="103.44"><span class="t">1:43</span><span class="n">域名注册，以及两个容易被忽略的小服务</span><span class="d">1:34</span></div>
+<div class="ch" data-t="197.808"><span class="t">3:17</span><span class="n">让服务可被观测，监控与日志</span><span class="d">1:47</span></div>
+<div class="ch" data-t="305.136"><span class="t">5:05</span><span class="n">对象存储的进阶玩法</span><span class="d">1:49</span></div>
+<div class="ch" data-t="414.192"><span class="t">6:54</span><span class="n">国内与海外，两套生态怎么对照</span><span class="d">1:48</span></div>
+<div class="ch" data-t="522.624"><span class="t">8:42</span><span class="n">三个新手必问的问题</span><span class="d">1:43</span></div>
+<div class="ch" data-t="626.28"><span class="t">10:26</span><span class="n">需要显卡时，四个专用平台</span><span class="d">1:42</span></div>
+<div class="ch" data-t="728.4"><span class="t">12:08</span><span class="n">让 AI 帮你部署、排错与加固</span><span class="d">2:01</span></div>
+<div class="ch" data-t="849.936"><span class="t">14:09</span><span class="n">收尾</span><span class="d">1:31</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe · 配套服务、AI 平台与部署排错收尾 — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-2/backend/cloud-server-deployment/index.md</code>），为<strong>二次演绎配音版</strong>。原文作者与贡献者来自开源社区。本文在原文基础上做了口语化改写、结构重组与实践补充，观点与例子由演播者添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>s3-03-cloud-server-deployment</code></li>
+<li>所属章节：第 10 章 · s3 重切复活篇</li>
+<li>对应音频：<code>s3-03-cloud-server-deployment-播客.mp3</code></li>
+<li>字幕：<code>s3-03-cloud-server-deployment-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>前两集解决了「东西放哪」和「网址与云服务地图」，这一集补的是<strong>配套层</strong>——那些单个都不难、但新手根本不知道它们存在，等要用时才临时补、一补就是一整天的东西。</p>
+<p>原文在这一章的尾部铺了大量短小节：域名注册商清单、邮件服务、短信服务、监控日志、对象存储的媒体处理、国内/海外生态对照表、三个新手常见疑问、四个 GPU 平台、两种 AI 协作部署方式、AI 辅助排错流程、一键更新脚本、安全加固清单、本章小结。</p>
+<p>音频稿把这些零散小节重组成「小服务 → 可观测 → 存储进阶 → 生态对照 → 三问 → GPU 平台 → AI 协作 → 收尾」八段。一句话概括：<strong>这一集不教新操作，教的是把前两集的能力补齐成一套能交付的系统。</strong></p>
+<hr>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>能力项</th><th>原文怎么说的</th><th>演播者的解读</th><th>所属环节</th></tr>
+<tr><td>域名注册商辨识</td><td>国内万网/DNSPod/华为云；海外 Namecheap/Cloudflare/GoDaddy</td><td>选哪边取决于要不要备案，不是价格</td><td>会寻址</td></tr>
+<tr><td>邮件服务认知</td><td>不要自建邮件服务器，用专业发送服务</td><td>自建大概率被判垃圾邮件，这是硬规矩</td><td>会配套</td></tr>
+<tr><td>短信资质认知</td><td>国内需企业资质与签名备案</td><td>个人项目直接用邮箱验证码替代，别耗时间</td><td>会配套</td></tr>
+<tr><td>监控与日志</td><td>云监控/SLS/CLS/CloudWatch；PM2 + Uptime Kuma</td><td>监控说「活着吗」，日志说「为什么」，二者不可互替</td><td>可观测</td></tr>
+<tr><td>对象存储媒体处理</td><td>图片处理参数、视频转码、内容审核</td><td>把工程任务变成一个 URL 参数，省代码也省存储</td><td>会配套</td></tr>
+<tr><td>生态对照翻译力</td><td>14 类服务的国内/海外/替代三方对照表</td><td>这张表不是用来背的，是用来把海外教程翻译成国内产品的</td><td>会翻译</td></tr>
+<tr><td>自建 vs 上云判断</td><td>三档：学习期 / 生产期 / 团队期</td><td>判断依据是「数据丢了谁承担」，不是预算</td><td>会判断</td></tr>
+<tr><td>免费套餐风险意识</td><td>AWS Free Tier 12 个月后自动转标准费率</td><td>到期销毁 + 设预算告警，否则月底账单惊喜</td><td>守边界</td></tr>
+<tr><td>GPU 平台选型</td><td>Modal / Spaces / Replicate / AutoDL</td><td>按「展示 / 转 API / 跑任务 / 国内便宜」四分</td><td>会选型</td></tr>
+<tr><td>AI 协作部署</td><td>本地生成脚本 vs SSH 直达</td><td>后者省事但有四条安全前提</td><td>会协作</td></tr>
+<tr><td>排错流程</td><td>看日志 → 复制给 AI → 对照速查表</td><td>80% 的部署故障落在这张速查表的六行里</td><td>会排错</td></tr>
+<tr><td>安全加固六项</td><td>密钥登录/改端口/fail2ban/自动更新/不入 Git/定期备份</td><td>可交给 AI 生成脚本，但每条要知道在防什么</td><td>守边界</td></tr>
+</table>
+<p><strong>这张表怎么用</strong>：上半部分是「知道有这个东西」，下半部分是「知道什么时候不用它」。这一集的高频踩坑不在「不会配」，而在「压根不知道要配」。</p>
+<hr>
+<h2>三、两个容易被忽略的小服务</h2>
+<p><strong>邮件服务</strong>——原文硬提醒：<strong>不要在服务器上自己搭邮件服务器</strong>（大概率被判为垃圾邮件）。国内：阿里云邮件推送、腾讯云 SES；海外：AWS SES、SendGrid、Mailgun、Resend。用途：注册验证、通知、营销邮件，均有免费额度。</p>
+<p><strong>短信服务</strong>——国内：阿里云短信、腾讯云短信；海外：AWS SNS、Twilio。<strong>现实约束</strong>：国内发短信需企业资质 + 签名备案，个人开发者基本申请不下来。原文建议很实际——个人项目用邮箱验证码替代，别在这上面耗时间。</p>
+<hr>
+<h2>四、可观测：监控与日志</h2>
+<p><strong>各家产品</strong>：阿里云云监控 + SLS；腾讯云云监控 + CLS；AWS CloudWatch。能力一致：监控 CPU/内存/磁盘、集中收集日志、设置告警规则。</p>
+<p><strong>入门替代组合</strong>（原文推荐）：PM2 自带进程监控 + Uptime Kuma（开源，一个 Docker 容器即可，支持多渠道通知），个人项目完全够用且零成本。</p>
+<p><strong>两条演播者补充</strong>：</p>
+<ol>
+<li><strong>监控与日志不可互替</strong>——监控回答「现在还活着吗」，日志回答「刚才发生了什么」。只配监控的结果是一挂只知道挂了，不知道为什么。</li>
+<li><strong>告警渠道要选你真会看的</strong>——配了邮件通知却一个月不看一次邮箱，等于没配；即时通讯推送的到达率远高于邮件。</li>
+</ol>
+<p><strong>判断标准</strong>：项目开始有真实用户（哪怕只有十人）就该上最基础的存活监控。</p>
+<hr>
+<h2>五、对象存储的进阶用法</h2>
+<ul>
+<li><strong>阿里云 OSS</strong>：图片处理（缩略图/水印/格式转换），视频转码需配合 MPS。</li>
+<li><strong>腾讯云 COS</strong>：数据万象 CI（图片处理 / 内容审核 / 人脸识别）。</li>
+<li><strong>AWS S3</strong>：配合 Lambda 在上传时自动生成缩略图。</li>
+</ul>
+<p><strong>原文示例</strong>：上传 5MB 原图 <code>photo.jpg</code>，访问时在 URL 后加参数 <code>?x-oss-process=image/resize,w_300</code>，直接得到 300px 宽缩略图，无需自行处理。</p>
+<p><strong>价值</strong>：把「图片处理」从工程任务变成一个 URL 参数——省代码，也省存储（同一张图不必存多份尺寸）。</p>
+<p><strong>补充两类能力</strong>：内容审核（UGC 项目基本必备）、视频转码（自动转网页友好格式与码率）。</p>
+<p><strong>成本提醒</strong>：媒体处理按调用次数计费，量大时应在前面套一层缓存，避免每次重复计算。</p>
+<hr>
+<h2>六、国内 vs 海外生态对照（速查翻译表）</h2>
+<table>
+<tr><th>功能类别</th><th>阿里云</th><th>腾讯云</th><th>AWS</th><th>免费/低价替代</th></tr>
+<tr><td>云服务器</td><td>ECS</td><td>CVM / Lighthouse</td><td>EC2</td><td>Vultr / DigitalOcean / Hetzner</td></tr>
+<tr><td>对象存储</td><td>OSS</td><td>COS</td><td>S3</td><td>Cloudflare R2（免出站流量费）</td></tr>
+<tr><td>关系数据库</td><td>RDS</td><td>云数据库</td><td>RDS</td><td>Supabase / Neon / PlanetScale</td></tr>
+<tr><td>缓存 Redis</td><td>云 Redis</td><td>云 Redis</td><td>ElastiCache</td><td>Upstash</td></tr>
+<tr><td>CDN</td><td>CDN</td><td>CDN / EdgeOne</td><td>CloudFront</td><td>Cloudflare CDN（免费）</td></tr>
+<tr><td>负载均衡</td><td>SLB / ALB</td><td>CLB</td><td>ELB</td><td>Nginx 自建 / Caddy</td></tr>
+<tr><td>Serverless</td><td>函数计算 FC</td><td>云函数 SCF</td><td>Lambda</td><td>Cloudflare Workers</td></tr>
+<tr><td>容器 / K8s</td><td>ACK</td><td>TKE</td><td>EKS</td><td>Fly.io / Railway</td></tr>
+<tr><td>DNS 解析</td><td>云解析</td><td>DNSPod</td><td>Route 53</td><td>Cloudflare DNS（免费）</td></tr>
+<tr><td>SSL 证书</td><td>免费证书</td><td>免费证书</td><td>ACM（免费）</td><td>Let&#x27;s Encrypt（免费）</td></tr>
+<tr><td>邮件推送</td><td>邮件推送</td><td>SES</td><td>SES</td><td>Resend / SendGrid 免费额度</td></tr>
+<tr><td>短信服务</td><td>短信服务</td><td>短信</td><td>SNS</td><td>Twilio</td></tr>
+<tr><td>监控</td><td>云监控</td><td>云监控</td><td>CloudWatch</td><td>Uptime Kuma（自建开源）</td></tr>
+<tr><td>AI 模型 / API</td><td>通义千问、百炼</td><td>混元、TI 平台</td><td>Bedrock</td><td>OpenAI / Anthropic API</td></tr>
+<tr><td>域名注册</td><td>万网</td><td>DNSPod</td><td>Route 53</td><td>Namecheap / Cloudflare</td></tr>
+</table>
+<p><strong>用法</strong>：不是背，是翻译。看到海外教程用了某个产品，回来一查就知道国内对应物是哪一个。</p>
+<hr>
+<h2>七、三个新手必问的问题</h2>
+<p><strong>Q1：全用云服务，还是都在 VPS 上自己搭？</strong></p>
+<table>
+<tr><th>阶段</th><th>建议</th><th>理由</th></tr>
+<tr><td>个人项目 / 学习期</td><td>VPS 自己搭（Docker Compose 一把梭）</td><td>省钱，且能学到东西</td></tr>
+<tr><td>面向用户的生产项目</td><td>数据库与对象存储上云，应用层可留在 VPS</td><td>自动备份、稳定性保障</td></tr>
+<tr><td>预算充足 / 团队项目</td><td>尽量全托管（RDS / Redis / OSS）</td><td>精力放在业务代码而非运维</td></tr>
+</table>
+<p><strong>Q2：海外免费套餐怎么用？</strong></p>
+<p>AWS 新用户 12 个月 Free Tier：EC2 t2/t3.micro 750 小时/月、S3 5GB、RDS 750 小时 + 20GB、Lambda 100 万次请求/月、CloudFront 50GB 出站。</p>
+<blockquote>⚠️ <strong>原文警告</strong>：到期后自动按标准费率计费，不用了务必销毁资源。强烈建议在 Billing Dashboard → Budgets 设置预算告警。</blockquote>
+<p><strong>Q3：国内云和海外云怎么选？</strong></p>
+<p>用户在国内 → 国内云 + 备案；用户在海外 → 海外服务；两边都有 → CDN + GeoDNS 分流；不想备案但要国内可访问 → 静态站走 CDN 托管或香港节点（速度不及国内备案机器）。</p>
+<hr>
+<h2>八、需要 GPU 时的四个专用平台</h2>
+<table>
+<tr><th>平台</th><th>定位</th><th>关键特点</th><th>适用</th></tr>
+<tr><td><strong>Modal</strong></td><td>Python AI/ML 的 Serverless GPU</td><td>装饰器定义函数、冷启动约 1 秒、按毫秒计费、每月 $30 额度</td><td>跑 Python 训练/批处理（仅支持 Python）</td></tr>
+<tr><td><strong>Hugging Face Spaces</strong></td><td>AI Demo 首选</td><td>免费 CPU 小实例，支持 Gradio/Streamlit/Docker，可一键 Fork</td><td>快速展示效果</td></tr>
+<tr><td><strong>Replicate</strong></td><td>把模型变成 API</td><td>推送模型自动打包成 HTTP API，按调用量计费</td><td>发布自己微调的模型</td></tr>
+<tr><td><strong>AutoDL</strong></td><td>国内 GPU 云</td><td>RTX 3090 约 ¥1/小时、A100 约 ¥5–8/小时，关机只收存储费</td><td>国内用户、预算有限</td></tr>
+</table>
+<p><strong>一句话选型</strong>：只展示 → Spaces；转 API → Replicate；跑 Python 任务 → Modal；国内且便宜 → AutoDL。</p>
+<hr>
+<h2>九、让 AI 帮你部署、排错与加固</h2>
+<p><strong>两种协作方式</strong></p>
+<ol>
+<li><strong>本地生成脚本，手动执行</strong>——让 AI 生成：完整部署步骤清单、全部配置文件（Nginx / PM2 / Dockerfile / docker-compose）、<code>deploy.sh</code>、环境变量检查清单。</li>
+<li><strong>AI 直接 SSH 到服务器操作</strong>——自动检查环境、装依赖、拉代码、构建、配置、验证。</li>
+</ol>
+<blockquote>⚠️ <strong>安全前提</strong>：先在测试服务器练手；重要数据定期备份；给 AI 的账号权限最小化（不要给 root）；执行危险命令前先看一眼它要做什么。</blockquote>
+<p><strong>AI 辅助排错流程</strong></p>
+<ol>
+<li><strong>先看日志</strong>：Nginx 错误日志 / <code>pm2 logs</code> / <code>docker compose logs</code> / <code>journalctl</code>。</li>
+<li><strong>把报错完整复制给 AI</strong>，并附上环境、配置、当前状态等上下文。</li>
+<li><strong>对照常见问题速查</strong>：</li>
+</ol>
+<ul>
+<li>502 Bad Gateway → 后端没启动 / 端口不对 / proxy_pass 地址错</li>
+<li>无法访问 IP → 安全组没开端口 / ufw 没放行 / Nginx 没启动</li>
+<li>刷新 404 → Nginx 没配 <code>try_files</code></li>
+<li>静态资源 404 → root 路径错 / 文件权限不对</li>
+<li>HTTPS 证书失败 → 域名没解析 / 80 端口被占</li>
+<li>PM2 频繁重启 → 代码有 bug，看日志</li>
+<li>Vercel 函数超时 → 超过 10 秒限制，改长任务平台</li>
+<li>Railway/Render 503 → 休眠了或额度用完</li>
+</ul>
+<p><strong>安全加固清单</strong>（可让 AI 生成脚本）：禁用密码登录只用 SSH 密钥；修改 SSH 默认端口；安装 fail2ban；启用自动安全更新 <code>apt install unattended-upgrades</code>；密钥与 <code>.env</code> 不进 Git；定期把数据库备份到对象存储。</p>
+<hr>
+<h2>十、约束说明</h2>
+<p>本集的<strong>约束</strong>与适用边界：</p>
+<ol>
+<li><strong>资质约束</strong>：国内短信需企业资质与签名备案，个人开发者通常无法申请，应以邮箱验证码替代。</li>
+<li><strong>合规约束</strong>：国内节点需 ICP 备案；跨境数据传输需符合所在地合规要求；UGC 项目应启用内容审核。</li>
+<li><strong>成本约束</strong>：免费套餐到期自动转标准费率；媒体处理按调用计费；两者都应设预算告警与用量上限。</li>
+<li><strong>安全约束</strong>：AI 远程操作必须权限最小化并先经测试环境验证；密钥一律走环境变量，禁止入版本库。</li>
+<li><strong>适用约束</strong>：本集是配套服务与排错的认知地图，不覆盖高并发架构、多活容灾、安全审计等生产级话题。</li>
+<li><strong>内容约束</strong>：本文为开源教程的二次演绎配音版，观点与例子由演播者添加，不代表原文作者立场。</li>
+</ol>
+<hr>
+<h2>十一、审查清单</h2>
+<ul>
+<li>域名注册商已按「是否需备案」选择国内或海外</li>
+<li>注册验证走邮件服务，未自建邮件服务器</li>
+<li>短信需求已确认资质，无资质时已改用邮箱验证码</li>
+<li>已配置存活监控，且告警渠道是自己真的会看的</li>
+<li>应用日志已集中收集，出问题时能查到当时的记录</li>
+<li>图片/视频处理已用对象存储参数化能力，未重复存储多尺寸</li>
+<li>免费套餐已设置到期提醒与预算告警，闲置资源已销毁</li>
+<li>GPU 需求已按「展示 / 转 API / 跑任务 / 国内便宜」四分定位</li>
+<li>AI 远程操作账号为非 root，且已在测试环境验证过</li>
+<li>安全加固六项已逐项完成（密钥登录、改端口、fail2ban、自动更新、不入 Git、定期备份）</li>
+<li>数据库定期备份到对象存储已验证可恢复</li>
+</ul>
+<hr>
+<h2>十二、实践提示</h2>
+<h3>提示1 · 用「丢数据谁承担」来判断自建还是上云</h3>
+<p>别问预算多少，问一句：这份数据丢了，后果由谁承担。答案是「只有我自己、可以重来」就自建；答案是「用户」就上云托管。这个判断比价格表可靠得多。</p>
+<h3>提示2 · 给免费套餐设两个闹钟</h3>
+<p>第一个闹钟设在到期前一个月，提醒你评估是否续用；第二个设在到期当天，提醒你销毁资源。两个闹钟能挡住绝大多数「月底账单惊喜」。</p>
+<h3>提示3 · 把速查表贴在编辑器侧边</h3>
+<p>把「502 / 无法访问 / 刷新 404 / 静态资源 404 / 证书失败 / 频繁重启」这六行和各自的第一嫌疑抄下来，放在随手可见的地方。部署排错时，80% 的情况你会在三十秒内定位。</p>
+<h3>提示4 · 给 AI 的账号做一次权限演练</h3>
+<p>新建一个非 root 账号交给 AI，让它执行一次完整部署。如果中途它要求提权，你就知道哪一步需要人工确认。这次演练能在真出事之前，把权限边界摸清楚。</p>
+<h3>提示5 · 做一次「恢复演练」而不是只做备份</h3>
+<p>备份做了不等于能用。挑一个周末，把最近的数据库备份真的恢复到一台新机器上，走一遍完整流程。能恢复的备份才叫备份，不能恢复的只是一堆文件。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s3.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
