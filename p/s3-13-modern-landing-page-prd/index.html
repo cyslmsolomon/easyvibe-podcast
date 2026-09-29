@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRD：现代 AI 生图 SaaS 平台 · 1. 项目定位</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 10 · EP 13</span>
+<h1>PRD：现代 AI 生图 SaaS 平台 · 1. 项目定位</h1>
+<p class="sub">第 10 章 · 第 13 讲 · 16:30</p>
+<div class="meta"><span>时长 <b>16:30</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>10</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/s3-13-modern-landing-page-prd-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/s3-13-modern-landing-page-prd-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/s3-13-modern-landing-page-prd/s3-13-modern-landing-page-prd-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/s3-13-modern-landing-page-prd/s3-13-modern-landing-page-prd-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-10.html">← 第 10 章目录</a>
+<a href="/p/s3-12-llm-skills-beautiful/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:21</span></div>
+<div class="ch" data-t="81.384"><span class="t">1:21</span><span class="n">定位，这不是一个展示页</span><span class="d">1:36</span></div>
+<div class="ch" data-t="177.384"><span class="t">2:57</span><span class="n">技术选型与它背后的取舍</span><span class="d">1:51</span></div>
+<div class="ch" data-t="288.48"><span class="t">4:48</span><span class="n">用户、目标与北极星指标</span><span class="d">1:45</span></div>
+<div class="ch" data-t="394.104"><span class="t">6:34</span><span class="n">范围，做什么和不做什么</span><span class="d">1:31</span></div>
+<div class="ch" data-t="485.928"><span class="t">8:05</span><span class="n">三套入口与十九个页面</span><span class="d">1:12</span></div>
+<div class="ch" data-t="558.768"><span class="t">9:18</span><span class="n">后端模块与接口清单</span><span class="d">1:51</span></div>
+<div class="ch" data-t="670.224"><span class="t">11:10</span><span class="n">套餐与积分怎么设计</span><span class="d">1:47</span></div>
+<div class="ch" data-t="778.128"><span class="t">12:58</span><span class="n">非功能要求、开发顺序、待确认项与收尾</span><span class="d">3:31</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe · 拆一份完整 PRD：AI 生图 SaaS 的十层结构 — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-2/assignments/modern-landing-page/PRD.md</code>），为<strong>二次演绎配音版</strong>。原文作者与贡献者来自开源社区。本文在原文基础上做了口语化改写、结构重组与实践补充，观点与例子由演播者添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>s3-13-modern-landing-page-prd</code></li>
+<li>所属章节：第 10 章 · s3 重切复活篇</li>
+<li>对应音频：<code>s3-13-modern-landing-page-prd-播客.mp3</code></li>
+<li>字幕：<code>s3-13-modern-landing-page-prd-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>这一集拆的是一份<strong>完整且贴近真实项目的产品需求文档</strong>：一个现代化 AI 生图 SaaS 网站。</p>
+<p>产品体验参考 Midjourney、Leonardo、Playground 这类平台，但<strong>后端不训练自己的模型，而是对接第三方图像生成模型服务</strong>——这个取舍意味着项目重心不在算法，而在产品闭环。</p>
+<p>量级：<strong>三套入口、十九个大页面、九个后端模块、三十多个接口、四档套餐、十三条待确认项。</strong></p>
+<p>音频稿按「定位 → 技术选型 → 用户与目标 → 做与不做 → 页面架构 → 后端模块 → 套餐积分 → 非功能/顺序/待确认 → 收尾」重排，重点不是念文档，而是<strong>看一份能落地的 PRD 是怎么一层一层搭起来的</strong>。</p>
+<p>一句话概括：<strong>第一版要做的不是一个展示页，而是一套最小可用的产品闭环。</strong></p>
+<hr>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>能力项</th><th>原文怎么写的</th><th>演播者的解读</th><th>所属环节</th></tr>
+<tr><td>一句话定位</td><td>面向普通创作者和独立开发者的现代 AI 生图 SaaS</td><td>不训练模型＝重心在产品闭环</td><td>会定位</td></tr>
+<tr><td>三入口拆分</td><td>www / app / admin 三个域名</td><td>三种使用者的心智模式完全不同</td><td>会定位</td></tr>
+<tr><td>选型 + 理由</td><td>前端框架 + Supabase Auth/Postgres/Storage + Stripe + 模型适配层</td><td><strong>写下理由，两个月后不用重吵一遍</strong></td><td>会选型</td></tr>
+<tr><td>前后台分开鉴权</td><td>后台必须校验管理员权限，接口分开鉴权</td><td>共用接口只靠前端判断＝门锁装在窗帘上</td><td>守安全</td></tr>
+<tr><td>四类目标用户</td><td>普通用户 / 设计师 / 社区用户 / 管理员</td><td>四类人对应三套入口</td><td>会画像</td></tr>
+<tr><td>北极星指标</td><td>共 8 个，首位是「新用户首图生成成功率」</td><td><strong>指标排序本身就是产品判断</strong></td><td>会度量</td></tr>
+<tr><td>不做清单</td><td>自训练模型、多模型编排、图片编辑器、团队协作、多语言</td><td><strong>不做清单比做清单更能防失控</strong></td><td>守边界</td></tr>
+<tr><td>19 个页面</td><td>官网 1 + 工作台 9 + 后台 9</td><td>后台监控页是这类产品的生命线</td><td>会拆分</td></tr>
+<tr><td>九个后端模块</td><td>auth / generation / images / points / billing / social / analytics / observability / admin</td><td>按业务能力切，而非按技术层切</td><td>会架构</td></tr>
+<tr><td>四档套餐</td><td>Basic / Standard / Pro / Mega</td><td>拉开的不只是积分，还有<strong>并发与功能开关</strong></td><td>会设计</td></tr>
+<tr><td>非功能十一条</td><td>其中 3 条关于积分、2 条关于可追踪</td><td>钱和账是最容易出问题的地方</td><td>守底线</td></tr>
+<tr><td>十三条待确认项</td><td>诚实承认还没想完</td><td><strong>显式列出比假装想完安全得多</strong></td><td>会收尾</td></tr>
+</table>
+<p><strong>这张表怎么用</strong>：从上往下是「想清楚 → 拆清楚 → 守住」三阶段。多数人卡在第一阶段——定位写得像口号，导致后面每一层都在补救。</p>
+<hr>
+<h2>三、逐段拆解</h2>
+<h3>3.1 定位：不是展示页，是闭环</h3>
+<p><strong>展示页的目标是让人看懂，产品闭环的目标是让人用起来并且回得来。</strong> 前者只需要页面，后者需要注册、状态、记录、付费、回访的理由。</p>
+<p>第一版范围被明确列成九项：官网落地页、注册登录、提示词输入与生成、历史记录与结果管理、套餐/额度体系、积分体系、分享与公开展示、点赞评论转发、管理后台。</p>
+<p><strong>三个入口分开的理由</strong>：游客在官网是被说服的人，用户在工作台是干活的人，管理员在后台是排查问题的人——<strong>塞进同一个界面，三边都难受。</strong></p>
+<p>常见错误：把第一版写成功能集合，却忘了回答「<strong>用户第一次来，走完哪几步才算真的用上了</strong>」。这份文档的答案很明确：<strong>三分钟内完成注册并生成第一张图。</strong></p>
+<h3>3.2 技术选型与它背后的取舍</h3>
+<p>默认方案：前端用带路由的框架；<strong>鉴权、数据库、文件存储交给同一个后端平台</strong>；支付用成熟支付服务；图像生成通过<strong>统一后端适配层</strong>对接第三方模型。</p>
+<p>原文罕见地写了一段「默认原因」，三条：</p>
+<ol>
+<li>适合第一版 SaaS 快速落地</li>
+<li>用户系统、数据库、对象存储一起解决</li>
+<li>对两套前端都友好，后续拆独立服务也留了空间</li>
+</ol>
+<p><strong>把选型理由一起写下来，是区分资深和新手最好的一条线</strong>——理由会在两个月后被重新拿出来讨论，那时如果没人记得当初为什么这么选，团队就会重新吵一遍。</p>
+<p><strong>鉴权设计四个要点</strong>：普通用户支持邮箱密码 + 第三方登录；管理员用同一套登录系统但在用户表标记角色；<strong>后台管理台必须校验管理员权限</strong>；<strong>用户前台与后台接口分开鉴权</strong>。</p>
+<p>最后一条是很多项目出事故的地方：<strong>前后台共用一个接口、只靠前端判断权限，等于把门锁装在窗帘上。</strong></p>
+<p>数据库：主业务库用一套关系型数据库，六类数据先放一起，分析型查询先基于主库聚合，数据量大后再拆。<strong>先跑起来，别一上来就做分布式。</strong></p>
+<h3>3.3 用户、目标与北极星指标</h3>
+<p>四类目标用户：想快速出图的普通用户 / 批量试提示词的设计师与创作者 / 浏览并互动的社区用户 / 管理用户与额度的管理员。<strong>四类人对应三套入口。</strong></p>
+<p>四条核心目标：3 分钟内完成注册并生成第一张图 / 清晰看到生成结果、积分消耗与历史 / 可以分享作品并获得互动反馈 / 支持积分购买消耗、失败重试、内容互动和后台管理。</p>
+<p>注意第三条——<strong>分享与互动被写进核心目标，而不是可选增强。</strong> 这说明产品从第一天就不打算只做工具，它想做社区。</p>
+<p><strong>北极星指标（8 个）</strong>：</p>
+<table>
+<tr><th>指标</th><th>说明</th></tr>
+<tr><td>新用户首图生成成功率</td><td><strong>排在第一位</strong></td></tr>
+<tr><td>日活跃生成用户数</td><td>—</td></tr>
+<tr><td>人均生成次数</td><td>—</td></tr>
+<tr><td>生成任务成功率</td><td>—</td></tr>
+<tr><td>付费转化率</td><td>—</td></tr>
+<tr><td>分享图片数</td><td>—</td></tr>
+<tr><td>点赞/评论互动率</td><td>—</td></tr>
+<tr><td>日活跃积分用户数</td><td>—</td></tr>
+</table>
+<p><strong>首位是「新用户首图生成成功率」而不是注册数或收入——这个排序本身就是产品判断。</strong> 对这类产品，第一次就生成失败的用户大概率不会来第二次。</p>
+<p>用法：把这八个指标当检查表，问自己每一个在当前系统里能不能被算出来。<strong>算不出来的那几个，就是数据表还缺的地方。</strong></p>
+<h3>3.4 范围：做什么与不做什么</h3>
+<p><strong>必须包含 12 项</strong>：官网首页、注册登录、生图工作台、图片历史页、套餐/积分页、积分页、支付订阅、公开分享页、点赞评论转发、图片生成接口、任务状态查询、后台查看用户/任务/积分/互动。</p>
+<p><strong>明确不做 5 项</strong>：自训练模型、多模型工作流编排、图片编辑器、团队协作、多语言。</p>
+<p><strong>不做清单比做清单更重要</strong>——做清单大家都能想到，而不做清单才是真正防止项目失控的东西。尤其第一项和第三项：自训练模型会把重心从产品拽到算法，图片编辑器几乎是一个独立产品的工作量。</p>
+<p><strong>三类角色权限</strong>：</p>
+<table>
+<tr><th>角色</th><th>权限</th></tr>
+<tr><td>游客</td><td>浏览官网、查看介绍、注册登录</td></tr>
+<tr><td>注册用户</td><td>创建任务、查看历史、管理积分与结果、查看明细、分享、点赞评论转发</td></tr>
+<tr><td>管理员</td><td>查看用户/任务状态/失败日志/套餐与积分消耗，管理积分规则、公开内容与互动数据</td></tr>
+</table>
+<p>写权限的技巧：<strong>不要只写谁能做什么，要写清谁不能做什么。</strong> 边界写在哪一侧，决定了实现时会不会漏。</p>
+<h3>3.5 三套入口与十九个页面</h3>
+<p><strong>总量：官网 1 + 工作台 9 + 后台 9 = 19 个大页面。</strong></p>
+<ul>
+<li><strong>官网首页</strong>：Hero、作品展示、功能介绍、价格方案、FAQ、CTA</li>
+<li><strong>用户工作台</strong>：登录、注册、生成工作台、历史图库、套餐页、积分页、社区广场、作品详情页、个人中心</li>
+<li><strong>后台管理台</strong>：首页概览、用户管理、任务管理、内容管理、套餐管理、支付订单、运营配置、指标看板、系统监控</li>
+</ul>
+<p><strong>生成工作台</strong>：正向/反向提示词、模型/比例/数量/质量参数、提交任务、三种状态（生成中/成功/失败）、再次生成/收藏/发布。</p>
+<p><strong>作品详情页</strong>：大图、作者与发布时间、完整提示词与参数、互动数据、复制提示词/再次生成/点赞/评论/转发。</p>
+<p><strong>两个后台页面值得单独提</strong>：</p>
+<ul>
+<li><strong>指标看板</strong>：新增用户、DAU/WAU/MAU、注册与付费转化、次日/7 日/30 日留存、套餐分布与续费、积分发消耗余、社区分享点赞评论转发率</li>
+<li><strong>系统监控页</strong>：API 调用量/成功率/错误率/耗时、第三方模型调用、数据库连接与慢查询、支付回调、任务队列积压与重试、告警与异常日志</li>
+</ul>
+<p><strong>为什么要专门做监控页</strong>：这类产品最致命的不是崩掉，而是<strong>悄悄变慢、悄悄涨价、悄悄失败</strong>——没有监控页，你只能等用户在评论区告诉你。</p>
+<p><strong>前端核心组件 19 项</strong>中，最容易被新手忽略的是<strong>空态、加载、失败重试</strong>这三个——它们恰恰决定了产品给人的是粗制滥造还是专业可靠。</p>
+<h3>3.6 后端模块与接口清单</h3>
+<p><strong>九个模块</strong>：auth（注册登录鉴权）/ generation（创建任务、查状态、失败重试）/ images（历史、删除、收藏、详情）/ points（购买、累计、扣减、奖励、兑换记录）/ billing（套餐、支付记录、升级）/ social（公开发布、点赞、评论、转发）/ analytics（留存、转化、订阅、积分、社区活跃）/ observability（API、模型、数据库、告警）/ admin（查看用户任务错误日志、审核内容、运营配置）。</p>
+<p><strong>划分方式值得学：按业务能力切，而不是按技术层切。</strong> 好处是每个模块都能对应到某类用户的一个具体动作，责任清楚，不会出现谁都不管的地带。</p>
+<p><strong>接口约 37 个，三个观察</strong>：</p>
+<ol>
+<li><strong>积分接口被单独拆出</strong>（查余额、查明细、签到、兑换四个）——说明积分是一等公民，不是支付模块的一个字段。</li>
+<li><strong>后台接口统一前缀，管理动作用修改类方法</strong>——权限校验可集中在中间件，不用每个接口各写一遍。</li>
+<li><strong>审核接口用修改类方法而非删除</strong>——保留恢复可能，是内容型产品的标准做法。</li>
+</ol>
+<h3>3.7 套餐与积分设计</h3>
+<p><strong>套餐逻辑</strong>：积分型订阅套餐；月付/年付两种，年付默认优惠 20%；按月发放积分；生成图片、生成视频、高清能力、并发能力由套餐共同决定。</p>
+<table>
+<tr><th>套餐</th><th>月付</th><th>年付折后</th><th>每月积分</th><th>图片并发</th><th>视频并发</th><th>其他权益</th></tr>
+<tr><td>Basic</td><td>$10</td><td>$8</td><td>2,000</td><td>3</td><td>1</td><td>基础生图、可补购积分</td></tr>
+<tr><td>Standard</td><td>$30</td><td>$24</td><td>8,000</td><td>3</td><td>3</td><td>高清视频、无限慢速图像生成</td></tr>
+<tr><td>Pro</td><td>$60</td><td>$48</td><td>18,000</td><td>12</td><td>6</td><td>隐身生成、更多并发</td></tr>
+<tr><td>Mega</td><td>$120</td><td>$96</td><td>40,000</td><td>12</td><td>12</td><td>更高上限，适合高频创作</td></tr>
+</table>
+<p><strong>设计重点</strong>：套餐之间拉开的不只是积分数量，还有<strong>并发路数和功能开关</strong>。只靠积分数量拉不开差异时，重度用户会全挤在最低档；<strong>并发与专属功能才能真正区分付费意愿。</strong></p>
+<p><strong>六条 FAQ 建议</strong>：买了套餐没生效怎么办 / 月付年付差别 / 积分用完怎么办 / 积分会不会过期 / 能否绑定多个登录方式 / 哪些内容支持公开分享。</p>
+<p>其中前两条与第四、第五条，是<strong>上线第一天最容易收到工单的问题</strong>——提前写好答案，等于提前省掉一批客服成本。</p>
+<h3>3.8 非功能要求、开发顺序与待确认项</h3>
+<p><strong>非功能要求 11 条</strong>（摘要）：生成过程有明确状态反馈 / 失败任务能提示原因 / 移动端至少可查看浏览历史结果 / 首页具备现代 SaaS 视觉质量 / 用户只能访问自己的图片和任务 / 积分扣减稳定可追踪 / 积分发放与扣减可审计 / 公开内容有最小审核或风控预留 / 互动接口预留防刷限流 / 后台指标支持日周月维度 / 日志、数据库、模型调用可追踪。</p>
+<p><strong>其中 3 条关于积分、2 条关于可追踪</strong>——这不是凑数，是吃过亏之后才会写出来的东西。<strong>钱和账，是这类产品最容易出问题的地方。</strong></p>
+<p><strong>开发顺序九步</strong>：官网首页与登录注册 → 用户鉴权 → 生成工作台 UI → 生图任务接口 → 历史图库 → 支付/套餐/积分/FAQ → 分享点赞评论转发 → 独立后台与各管理页 → 指标看板与系统监控。</p>
+<p>特点：<strong>先打通一条最短的可用路径，再往两边长</strong>，而不是按模块顺序从鉴权一路做到监控。</p>
+<p><strong>十三条待确认项</strong>（摘要）：第三方模型优先接哪家 / 图片是否允许公开分享 / 后台是否必须独立二级域名 / 积分是否含邀请奖励 / 积分是否只用于生成消耗 / 年付优惠是否固定 20% / 是否需要单独积分包 / 是否接受默认鉴权与数据库方案 / 留存与监控是否先做基础报表 / 评论是否允许二级回复 / 转发是站内还是带外链 / 第一版是否需人工审核。</p>
+<p><strong>意义：它诚实地承认这份文档还没想完。把没想完的部分显式列出来，比假装想完了安全得多。</strong></p>
+<hr>
+<h2>四、约束</h2>
+<p><strong>约束一：第一版必须跑通闭环，不是做展示页。</strong> 判断标准是「用户能否在三分钟内完成注册并生成第一张图」。</p>
+<p><strong>约束二：不做清单必须写，且必须被遵守。</strong> 自训练模型和图片编辑器尤其会拖垮第一版。</p>
+<p><strong>约束三：前后台接口必须分开鉴权。</strong> 后台校验必须在服务端，不能只靠前端判断。</p>
+<p><strong>约束四：积分相关逻辑必须可追踪、可审计。</strong> 三条非功能要求都指向这一点。</p>
+<p><strong>约束五：开发顺序先打通最短路径。</strong> 不要按模块顺序从鉴权一路做到监控。</p>
+<p><strong>约束六：待确认项要显式列出。</strong> 没想完的部分写清楚，比含糊过去安全。</p>
+<hr>
+<h2>五、与 Easy-Vibe 其他章节的关系</h2>
+<p>在 <strong>Easy-Vibe</strong> 的脉络里，这一集是「把需求写清楚」这条线的集大成者。</p>
+<p>前面几集讲的是需求文档的组成部分——定位、画像、用户故事、MVP 功能、非功能性需求、路线图；这一集给出的是<strong>一份把这些部分全部装配起来的完整样本</strong>。</p>
+<p>和上一集的平台选型连起来看，两集正好互补：<strong>上一集决定容器，这一集决定内容。</strong> 上一集说「先做最短入口」，这一集演示了什么叫最短入口——不是页面少，而是闭环短。</p>
+<p>还有一个可迁移的点：<strong>这份文档把「为什么这么选」也写了进去。</strong> 无论是平台选型、技术选型还是风格选型，留下理由，都是给两个月后的自己省一次争论。</p>
+<hr>
+<h2>六、审查清单</h2>
+<p>写自己的 PRD 时逐条打勾：</p>
+<ul>
+<li>已用一句话说清「这是什么、给谁、不做什么」</li>
+<li>已明确第一版是闭环而不是展示页，并给出最短路径</li>
+<li>技术选型已附带理由</li>
+<li>前后台鉴权已分开，后台校验在服务端</li>
+<li>目标用户按使用场景分类，而非按人口统计分类</li>
+<li>北极星指标已列出，并确认每个都能被算出来</li>
+<li>已有明确的「不做清单」</li>
+<li>三类角色的权限边界（尤其「不能做什么」）已写清</li>
+<li>页面清单已按入口分组，并覆盖空态/加载/失败三种状态</li>
+<li>后端模块按业务能力切分，每个模块对应一类用户动作</li>
+<li>套餐差异不只靠数量，还靠并发与功能开关</li>
+<li>积分的扣减与发放逻辑已要求可追踪、可审计</li>
+<li>待确认项已显式列出</li>
+</ul>
+<hr>
+<h2>七、实践提示</h2>
+<h3>提示1 · 用「三分钟能否出第一张图」检验闭环</h3>
+<p>不要问功能齐不齐，要问用户第一次来走完哪几步才算真的用上了。答不上来，说明你写的是展示页。</p>
+<h3>提示2 · 写选型时把理由一起写下来</h3>
+<p>理由会在两个月后被重新讨论。<strong>留下理由，就是给未来的自己省一次争论。</strong></p>
+<h3>提示3 · 不做清单至少列五项，并挑出最危险的两项</h3>
+<p>这份文档里最危险的是自训练模型和图片编辑器——一个拽走重心，一个是独立产品的工作量。</p>
+<h3>提示4 · 后台一定要有监控页，不只是管理页</h3>
+<p>这类产品最致命的不是崩掉，而是悄悄变慢、悄悄失败。<strong>没有监控页，你只能等用户在评论区告诉你。</strong></p>
+<h3>提示5 · 套餐差异别只堆数量</h3>
+<p>只靠积分数量拉不开差异时，重度用户会全挤在最低档。<strong>用并发路数和功能开关来真正区分付费意愿。</strong></p>
+<hr>
+<h2>八、收尾</h2>
+<p>这一集真正想留下的不是那份文档的内容，而是它的<strong>十层结构</strong>：定位、选型与理由、用户与目标、做与不做、页面清单、模块与接口、商业设计、非功能要求、开发顺序、待确认项。</p>
+<p>其中最容易被跳过、也最不该跳过的两层，是<strong>「不做清单」和「待确认项」</strong>——一个防止你在过程中失控，一个防止你在起步时自欺。</p>
+<p>如果你正在写自己的产品文档，就照这个结构抄一遍。十块填完你会发现，<strong>那些原本模糊的地方，自己变清楚了。</strong></p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s3.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
