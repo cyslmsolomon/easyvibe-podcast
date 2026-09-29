@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>把网站发到网上（进阶方式）：自己买台 VPS 服务器搭建发布 · 5.1 买域…</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 10 · EP 2</span>
+<h1>把网站发到网上（进阶方式）：自己买台 VPS 服务器搭建发布 · 5.1 买域…</h1>
+<p class="sub">第 10 章 · 第 2 讲 · 15:52</p>
+<div class="meta"><span>时长 <b>15:52</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>10</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/s3-02-cloud-server-deployment-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/s3-02-cloud-server-deployment-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/s3-02-cloud-server-deployment/s3-02-cloud-server-deployment-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/s3-02-cloud-server-deployment/s3-02-cloud-server-deployment-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-10.html">← 第 10 章目录</a>
+<a href="/p/s3-01-cloud-server-deployment/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:48</span></div>
+<div class="ch" data-t="108.216"><span class="t">1:48</span><span class="n">先把门牌号定下来，买域名与解析</span><span class="d">2:14</span></div>
+<div class="ch" data-t="242.352"><span class="t">4:02</span><span class="n">云服务地图第一组，算力</span><span class="d">2:52</span></div>
+<div class="ch" data-t="414.96"><span class="t">6:54</span><span class="n">云服务地图第二组，存文件</span><span class="d">2:43</span></div>
+<div class="ch" data-t="578.016"><span class="t">9:38</span><span class="n">云服务地图第三组，存数据</span><span class="d">2:24</span></div>
+<div class="ch" data-t="722.064"><span class="t">12:02</span><span class="n">云服务地图第四组，让访问更快</span><span class="d">2:17</span></div>
+<div class="ch" data-t="859.272"><span class="t">14:19</span><span class="n">收尾</span><span class="d">1:32</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe · 买域名与解析 + 云厂商服务全景 — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-2/backend/cloud-server-deployment/index.md</code>），为<strong>二次演绎配音版</strong>。原文作者与贡献者来自开源社区。本文在原文基础上做了口语化改写、结构重组与实践补充，观点与例子由演播者添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>s3-02-cloud-server-deployment</code></li>
+<li>所属章节：第 10 章 · s3 重切复活篇</li>
+<li>对应音频：<code>s3-02-cloud-server-deployment-播客.mp3</code></li>
+<li>字幕：<code>s3-02-cloud-server-deployment-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>上一集解决了「东西放哪」，这一集解决两个紧接着冒出来的具体问题。</p>
+<p><strong>第一，网址从哪来。</strong> 服务器给你的是一个 IP 地址——一串没人记得住的数字。要让它变成 <code>yourdomain.com</code>，需要买域名并把它解析到那台机器上。这是从「能访问」到「能被记住」的一步。</p>
+<p><strong>第二，控制台里那上百个产品到底是什么。</strong> 买完服务器第一次进云厂商控制台，几乎所有人都会懵：ECS、OSS、CDN、RDS、SLB、VPC……每个名字都很专业，每个都像不买不行。原文把这一节命名为「云厂商常见服务功能全解析」，目的就是建立<strong>云服务的地图感</strong>。</p>
+<p>音频稿把这一集的素材重排成了「门牌号 → 算力 → 存文件 → 存数据 → 加速」五段。一句话概括：<strong>这一集不教你怎么开通服务，教你怎么判断哪些服务现在还不用开通。</strong></p>
+<hr>
+<h2>二、能力地图</h2>
+<p>原文的能力点分散在域名解析、云服务清单和若干安全提醒里。我按「会寻址 → 会算力 → 会存文件 → 会存数据 → 会加速 → 守边界」六个环节重排：</p>
+<table>
+<tr><th>能力项</th><th>原文怎么说的</th><th>演播者的解读</th><th>所属环节</th></tr>
+<tr><td>域名选购</td><td>万网/腾讯云/Namecheap/Cloudflare/GoDaddy，.com 55–75 元/年，.cn 29 元/年</td><td>短、好念、无歧义优先，别为省钱选生僻后缀</td><td>会寻址</td></tr>
+<tr><td>A/CNAME/AAAA/MX/TXT 记录辨识</td><td>五种记录类型的作用与示例</td><td>A 指向 IPv4、CNAME 指向域名，配 CDN 时必用 CNAME</td><td>会寻址</td></tr>
+<tr><td>云服务器辨识</td><td>ECS / CVM / Lighthouse / HECS / EC2 是同一件事</td><td>名字不同，本质都是「自选配置的虚拟机」</td><td>会算力</td></tr>
+<tr><td>算力三档选型</td><td>服务器 / 函数计算 / 容器编排</td><td>按「是否只在触发时运行 → 是否单服务」两问排序</td><td>会算力</td></tr>
+<tr><td>对象存储认知</td><td>OSS / COS / S3，最常用服务之一</td><td>「用户文件不要存本地磁盘」是本集最重要的规矩</td><td>会存文件</td></tr>
+<tr><td>密钥安全意识</td><td>AccessKey 不得硬编码或入 Git</td><td>泄露后立即禁用并轮换，扫描机器人真实存在</td><td>会存文件</td></tr>
+<tr><td>云数据库认知</td><td>RDS / TDSQL-C / RDS，白名单配置</td><td>「生产库不要和 Web 服务挤一台机器」</td><td>会存数据</td></tr>
+<tr><td>缓存认知</td><td>Redis / ElastiCache</td><td>入门本地装，生产用托管版</td><td>会存数据</td></tr>
+<tr><td>CDN 与负载均衡</td><td>CDN / EdgeOne / CloudFront；SLB / CLB / ELB</td><td>只有用户开始抱怨慢才需要，顺序不能反</td><td>会加速</td></tr>
+<tr><td>证书与私有网络</td><td>免费 SSL / ACM / certbot；VPC</td><td>certbot + Let&#x27;s Encrypt 是最通用免费方案</td><td>会加速</td></tr>
+<tr><td>边界意识</td><td>个人项目用不上 K8s / NAS / 负载均衡</td><td>过早上复杂架构的代价永远大于收益</td><td>守边界</td></tr>
+</table>
+<p><strong>这张表怎么用</strong>：左边三列是「知道它是什么」，右边是「知道什么时候不用它」。后者价值更高——新手踩的坑绝大多数不是「没用上某个服务」，而是「提前用了不该用的服务」。</p>
+<hr>
+<h2>三、门牌号：买域名与解析</h2>
+<p><strong>买域名</strong>：阿里云万网、腾讯云、Namecheap、Cloudflare、GoDaddy 均可。<code>.com</code> 约 55–75 元/年，<code>.cn</code> 约 29 元/年。选名原则是短、好念、无歧义。</p>
+<p><strong>解析</strong>：在控制台加 A 记录——<code>@</code> 指向服务器 IP（主域名），<code>www</code> 指向同一 IP，需要后端接口时再加 <code>api</code>。</p>
+<table>
+<tr><th>记录类型</th><th>作用</th><th>示例</th></tr>
+<tr><td>A</td><td>域名 → IPv4 地址</td><td><code>@ → 123.45.67.89</code></td></tr>
+<tr><td>AAAA</td><td>域名 → IPv6 地址</td><td><code>@ → 2400:xxxx::</code></td></tr>
+<tr><td>CNAME</td><td>域名 → 另一个域名（配 CDN 必用）</td><td><code>static → static.cdn.com</code></td></tr>
+<tr><td>MX</td><td>邮件服务器（企业邮箱需要）</td><td>—</td></tr>
+<tr><td>TXT</td><td>任意文本（验证所有权、SPF/DKIM）</td><td>—</td></tr>
+</table>
+<p><strong>两个高频疑问</strong>：解析生效通常几分钟，最长 48 小时，可用 <code>ping</code> 验证；不买域名直接用 IP 也能访问，但对外服务建议买一个。</p>
+<p><strong>备案提醒</strong>：国内节点绑定域名需 ICP 备案，周期几天到十几天，有上线时间节点时要倒排；海外节点无此步骤。</p>
+<hr>
+<h2>四、算力组：服务器、函数、容器编排</h2>
+<p><strong>云服务器</strong>——阿里云 ECS、腾讯云 CVM / Lighthouse、华为云 ECS / HECS、AWS EC2。本质是同一件事：可自选配置、自装系统的虚拟机。适用：需掌控运行环境、跑自定义服务、24 小时在线进程。以腾讯云轻量为例：新建 → 选镜像（Ubuntu 22.04）→ 选套餐地域 → 得公网 IP → 重置密码 → 防火墙放行 22/80/443 → SSH 连接。</p>
+<p><strong>函数计算</strong>——阿里云 FC、腾讯云 SCF、AWS Lambda。上传代码，按调用次数与运行时长付费，无请求不花钱。适用：Webhook 处理、图片压缩、定时任务、流量波动大的 API。<strong>不适用</strong>：WebSocket Bot 这类常驻服务。</p>
+<p><strong>容器编排</strong>——阿里云 ACK、腾讯云 TKE、AWS EKS（Kubernetes）。适用：多服务微服务、自动扩缩容、有运维能力的团队。个人/小项目一台 VPS + Docker Compose 足够。</p>
+<p><strong>选型判断顺序</strong>：只在被触发时才运行 → 函数计算；只有一个服务 → 一台服务器；服务多到需要画拓扑图 → 才考虑容器编排。</p>
+<p><strong>附带两块存储</strong>：云硬盘（阿里云云盘 / 腾讯云 CBS / AWS EBS）独立于服务器生命周期，机器删了数据还在；共享文件存储（NAS / CFS / EFS）供多台服务器同时挂载，个人项目一般用不上。</p>
+<hr>
+<h2>五、存储组：对象存储是重点</h2>
+<p><strong>对象存储</strong>——阿里云 OSS、腾讯云 COS、AWS S3。约 ¥0.12/GB/月（标准存储），各家有新用户免费额度（阿里云 5GB 6 个月、腾讯云 50GB 6 个月、AWS 5GB 12 个月）。</p>
+<p><strong>用途</strong>：用户上传的图片/头像/附件；托管前端静态站（传 <code>dist/</code> 并开启静态网站托管）；数据库导出文件备份；配合 CDN 加速；生成临时链接分享私有文件。</p>
+<p><strong>操作（以阿里云 OSS 为例）</strong>：创建 Bucket（名称全局唯一）→ 地域选离服务器近的 → 标准存储 → 读写权限初期选「公共读」，敏感文件选「私有」→ 上传文件 → 拿到形如 <code>https://myapp-images.oss-cn-hangzhou.aliyuncs.com/avatar.jpg</code> 的 URL → 前端直接引用。</p>
+<p><strong>原文最重要的两条提醒</strong>：</p>
+<ol>
+<li><strong>不要把用户上传的文件存在服务器本地磁盘上</strong>——服务器重装/迁移/扩容时极易丢失。</li>
+<li><strong>AccessKey 相当于 OSS 密码，绝不硬编码在前端代码或提交到 Git</strong>——放在服务端环境变量，泄露后立即到 RAM 控制台禁用旧 Key 并生成新的。</li>
+</ol>
+<p><strong>三条实践建议</strong>：静态资源与私密文件分桶；图片上传前先在客户端压缩（可省大半存储与流量费）；设置生命周期规则，自动清理或降冷超时文件。</p>
+<hr>
+<h2>六、数据组：云数据库与缓存</h2>
+<p><strong>云数据库</strong>——阿里云 RDS、腾讯云 TDSQL-C / 云数据库 MySQL、AWS RDS。原文提醒：<strong>不要把数据库装在同一台 VPS 上跑生产环境</strong>。技术上可行，但生产环境用云数据库可换来自动备份、高可用、监控告警、一键扩容。</p>
+<p><strong>创建流程</strong>：RDS 控制台创建实例 → 选引擎（MySQL 8.0 最常用）→ 规格（入门 1 核 2G）→ <strong>设置白名单把服务器 IP 加进去</strong>（最常卡住的一步）→ 创建账号密码 → 创建数据库名 → 拿连接地址 → 改项目 <code>.env</code> 里的 <code>DATABASE_URL</code>。</p>
+<p><strong>迁移临界点</strong>（演播者补充）：出现以下任一情况就该迁到云数据库——有注册用户；数据丢失会造成实际损失；需要回滚到某个时间点。</p>
+<p><strong>缓存 Redis</strong>——阿里云/腾讯云 Redis 版、AWS ElastiCache。用途：缓存热点数据、存 Session/Token、消息队列、排行榜。入门可在 VPS 上 <code>apt install redis-server</code>，生产/高可用场景用云 Redis。</p>
+<hr>
+<h2>七、加速组：CDN、负载均衡与配套服务</h2>
+<p><strong>CDN</strong>——阿里云 CDN / DCDN、腾讯云 CDN / EdgeOne、AWS CloudFront。把静态资源缓存到边缘节点，用户从最近节点取。适用：有大文件、用户分散各地、想减轻源站带宽压力。Cloudflare Pages 本质上就是 CDN + 静态托管。</p>
+<p><strong>配置（以腾讯云 CDN 为例）</strong>：添加域名（如 <code>static.yourdomain.com</code>）→ 源站选 COS 源或自有源 → 等 5–10 分钟下发 → 在解析控制台给该域名加 CNAME 指向 CDN 分配的地址。</p>
+<p><strong>负载均衡</strong>——阿里云 SLB / ALB、腾讯云 CLB、AWS ELB。把流量分发到多台后端服务器并自动摘除故障节点。个人项目一台服务器时用不上。</p>
+<p><strong>配套</strong>：DNS（万网 / DNSPod / Route 53 / Cloudflare DNS）；SSL（各家免费证书，通用方案是 certbot + Let&#x27;s Encrypt，90 天自动续期）；VPC（隔离虚拟局域网，新用户一般默认生成）。</p>
+<p><strong>顺序原则</strong>：用户没抱怨慢 → 不加；抱怨慢 → 先加 CDN（投入最小见效最快）；CDN 扛不住 → 再加机器和负载均衡。反过来就是过度设计。</p>
+<hr>
+<h2>八、约束说明</h2>
+<p>本节明确本集的<strong>约束</strong>与适用边界：</p>
+<ol>
+<li><strong>价格约束</strong>：文中所有价格与免费额度均为原文档记录时的状态，各家政策会变，开通前以官网当日公示为准。</li>
+<li><strong>合规约束</strong>：国内节点域名需完成 ICP 备案；跨境数据存储需符合所在地数据合规要求。</li>
+<li><strong>安全约束</strong>：AccessKey 一律走服务端环境变量，禁止入前端代码与版本库；数据库必须配置白名单，禁止对全网开放。</li>
+<li><strong>成本约束</strong>：对象存储与 CDN 按量计费，异常流量会导致账单突增，建议设置用量告警与上限。</li>
+<li><strong>适用约束</strong>：本集是云服务认知地图，不覆盖 K8s 集群运维、数据库调优、多活架构等生产级话题。</li>
+<li><strong>内容约束</strong>：本文为开源教程的二次演绎配音版，观点与例子由演播者添加，不代表原文作者立场。</li>
+</ol>
+<hr>
+<h2>九、审查清单</h2>
+<ul>
+<li>已购买域名，并完成 <code>@</code> / <code>www</code> / 必要的 <code>api</code> 三条 A 记录</li>
+<li>已用 <code>ping</code> 验证解析返回的 IP 与服务器一致</li>
+<li>国内节点已确认备案流程与时间安排</li>
+<li>算力选型已过两问：是否只在触发时运行 / 是否单服务</li>
+<li>用户上传文件已走对象存储，未落在服务器本地磁盘</li>
+<li>AccessKey 存放于服务端环境变量，未出现在前端代码或 Git 历史中</li>
+<li>对象存储已设置生命周期规则，静态资源与私密文件已分桶</li>
+<li>生产数据库已独立托管，且服务器 IP 已加入白名单</li>
+<li>项目配置中的数据库连接串已指向云数据库地址</li>
+<li>CDN 尚未启用时，未提前配置负载均衡/多机架构</li>
+<li>HTTPS 已配置，certbot 自动续期已验证可用</li>
+<li>已确认不存在「为显得专业而过早上 K8s / NAS」的情况</li>
+</ul>
+<hr>
+<h2>十、实践提示</h2>
+<h3>提示1 · 用「两问法」给算力选型</h3>
+<p>先问「是不是只在被触发时才需要运行」——是就用函数计算；再问「是不是只有一个服务」——是就一台服务器。两问之后还不满足，才轮到容器编排。这套顺序能挡住绝大多数过度设计。</p>
+<h3>提示2 · 做一次「本地磁盘清理」演练</h3>
+<p>假设你的服务器明天就要重装。列出所有存在本地磁盘上的用户文件，把它们迁到对象存储。这个假设练习比读十遍提醒都管用，因为它逼你真的去找一遍。</p>
+<h3>提示3 · 给数据库白名单写一条注释</h3>
+<p>在白名单里加服务器 IP 时，顺手在备注里写清楚「这是哪台机器、什么时候加的」。三个月后你换服务器时会感谢自己——否则你面对的是一堆无标注的 IP。</p>
+<h3>提示4 · 先看五分钟，不买任何东西</h3>
+<p>打开云厂商控制台，只看不买。把算力、存储、数据、加速四组各找出一个代表产品，在心里对上号。五分钟就够，但下次进来你不会再发怵。</p>
+<h3>提示5 · 给「慢」设一个触发阈值</h3>
+<p>提前定一条规则：当页面加载超过 N 秒、或月度出网流量超过 N GB 时，才启动 CDN 评估。把主观感受变成客观阈值，你就不会因为一次偶然的卡顿而冲动开通服务。</p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s3.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
