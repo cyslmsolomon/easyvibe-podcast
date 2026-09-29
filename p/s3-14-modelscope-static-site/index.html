@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>在魔搭社区发布你的 Vibe Coding 产物 · 在魔搭社区发布你的 Vi…</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 25% 0%,#1a1033 0%,#0a0a18 55%);
+    color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;
+    padding:40px 18px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:720px}
+  a{color:#c084fc;text-decoration:none}
+  a:hover{color:#d8b4fe}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:#c084fc;
+    border:1px solid #7c3aed55;background:#4c1d9533;padding:5px 12px;
+    border-radius:999px;margin-bottom:20px}
+  h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.01em}
+  .sub{color:#94a3b8;margin-top:12px;font-size:15px;line-height:1.75}
+  .meta{display:flex;gap:20px;margin-top:20px;font-size:13px;
+    color:#64748b;flex-wrap:wrap}
+  .meta b{color:#cbd5e1;font-weight:600}
+  .player{margin-top:26px;background:#12101f;border:1px solid #241f3a;
+    border-radius:16px;padding:20px;box-shadow:0 20px 50px -20px #000c}
+  audio{width:100%;display:block}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1;min-width:130px;text-align:center;text-decoration:none;
+    padding:11px 16px;border-radius:10px;font-size:14px;font-weight:600;
+    background:#7c3aed;color:#fff;transition:.18s;border:none;cursor:pointer;
+    font-family:inherit;display:inline-block}
+  .btn:hover{background:#8b5cf6;transform:translateY(-1px);color:#fff}
+  .btn.ghost{background:#241f3a;color:#cbd5e1}
+  .btn.ghost:hover{background:#2f2849;color:#e2e8f0}
+  h2{font-size:13px;letter-spacing:.1em;color:#64748b;margin:34px 0 12px;
+    font-weight:600}
+  .ch{display:flex;align-items:baseline;gap:14px;padding:12px 14px;
+    border-radius:10px;cursor:pointer;transition:.15s;border:1px solid transparent}
+  .ch:hover{background:#12101f;border-color:#241f3a}
+  .ch .t{font-variant-numeric:tabular-nums;color:#c084fc;font-size:13px;
+    font-weight:600;min-width:44px}
+  .ch .n{font-size:15px;color:#cbd5e1}
+  .ch .d{margin-left:auto;font-size:12px;color:#475569}
+  .card{display:block;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:18px;margin-top:12px;transition:.18s}
+  .card:hover{border-color:#7c3aed66;transform:translateY(-1px)}
+  .card .row{display:flex;align-items:baseline;gap:12px}
+  .card .idx{font-variant-numeric:tabular-nums;color:#c084fc;font-weight:700;
+    font-size:13px;min-width:34px}
+  .card .ttl{font-size:17px;color:#e2e8f0;font-weight:600}
+  .card .pr{margin-left:auto;font-size:12.5px;color:#64748b;
+    font-variant-numeric:tabular-nums}
+  .card .desc{color:#64748b;font-size:13px;margin-top:8px;line-height:1.7}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;font-size:13.5px}
+  .nav a,.nav span{flex:1;min-width:120px;text-align:center;padding:10px 12px;
+    border-radius:10px;background:#12101f;border:1px solid #241f3a;color:#cbd5e1}
+  .nav a:hover{border-color:#7c3aed66;color:#fff}
+  .nav span{opacity:.4}
+  footer{margin-top:38px;padding-top:20px;border-top:1px solid #241f3a;
+    font-size:12.5px;color:#475569;line-height:1.9}
+  .subs-wrap{position:relative;margin-top:8px}
+  .subs{position:relative;height:min(45vh,340px);overflow-y:auto;
+    background:#12101f;border:1px solid #241f3a;border-radius:14px;
+    padding:8px 4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .subs-msg{padding:18px 10px;text-align:center;font-size:13px;color:#64748b}
+  .subs-msg.err{color:#f87171}
+  .subs-msg.err b{color:#c084fc;cursor:pointer;text-decoration:underline}
+  .sub{display:flex;gap:10px;padding:7px 10px;border-radius:8px;
+    border:1px solid transparent;cursor:pointer;transition:background .15s}
+  .sub:hover{background:#181530}
+  .sub .ts{flex:none;min-width:40px;padding-top:2px;font-size:11.5px;
+    color:#475569;font-variant-numeric:tabular-nums}
+  .sub .tx{font-size:14.5px;line-height:1.65;color:#94a3b8}
+  .sub.on{background:#2a2350;border-color:#7c3aed66}
+  .sub.on .ts{color:#c084fc}
+  .sub.on .tx{color:#f1f5f9;font-weight:600}
+  .sub-sep{display:flex;align-items:center;gap:10px;margin:12px 10px 6px;
+    font-size:11.5px;letter-spacing:.08em;color:#64748b}
+  .sub-sep::before,.sub-sep::after{content:"";height:1px;background:#241f3a;flex:1}
+  .sub-sep span{flex:none}
+  .follow{position:absolute;right:12px;bottom:12px;padding:8px 14px;
+    border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;
+    border:1px solid #7c3aed66;background:#2a2350;color:#e2e8f0;cursor:pointer;
+    box-shadow:0 10px 24px -10px #000c}
+  .follow:hover{background:#3a2f6b;color:#fff}
+  details.art{margin-top:34px;background:#12101f;border:1px solid #241f3a;
+    border-radius:14px;padding:16px 18px}
+  details.art summary{cursor:pointer;font-size:13px;letter-spacing:.1em;
+    color:#64748b;font-weight:600;list-style:none}
+  details.art summary::-webkit-details-marker{display:none}
+  details.art summary::before{content:"▸ ";color:#c084fc}
+  details.art[open] summary::before{content:"▾ "}
+  .art{color:#94a3b8;font-size:14.5px;line-height:1.8;margin-top:16px}
+  .art h1{font-size:20px;color:#e2e8f0;margin:0 0 10px}
+  .art h2{font-size:16px;color:#e2e8f0;margin:26px 0 10px;letter-spacing:0}
+  .art h3{font-size:15px;color:#cbd5e1;margin:20px 0 8px}
+  .art table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;
+    display:block;overflow-x:auto}
+  .art th,.art td{border:1px solid #241f3a;padding:7px 9px;text-align:left;
+    vertical-align:top}
+  .art th{background:#181530;color:#cbd5e1}
+  .art blockquote{margin:14px 0;padding:6px 14px;border-left:3px solid #7c3aed66;
+    color:#94a3b8}
+  .art code{background:#181530;padding:2px 5px;border-radius:4px;font-size:13px;
+    color:#c084fc}
+  .art pre{background:#181530;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .art pre code{background:none;padding:0;color:#cbd5e1}
+  .art ul,.art ol{padding-left:22px}
+  .art li{margin:4px 0}
+  .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
+  .art a{color:#c084fc}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">CHAPTER 10 · EP 14</span>
+<h1>在魔搭社区发布你的 Vibe Coding 产物 · 在魔搭社区发布你的 Vi…</h1>
+<p class="sub">第 10 章 · 第 14 讲 · 16:16</p>
+<div class="meta"><span>时长 <b>16:16</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>10</b></span></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/s3-14-modelscope-static-site-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/s3-14-modelscope-static-site-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/s3-14-modelscope-static-site/s3-14-modelscope-static-site-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/s3-14-modelscope-static-site/s3-14-modelscope-static-site-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
+<div class="nav">
+<a href="/chapter-10.html">← 第 10 章目录</a>
+<a href="/p/s3-13-modern-landing-page-prd/">← 上一讲</a>
+<span>下一讲 →</span>
+</div>
+<h2>章节导航（点击跳转）</h2><div id="chapters">
+<div class="ch" data-t="0.0"><span class="t">0:00</span><span class="n">开场</span><span class="d">1:40</span></div>
+<div class="ch" data-t="100.104"><span class="t">1:40</span><span class="n">创空间是什么，为什么选它</span><span class="d">1:45</span></div>
+<div class="ch" data-t="205.224"><span class="t">3:25</span><span class="n">先选对发布方式</span><span class="d">1:42</span></div>
+<div class="ch" data-t="307.728"><span class="t">5:07</span><span class="n">推荐做法，用官方技能发布</span><span class="d">1:50</span></div>
+<div class="ch" data-t="418.32"><span class="t">6:58</span><span class="n">用技能发布要准备三样东西</span><span class="d">2:08</span></div>
+<div class="ch" data-t="547.128"><span class="t">9:07</span><span class="n">手动流程，把能发布的产物准备好</span><span class="d">1:53</span></div>
+<div class="ch" data-t="660.744"><span class="t">11:00</span><span class="n">手动流程，创建空间与上传文件</span><span class="d">2:02</span></div>
+<div class="ch" data-t="783.696"><span class="t">13:03</span><span class="n">手动流程，部署验收与后续更新</span><span class="d">2:06</span></div>
+<div class="ch" data-t="910.656"><span class="t">15:10</span><span class="n">收尾</span><span class="d">1:05</span></div>
+</div>
+<details class="art"><summary>解读全文</summary><div class="art"><h1>Easy-Vibe · 把网页发布到魔搭创空间：静态站点的完整流程 — 解读与音频稿件</h1>
+<blockquote><strong>来源标注</strong>：本内容改编自开源项目 <strong>Easy-Vibe</strong>（仓库 <code>datawhalechina/easy-vibe</code>，路径 <code>docs/zh-cn/stage-1/appendix-modelscope-static-site/index.md</code>），为<strong>二次演绎配音版</strong>。原文作者与贡献者来自开源社区。本文在原文基础上做了口语化改写、结构重组与实践补充，观点与例子由演播者添加，不等同于原文表述。</blockquote>
+<ul>
+<li>篇目 slug：<code>s3-14-modelscope-static-site</code></li>
+<li>所属章节：第 10 章 · s3 重切复活篇</li>
+<li>对应音频：<code>s3-14-modelscope-static-site-播客.mp3</code></li>
+<li>字幕：<code>s3-14-modelscope-static-site-播客.srt</code></li>
+</ul>
+<hr>
+<h2>一、这一集在解决什么问题</h2>
+<p>网页终于做出来了，接下来当然要找个地方展示，<strong>让朋友、同学或者真正的用户可以直接打开它。</strong></p>
+<p>两个方向：租服务器自己配域名、HTTPS 和部署流程；或<strong>把作品托管到成熟的开源社区，少处理运维工作，把精力留给页面本身</strong>。这一集讲第二种——发布到<strong>魔搭社区（ModelScope）</strong>。</p>
+<p>魔搭社区由阿里巴巴联合 CCF 开源发展委员会发起，除 20 万+ 开源模型和 3 万+ 数据集外，也提供用于展示应用的<strong>创空间（Studio）</strong>。对我们来说它最实用的一点是：<strong>不用先成为运维专家，也能给作品准备一个可以免费分享的展示地址。</strong></p>
+<p>创空间支持 <strong>Gradio / Streamlit / Docker / static</strong> 四种类型。本文重点讲 <strong>static（已经构建好的纯静态网站）</strong>。</p>
+<p>一句话概括：<strong>创建静态创空间 → 上传构建产物 → 部署 → 通过创空间链接访问。</strong> 界面会变，这四步不会变。</p>
+<blockquote>原文依据魔搭当前的创空间页面、官方 Skill 与命令行资料整理，最后核验于 2026-08-11。按钮位置可能变化，但主流程不变。</blockquote>
+<hr>
+<h2>二、能力地图</h2>
+<table>
+<tr><th>能力项</th><th>原文怎么说的</th><th>演播者的解读</th><th>所属环节</th></tr>
+<tr><td>判断是否为静态站</td><td>能否不靠服务端、靠浏览器自己跑起来</td><td>能，就是静态网页</td><td>会判断</td></tr>
+<tr><td>类型选择表</td><td>纯 HTML / 框架项目 → Static；Gradio / Streamlit → 对应类型；自定义后端 → Docker</td><td>选错方式，后面全白费</td><td>会选型</td></tr>
+<tr><td>红线：不传源码</td><td>浏览器不能替你执行依赖安装和构建</td><td>构建产物 ≠ 源码目录</td><td>守红线</td></tr>
+<tr><td><code>ms-hub</code></td><td>平台统一入口，覆盖仓库/模型/数据集/创空间</td><td>第一次接入时用</td><td>会用</td></tr>
+<tr><td><code>ms-studio-deploy</code></td><td>项目识别、创建空间、Git 同步、部署、日志、诊断</td><td><strong>发布或更新本地网页优先用</strong></td><td>会用</td></tr>
+<tr><td>装完重启会话</td><td>让工具刷新可用 Skill 列表</td><td><strong>不重启＝看起来像装失败</strong></td><td>会用</td></tr>
+<tr><td>三条准备</td><td>装好 Skill / 根目录直含 index.html / 配好 Access Token</td><td>缺一都要卡住</td><td>会用</td></tr>
+<tr><td>私有优先</td><td>第一次建议私有，验收后再公开</td><td>先别让人看见半成品</td><td>守安全</td></tr>
+<tr><td>本地起服务检查</td><td>用 localhost 端口，不要双击文件</td><td>file 协议与 HTTP 行为不同</td><td>会验证</td></tr>
+<tr><td>产物目录内容</td><td>上传 dist/build <strong>里的内容</strong>，不是目录本身</td><td><strong>多包一层就找不到入口</strong></td><td>会验证</td></tr>
+<tr><td>资源基路径</td><td>404 时改为相对路径</td><td>只在部署后才暴露</td><td>会排错</td></tr>
+<tr><td>Hash 路由</td><td>静态托管不一定回退到 index.html</td><td>只在部署后才暴露</td><td>会排错</td></tr>
+<tr><td>验收五件事</td><td>首页 / 静态资源 / 控制台 / 手机宽度 / <strong>未登录窗口</strong></td><td>最后一条最易漏</td><td>会验收</td></tr>
+</table>
+<p><strong>这张表怎么用</strong>：上半部分是「别走错路」，中间是「让工具替你跑」，下半部分是「部署后才暴露的坑」。这三类失败几乎覆盖了静态站发布的所有翻车场景。</p>
+<hr>
+<h2>三、逐段拆解</h2>
+<h3>3.1 创空间是什么</h3>
+<p>魔搭社区由国内大型科技公司联合开源发展委员会发起。创空间支持四种类型：<strong>Gradio（机器学习演示应用）、Streamlit（数据应用）、Docker（自定义后端/系统依赖）、static（纯静态网页）</strong>。</p>
+<p>判断标准一句话：<strong>它能不能在没有服务端的情况下，靠浏览器自己跑起来。能，就是静态网页。</strong></p>
+<p>主流程四步不变：<strong>创建静态创空间 → 上传构建产物 → 部署 → 通过创空间链接访问。</strong></p>
+<p>两点补充：</p>
+<ul>
+<li><strong>静态档不需要付费硬件</strong>，几乎零成本就能拿到长期在线地址。这把试错门槛降到最低——你不需要先说服自己花钱，才敢把东西放出去。</li>
+<li><strong>发布这一步有特别的价值</strong>：当作品第一次有了可被别人打开的链接，它就从练习变成了作品。而别人打开链接后给的反馈，往往比自己闷头改十次更有用。</li>
+</ul>
+<h3>3.2 先选对发布方式</h3>
+<table>
+<tr><th>你的项目</th><th>创空间类型</th><th>发布前要做什么</th></tr>
+<tr><td>纯 HTML / CSS / JavaScript</td><td><strong>Static / 静态网页</strong></td><td>不需要构建，直接准备网页文件</td></tr>
+<tr><td>Vue、React、Vite、Svelte 等</td><td><strong>Static / 静态网页</strong></td><td><strong>先执行构建</strong>，只上传 dist 或 build 里的内容</td></tr>
+<tr><td>Gradio 应用</td><td>Gradio</td><td>准备 app.py 和 requirements.txt</td></tr>
+<tr><td>Streamlit 应用</td><td>Streamlit</td><td>准备入口文件和依赖</td></tr>
+<tr><td>有自定义后端、系统依赖或特殊启动方式</td><td>Docker</td><td>编写 Dockerfile，监听平台要求的端口</td></tr>
+</table>
+<p><strong>红线：不要把 Vue、React 的源代码直接当成 Static 网站上传——浏览器不能替你执行 npm install 和 npm run build。</strong></p>
+<p>十秒自检法：打开准备上传的目录，看里面<strong>有没有 index.html，且旁边直接跟着样式与脚本文件</strong>。如果只有源码目录、配置文件和依赖清单，说明还没构建或进错了目录。</p>
+<h3>3.3 推荐做法：用官方 Skill 发布</h3>
+<p>两个相关 Skill：</p>
+<table>
+<tr><th>Skill</th><th>作用</th><th>什么时候用</th></tr>
+<tr><td><code>ms-hub</code></td><td>魔搭平台统一入口，覆盖仓库、模型、数据集、创空间、MCP 和 Skills Center</td><td>第一次接入，或只需快捷操作</td></tr>
+<tr><td><code>ms-studio-deploy</code></td><td>项目识别、创建空间、Git 同步、部署、日志检查、故障诊断</td><td><strong>发布或更新本地网页时优先使用</strong></td></tr>
+</table>
+<p><strong>类型判断</strong>：根目录已有 <code>index.html</code> 的构建产物会被识别为 <code>static</code>。<strong>Static 创空间不负责运行 npm run build</strong>，框架项目仍要先本地构建。</p>
+<p><strong>安装</strong>：先装魔搭 SDK，再装统一入口与创空间部署 Skill。若 <code>modelscope</code> 命令没有 <code>skills</code> 子命令，用官方安装脚本。Skill 默认装到 <code>~/.agents/skills/</code>。</p>
+<p><strong>装完必须重启会话</strong>——这个坑表现得很像装失败了：命令显示成功，工具就是找不到。判断方法：装完重启一次，再问工具现在有哪些 Skill 可用。</p>
+<h3>3.4 用 Skill 发布要准备三样东西</h3>
+<ol>
+<li>已安装 <code>ms-studio-deploy</code> Skill，<strong>并重新打开过一次智能体会话</strong></li>
+<li>当前目录就是准备发布的目录，且<strong>根目录直接包含 <code>index.html</code></strong></li>
+<li>本机已配置魔搭 Access Token（在终端设置）</li>
+</ol>
+<p>纯 HTML 项目直接进网页目录；框架项目先构建再进产物目录（Vite 通常是 <code>dist</code>，Create React App 是 <code>build</code>）。</p>
+<p>提示词可以极简——「把当前目录发布到创空间的静态空间」。Skill 会先检查 <code>index.html</code> 与登录信息，需要新建时确认名称与可见性；<strong>没有特别说明时建议先用私有空间</strong>。</p>
+<p><strong>两条底线</strong>：</p>
+<ul>
+<li><strong>令牌同时用于 API 认证和 Git 推送，不要写进网页源码、README、提示词或可分享截图。</strong></li>
+<li>静态网站不需要付费硬件；<strong>其他类型的空间若涉及付费资源，Skill 必须先得到你的明确同意。</strong></li>
+</ul>
+<p>补一条关于自动化的判断：把发布流程交给智能体，<strong>最大的好处不是省时间，而是省力</strong>——创建、推送、部署、查日志四件事单独看都不难，但连起来做容易在中间走神导致整条链断掉。交给它，你只需盯住最后那个链接能不能打开。</p>
+<h3>3.5 手动流程：准备可发布的产物</h3>
+<p><strong>情况 A：纯 HTML 网页</strong></p>
+<p>最小目录就是 <code>index.html</code> + 样式 + 脚本 + 图片，<strong>首页文件必须在根目录</strong>。</p>
+<p>本地检查要<strong>在终端起一个本地服务，用浏览器打开 localhost 的 8000 端口</strong>——<strong>不要只双击 index.html</strong>，因为 <code>file://</code> 和真正的 HTTP 访问在模块、跨域和路径处理上并不相同。双击看着没问题、传上去全崩，是新手最常见的困惑之一。</p>
+<p><strong>情况 B：Vue / React / Vite 等项目</strong></p>
+<p>先安装依赖并构建，常见输出目录：Vite / Vue+Vite / React+Vite → <code>dist/</code>；Create React App → <code>build/</code>；Vue CLI → <code>dist/</code>。</p>
+<p><strong>你要发布的是输出目录里的内容</strong>，确保最终仓库根目录直接出现 <code>index.html</code>。</p>
+<p>两个只在部署后才暴露的坑：</p>
+<ul>
+<li>若 CSS/JS/图片 404，Vite 项目可先把<strong>资源基路径改为相对路径</strong>，然后重新构建</li>
+<li>单页应用建议用 <strong>Hash 路由</strong>（如 <code>/#/about</code>），因为纯静态托管不一定把所有路径回退到 <code>index.html</code></li>
+</ul>
+<p>建议：构建完不要立刻上传，先在本地起服务把主要子页面都点一遍。<strong>多花两分钟，能省掉一轮上传加部署的来回。</strong></p>
+<h3>3.6 手动流程：创建空间与上传文件</h3>
+<p><strong>第 1 步，进入创空间并登录。</strong> 页面顶部会显示「创建空间 → 搭建应用 → 发布空间 → 分享创意」。未登录时平台会先要求登录或注册。</p>
+<p>注意：<strong>国内站 <code>modelscope.cn</code> 与国际站 <code>modelscope.ai</code> 的账号、令牌与内容并不互通</strong>，面向国内用户通常选国内站。<strong>注册前先想清楚用哪个站，换站等于重来一遍。</strong></p>
+<p><strong>第 2 步，填写空间基础信息（5 项）</strong>：所属账号或组织（决定链接中的拥有者名称）/ 空间名称（建议小写英文字母、数字、连字符）/ 显示名称与简介（访客能看懂）/ 可见性（<strong>第一次建议私有，验收后再公开</strong>）/ 许可证。</p>
+<p><strong>第 3 步，上传网页文件。</strong> 进入文件页，上传 <code>index.html</code>、CSS、JS、图片。</p>
+<p><strong>高频错误</strong>：上传完成后，<strong>文件列表根目录必须直接出现 <code>index.html</code>，不能多包一层 <code>dist/</code>、<code>build/</code> 或项目目录</strong>。</p>
+<p>为什么会发生：本地构建出的目录名字叫 <code>dist</code>，很多人把整个目录拖进去，于是平台上变成「dist 里再套一层内容」。<strong>正确做法是打开这个目录，选中里面全部内容再上传</strong>——这一个动作的细节，能挡掉一大半的发布失败。</p>
+<h3>3.7 手动流程：部署验收与更新</h3>
+<p><strong>第 4 步，部署设置中选 Static。</strong> 平台会提示 Static 适合展示已准备好的 HTML 页面。再次确认根目录有 <code>index.html</code> 后保存。</p>
+<p><strong>边界判断</strong>：如果网页需要<strong>数据库、私密 API Key 或服务端计算</strong>，它就不是纯静态网页——应选 Gradio/Streamlit/Docker，或把后端部署到别的服务。<strong>把密钥写进前端 JavaScript 无法保密：这不是加密问题，是位置错了。</strong></p>
+<p><strong>第 5 步，等待部署并验收。</strong> 保存后通常自动开始部署，未触发就手动点部署/重启。等状态变为「运行中」后打开链接，重点确认五件事：</p>
+<ol>
+<li>首页能否打开</li>
+<li>CSS、JS 和图片是否正常</li>
+<li>浏览器控制台是否有 404、CORS 或 JS 错误</li>
+<li>手机宽度下是否能正常使用</li>
+<li><strong>复制公开链接后，在未登录窗口中是否仍能访问</strong></li>
+</ol>
+<p>最后一条最容易被忽略：<strong>私有空间你自己看着正常，不代表别人能打开。</strong></p>
+<p><strong>第 6 步，更新。</strong> 修改源码后先本地测试并重新构建，回到文件页用新的 <code>dist</code>/<code>build</code> 内容替换旧文件，再重新部署。<strong>只上传构建产物，不要上传 <code>node_modules</code>、开发配置和完整源代码。</strong></p>
+<p>版本小习惯：<strong>每次更新前给旧版本留一份备份。</strong> 静态网站回滚不像服务端那样有成熟工具，删掉的文件就是真没了——留一份上一版产物在本地，出问题时能立刻换回去，这比任何排查技巧都管用。</p>
+<hr>
+<h2>四、约束</h2>
+<p><strong>约束一：不要把框架源码当静态站上传。</strong> 浏览器不能替你执行构建。</p>
+<p><strong>约束二：根目录必须直接出现 index.html。</strong> 多包一层 <code>dist/</code> 或 <code>build/</code> 就打不开。</p>
+<p><strong>约束三：不要用双击文件的方式验收。</strong> <code>file://</code> 与 HTTP 在模块、跨域、路径处理上不同。</p>
+<p><strong>约束四：令牌不得出现在源码、README、提示词或可分享截图中。</strong> 它同时用于 API 认证与 Git 推送。</p>
+<p><strong>约束五：需要数据库、私密 Key 或服务端计算的，不是静态站。</strong> 密钥写进前端无法保密。</p>
+<p><strong>约束六：第一次发布用私有，验收后再公开，且必须用未登录窗口复验。</strong></p>
+<hr>
+<h2>五、与 Easy-Vibe 其他章节的关系</h2>
+<p>在 <strong>Easy-Vibe</strong> 的脉络里，这一集是整条链路的<strong>最后一公里</strong>：前面所有「把需求写清楚、把界面做出来」的工作，只有在这一步之后才真正产生外部价值。</p>
+<p>和上一集的 PRD 连起来看：<strong>上一集决定做什么，这一集决定怎么让人看到。</strong> 而这一集反复强调的「先私有、再公开」「用未登录窗口复验」，和上一集讲的「第一版先跑通闭环」是同一种谨慎——<strong>先在可控范围内确认正确，再扩大影响面。</strong></p>
+<p>还有一点可以迁移到任何发布场景：<strong>界面会变，流程不变。</strong> 把主流程记成四步，比记住任何一张截图都可靠。</p>
+<hr>
+<h2>六、审查清单</h2>
+<p>发布前后逐条打勾：</p>
+<ul>
+<li>已确认项目确实是静态站（不依赖服务端计算）</li>
+<li>框架项目已在本地完成构建</li>
+<li>准备上传的目录里根目录直接包含 <code>index.html</code></li>
+<li>未把 <code>dist</code> / <code>build</code> 目录本身拖进去（只传里面的内容）</li>
+<li>未上传 <code>node_modules</code>、开发配置和完整源代码</li>
+<li>已在本地起服务（而非双击文件）检查主要页面</li>
+<li>若有静态资源 404，已尝试改为相对路径基路径</li>
+<li>单页应用已使用 Hash 路由</li>
+<li>空间可见性第一次设为私有</li>
+<li>令牌未出现在源码、README、提示词或截图中</li>
+<li>验收五件事全部通过，包含<strong>未登录窗口</strong>访问</li>
+<li>更新前已备份上一版产物</li>
+</ul>
+<hr>
+<h2>七、实践提示</h2>
+<h3>提示1 · 十秒自检：看目录里有没有 index.html</h3>
+<p>打开准备上传的目录——有 <code>index.html</code> 且旁边直接跟着样式和脚本，才说明你拿的是构建产物；只有源码目录和配置文件，说明还没构建或进错了目录。</p>
+<h3>提示2 · 装完 Skill 一定重启一次会话</h3>
+<p>不重启的表现和「装失败」一模一样：命令成功，工具找不到。装完重启，再问一次有哪些 Skill 可用。</p>
+<h3>提示3 · 上传时「打开目录，选中里面全部内容」</h3>
+<p>把 <code>dist</code> 整个拖进去，根目录就会多包一层，平台找不到入口。<strong>这一个动作的细节能挡掉一大半发布失败。</strong></p>
+<h3>提示4 · 两个坑只在部署后才暴露</h3>
+<p>静态资源 404（改相对路径基路径）和子页面空白（改 Hash 路由）——本地都试不出来。构建完先在本地起服务把主要子页面点一遍，多花两分钟省一轮来回。</p>
+<h3>提示5 · 用未登录窗口复验公开链接</h3>
+<p>私有空间自己看着正常，不代表别人能打开。<strong>公开之后一定要在未登录窗口再验一次。</strong></p>
+<hr>
+<h2>八、收尾</h2>
+<p>这一集真正想留下的不是某个平台的按钮位置——那些随时会变。而是那四步不会变的主流程：<strong>创建静态创空间 → 上传构建产物 → 部署 → 通过链接访问。</strong></p>
+<p>以及三条最硬的红线：<strong>不传源码、根目录直含 index.html、令牌绝不外泄。</strong></p>
+<p>最后那条建议值得照做：<strong>第一次发布就用私有，确认页面正常之后再改为公开。</strong> 这个顺序看起来多了一步，但它能让你在页面还没调试好的时候，不必担心被别人看到半成品。</p>
+<p>而当你的作品第一次有了可以被别人打开的链接，它就从练习变成了作品——<strong>别人打开链接之后给你的那句反馈，往往比你自己闷头改十次都更有用。</strong></p></div></details>
+<footer>音频 32kbps / 24kHz / 单声道，直链 MP3（支持边下边播与拖动进度条）<br>本内容改编自开源项目 Easy-Vibe（datawhalechina/easy-vibe），为二次演绎配音版<br>原文仓库：<a href="https://github.com/datawhalechina/easy-vibe" target="_blank" rel="noopener">datawhalechina/easy-vibe · docs/zh-cn/stage-1/learning-map/index.md</a><br>本页由 <code>render_site.py</code> 从 <code>state-ev-s3.json</code> 自动生成，请勿手改。</footer>
+</div>
+<script>
+// 入口 URL 规范化：/index.html/ 这类「目录式」地址会让相对路径错位，
+// 这里把地址栏收敛回目录根，避免后续任何相对解析踩坑。
+(function () {
+  var p = location.pathname;
+  if (/(^|\/)index\.html\/?$/.test(p)) {
+    var np = p.replace(/(^|\/)index\.html\/?$/, '$1') || '/';
+    try { history.replaceState(null, '', np); } catch (e) {}
+  }
+})();
+
+(function () {
+  var au = document.getElementById('au');
+  var box = document.getElementById('subs');
+  var fbtn = document.getElementById('follow');
+  if (!au || !box || !fbtn) return;
+
+  var chs = [].slice.call(document.querySelectorAll('.ch'));
+
+  chs.forEach(function (el) {
+    el.addEventListener('click', function () {
+      au.currentTime = parseFloat(el.dataset.t);
+      au.play();
+    });
+  });
+
+  var chOn = null;
+  function syncChapters(t) {
+    var a = null;
+    for (var i = 0; i < chs.length; i++) {
+      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    }
+    if (a === chOn) return;
+    chOn = a;
+    chs.forEach(function (el) {
+      var on = el === a;
+      el.style.background = on ? '#12101f' : '';
+      el.style.borderColor = on ? '#7c3aed66' : 'transparent';
+    });
+  }
+
+  var subs = [];
+  var rows = [];
+  var cur = -1;
+  var following = true;
+  var smooth = 'scrollBehavior' in document.documentElement.style;
+
+  var seps = chs.map(function (el) {
+    var n = el.querySelector('.n');
+    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+  });
+
+  function mmss(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function parseSRT(txt) {
+    var out = [];
+    txt.replace(/\r/g, '').split(/\n\s*\n/).forEach(function (blk) {
+      var lines = blk.split('\n').filter(function (l) { return l.trim(); });
+      var tl = null, ti = -1;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') >= 0) { tl = lines[i]; ti = i; break; }
+      }
+      if (!tl) return;
+      var m = tl.match(/(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/);
+      if (!m) return;
+      var t = (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000;
+      var text = lines.slice(ti + 1).join(' ').trim();
+      if (text) out.push({ t: t, text: text });
+    });
+    return out;
+  }
+
+  function build() {
+    var frag = document.createDocumentFragment();
+    rows = [];
+    var si = 0;
+    subs.forEach(function (s, i) {
+      while (si < seps.length && seps[si].t <= s.t + 0.05) {
+        var d = document.createElement('div');
+        d.className = 'sub-sep';
+        var sp = document.createElement('span');
+        sp.textContent = seps[si].name;
+        d.appendChild(sp);
+        frag.appendChild(d);
+        si++;
+      }
+      var el = document.createElement('div');
+      el.className = 'sub';
+      el.dataset.i = i;
+      var ts = document.createElement('span');
+      ts.className = 'ts';
+      ts.textContent = mmss(s.t);
+      var tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.textContent = s.text;
+      el.appendChild(ts);
+      el.appendChild(tx);
+      frag.appendChild(el);
+      rows[i] = el;
+    });
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  function locate(t) {
+    var lo = 0, hi = subs.length - 1, a = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (subs[mid].t <= t + 0.001) { a = mid; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return a;
+  }
+
+  function center(el) {
+    var y = el.offsetTop - (box.clientHeight - el.offsetHeight) / 2;
+    if (smooth && box.scrollTo) box.scrollTo({ top: y, behavior: 'smooth' });
+    else box.scrollTop = y;
+  }
+
+  function sync(t) {
+    var i = locate(t);
+    if (i === cur) return;
+    if (cur >= 0 && rows[cur]) rows[cur].classList.remove('on');
+    cur = i;
+    if (i < 0 || !rows[i]) return;
+    rows[i].classList.add('on');
+    if (following) center(rows[i]);
+  }
+
+  function pauseFollow() {
+    if (!following) return;
+    following = false;
+    fbtn.hidden = false;
+  }
+  function resumeFollow() {
+    following = true;
+    fbtn.hidden = true;
+    if (cur >= 0 && rows[cur]) center(rows[cur]);
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    box.addEventListener(ev, pauseFollow, { passive: true });
+  });
+  box.addEventListener('keydown', function (e) {
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) pauseFollow();
+  });
+  fbtn.addEventListener('click', resumeFollow);
+
+  box.addEventListener('click', function (e) {
+    var el = e.target;
+    while (el && el !== box && !(el.classList && el.classList.contains('sub'))) {
+      el = el.parentNode;
+    }
+    if (!el || el === box || !el.classList) return;
+    var sel = window.getSelection ? String(window.getSelection()) : '';
+    if (sel.length) return;
+    var i = +el.dataset.i;
+    if (!subs[i]) return;
+    au.currentTime = subs[i].t;
+    au.play();
+    if (!following) resumeFollow();
+  });
+
+  au.addEventListener('timeupdate', function () {
+    syncChapters(au.currentTime);
+    sync(au.currentTime);
+  });
+  au.addEventListener('seeked', function () { sync(au.currentTime); });
+
+  function load() {
+    box.textContent = '';
+    var m = document.createElement('div');
+    m.className = 'subs-msg';
+    m.textContent = '字幕加载中…';
+    box.appendChild(m);
+
+    fetch(box.dataset.srt, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http'); e.status = r.status; throw e; }
+        return r.text();
+      })
+      .then(function (txt) {
+        subs = parseSRT(txt);
+        if (!subs.length) { var e = new Error('empty'); e.status = 0; throw e; }
+        build();
+        if (au.currentTime > 0) sync(au.currentTime);
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          var w = document.getElementById('subswrap');
+          if (w) w.hidden = true;
+          return;
+        }
+        box.textContent = '';
+        var d = document.createElement('div');
+        d.className = 'subs-msg err';
+        d.appendChild(document.createTextNode('字幕加载失败 · '));
+        var b = document.createElement('b');
+        b.textContent = '重试';
+        d.appendChild(b);
+        box.appendChild(d);
+        b.addEventListener('click', load);
+      });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
