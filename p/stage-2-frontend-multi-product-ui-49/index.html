@@ -109,6 +109,33 @@
   .art li{margin:4px 0}
   .art hr{border:none;border-top:1px solid #241f3a;margin:22px 0}
   .art a{color:#c084fc}
+
+  /* ---- 播放控制条（render_site.py 注入，勿手改）---- */
+  .ev-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;
+    margin-top:16px;padding:10px 14px;background:#181530;
+    border:1px solid #241f3a;border-radius:12px;font-size:13px;color:#94a3b8}
+  .ev-ctl .ev-lbl{color:#64748b}
+  .ev-ctl .ev-seg{display:inline-flex;border:1px solid #241f3a;
+    border-radius:8px;overflow:hidden}
+  .ev-ctl .ev-seg button{background:none;border:0;color:#94a3b8;font:inherit;
+    padding:6px 11px;cursor:pointer;white-space:nowrap;transition:.15s}
+  .ev-ctl .ev-seg button+button{border-left:1px solid #241f3a}
+  .ev-ctl .ev-seg button:hover{color:#e2e8f0}
+  .ev-ctl .ev-seg button.on{background:#2a2350;color:#d8b4fe}
+  .ev-ctl .ev-seg button:disabled{opacity:.4;cursor:not-allowed}
+  .ev-ctl .ev-sw{display:inline-flex;align-items:center;gap:8px;
+    cursor:pointer;user-select:none}
+  .ev-ctl .ev-dot{width:34px;height:18px;border-radius:999px;background:#241f3a;
+    position:relative;transition:.15s;flex:0 0 auto}
+  .ev-ctl .ev-dot i{position:absolute;top:2px;left:2px;width:14px;height:14px;
+    border-radius:50%;background:#64748b;transition:.15s}
+  .ev-ctl.on-bgm .ev-dot{background:#4c1d95}
+  .ev-ctl.on-bgm .ev-dot i{left:18px;background:#c084fc}
+  .ev-ctl.on-bgm .ev-sw{color:#e2e8f0}
+  .ev-ctl input[type=range]{width:88px;accent-color:#c084fc}
+  .ev-ctl .ev-sp{flex:1 1 auto}
+  @media(max-width:640px){.ev-ctl .ev-sp{display:none}
+    .ev-ctl .ev-seg button{padding:6px 9px;font-size:12.5px}}
 </style>
 </head>
 <body>
@@ -117,7 +144,7 @@
 <h1>参考 UI 设计规范设计页面和按钮 · 2.1 参考 Apple：学习“定义得足够…</h1>
 <p class="sub">第 7 章 · 第 49 讲 · 15:10</p>
 <div class="meta"><span>时长 <b>15:10</b></span><span>音色 <b>云健 · 男声</b></span><span>章节 <b>7</b></span></div>
-<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-frontend-multi-product-ui-49-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-frontend-multi-product-ui-49-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-2-frontend-multi-product-ui-49/stage-2-frontend-multi-product-ui-49-播客.srt" download>下载字幕 SRT</a></div></div>
+<div class="player"><audio id="au" controls preload="metadata" src="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-frontend-multi-product-ui-49-播客.mp3">你的浏览器不支持音频播放</audio><div class="actions"><a class="btn" href="https://pub-127d7cde1eba4ee1a877b0c3517daa58.r2.dev/ev/stage-2-frontend-multi-product-ui-49-播客.mp3" download>下载 / 保存音频</a><a class="btn ghost" href="/p/stage-2-frontend-multi-product-ui-49/stage-2-frontend-multi-product-ui-49-播客.srt" download>下载字幕 SRT</a></div><div class="ev-ctl" id="evCtl"><span class="ev-lbl">播完后</span><span class="ev-seg" id="evMode"><button data-m="loop">循环本集</button><button data-m="next">自动下一讲</button><button data-m="none">不做处理</button></span><span class="ev-sp"></span><label class="ev-sw"><input type="checkbox" id="evBgm" hidden><span class="ev-dot"><i></i></span><span>敲敲鱼</span></label><span class="ev-seg" id="evSnd"><button data-s="woodfish-01.wav">01</button><button data-s="woodfish-03.wav">03</button><button data-s="woodfish-06.wav">06</button></span><input type="range" id="evVol" min="0" max="100" value="35" aria-label="背景音效音量"><audio id="evBgmAu" loop preload="auto" src="/assets/woodfish-01.wav"></audio></div></div>
 <div class="subs-wrap" id="subswrap"><h2>同步字幕</h2><div class="subs" id="subs" data-srt="/p/stage-2-frontend-multi-product-ui-49/stage-2-frontend-multi-product-ui-49-播客.srt" role="region" aria-label="同步字幕"></div><button class="follow" id="follow" type="button" hidden>回到当前</button></div>
 <div class="nav">
 <a href="/chapter-7.html">← 第 7 章目录</a>
@@ -356,24 +383,47 @@
   var fbtn = document.getElementById('follow');
   if (!au || !box || !fbtn) return;
 
-  var chs = [].slice.call(document.querySelectorAll('.ch'));
+  // 章节列表改成「惰性取 + 事件委托」：
+  // 页内接续下一讲时会整块重建 #chapters 的 DOM，早期把 chs 抓成静态数组的话，
+  // 切集后 syncChapters / seps 全指向已被丢弃的旧节点，表现为高亮和分隔条全失效。
+  var chBox = document.getElementById('chapters');
+  function chs() {
+    return chBox ? [].slice.call(chBox.querySelectorAll('.ch')) : [];
+  }
 
-  chs.forEach(function (el) {
-    el.addEventListener('click', function () {
-      au.currentTime = parseFloat(el.dataset.t);
-      au.play();
+  // 原实现直接 au.currentTime = t，若元数据还没加载（readyState < 1）
+  // 赋值会被静默丢弃 —— 表现就是「点了没反应」。这里等 loadedmetadata 再跳。
+  function seek(t) {
+    var go = function () {
+      try { au.currentTime = t; } catch (e) {}
+      var p = au.play();
+      if (p && p.catch) p.catch(function () {});
+    };
+    if (au.readyState >= 1) go();
+    else au.addEventListener('loadedmetadata', go, { once: true });
+  }
+
+  if (chBox) {
+    chBox.addEventListener('click', function (e) {
+      var el = e.target;
+      while (el && el !== chBox && !(el.classList && el.classList.contains('ch'))) {
+        el = el.parentNode;
+      }
+      if (!el || el === chBox) return;
+      seek(parseFloat(el.dataset.t));
     });
-  });
+  }
 
   var chOn = null;
   function syncChapters(t) {
+    var list = chs();
     var a = null;
-    for (var i = 0; i < chs.length; i++) {
-      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    for (var i = 0; i < list.length; i++) {
+      if (t >= parseFloat(list[i].dataset.t)) a = list[i];
     }
     if (a === chOn) return;
     chOn = a;
-    chs.forEach(function (el) {
+    list.forEach(function (el) {
       var on = el === a;
       el.style.background = on ? '#12101f' : '';
       el.style.borderColor = on ? '#7c3aed66' : 'transparent';
@@ -386,10 +436,14 @@
   var following = true;
   var smooth = 'scrollBehavior' in document.documentElement.style;
 
-  var seps = chs.map(function (el) {
-    var n = el.querySelector('.n');
-    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
-  });
+  var seps = [];
+  function syncSeps() {
+    seps = chs().map(function (el) {
+      var n = el.querySelector('.n');
+      return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+    });
+  }
+  syncSeps();
 
   function mmss(s) {
     s = Math.max(0, Math.floor(s));
@@ -417,6 +471,8 @@
   function build() {
     var frag = document.createDocumentFragment();
     rows = [];
+    cur = -1;
+    chOn = null;
     var si = 0;
     subs.forEach(function (s, i) {
       while (si < seps.length && seps[si].t <= s.t + 0.05) {
@@ -500,8 +556,7 @@
     if (sel.length) return;
     var i = +el.dataset.i;
     if (!subs[i]) return;
-    au.currentTime = subs[i].t;
-    au.play();
+    seek(subs[i].t);
     if (!following) resumeFollow();
   });
 
@@ -547,7 +602,324 @@
       });
   }
   load();
+  // 页内接续下一讲时由播放器脚本派发：先重建章节分隔条，再按新 data-srt 重拉字幕。
+  // 这是本站独有的一步 —— 参考实现（无滚动字幕）里没有。
+  box.addEventListener('ev:reload', function () { syncSeps(); load(); });
 })();
 </script>
+<script src="/assets/eps.js"></script>
+
+<script>
+(function () {
+  var au = document.getElementById('au');
+  var ctl = document.getElementById('evCtl');
+  var EPS = (window.EV_EPS && window.EV_EPS.eps) || [];
+  var cur = 64;
+  var BASE = '';
+  if (!au || !ctl) return;
+
+  var K_M = 'ev:mode', K_B = 'ev:bgm', K_V = 'ev:bgmvol', K_S = 'ev:bgmsnd';
+  function ls(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+  function ss(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function mmss(s) { s = Math.max(0, Math.round(s || 0)); return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2); }
+  function secs(t) { var m = String(t || '0:0').split(':'); return (+m[0] || 0) * 60 + (+m[1] || 0); }
+  function url(p) { return BASE + p; }
+
+  var h1 = document.querySelector('h1');
+  var tag = document.querySelector('.tag');
+  var sub = document.querySelector('.sub');
+  var meta = document.querySelector('.meta');
+  var chBox = document.getElementById('chapters');
+  var subsBox = document.getElementById('subs');
+  var nav = document.querySelector('.nav');
+  var artEl = document.querySelector('details.art');
+  var actions = document.querySelectorAll('.actions a');
+
+  function seek(t) {
+    var go = function () {
+      try { au.currentTime = t; } catch (e) {}
+      var p = au.play();
+      if (p && p.catch) p.catch(function () {});
+    };
+    if (au.readyState >= 1) go();
+    else au.addEventListener('loadedmetadata', go, { once: true });
+  }
+
+  // ---- 页内切集 ----
+  function loadEp(i, autoplay, push) {
+    var e = EPS[i];
+    if (!e) return false;
+    cur = i;
+    au.src = e.a;
+    msMeta(i);
+    if (h1) h1.textContent = e.t;
+    if (tag) tag.textContent = 'CHAPTER ' + e.c + ' · EP ' + e.n;
+    if (sub) sub.textContent = '第 ' + e.c + ' 章 · 第 ' + e.n + ' 讲 · ' + e.du;
+    if (meta) {
+      var bs = meta.querySelectorAll('b');
+      if (bs[0]) bs[0].textContent = e.du;
+      if (bs[2]) bs[2].textContent = e.c;
+    }
+    document.title = e.t;
+    if (actions[0]) actions[0].href = e.a;
+    if (actions[1]) actions[1].href = e.u;
+
+    // 章节导航整块重建（服务端渲染的那份节点会被丢弃）
+    if (chBox) {
+      var h = '';
+      (e.sec || []).forEach(function (s) {
+        h += '<div class="ch" data-t="' + s[0] + '"><span class="t">' + mmss(s[0]) +
+             '</span><span class="n">' + esc(s[1]) + '</span></div>';
+      });
+      chBox.innerHTML = h;
+    }
+    // ⚠ 本站独有：滚动字幕是按 #subs 的 data-srt fetch 的，切集必须换地址并重载
+    if (subsBox) {
+      subsBox.dataset.srt = e.u;
+      try { subsBox.dispatchEvent(new CustomEvent('ev:reload')); } catch (err) {}
+    }
+    // 解读稿是渲染期把 Markdown 内联进来的，切集后无法就地替换 —— 换成规范链接
+    if (artEl) {
+      var p = document.createElement('p');
+      p.className = 'sub';
+      p.innerHTML = '本讲解读全文见 <a href="' + url('/p/' + e.s + '/') + '">' + esc(e.t) + '</a>';
+      artEl.parentNode.replaceChild(p, artEl);
+      artEl = p;
+    }
+    // 底部导航：章目录 / 上一讲 / 下一讲
+    if (nav) {
+      var pv = EPS[i - 1], nx = EPS[i + 1];
+      nav.innerHTML =
+        '<a href="' + url('/chapter-' + e.c + '.html') + '">← 第 ' + e.c + ' 章目录</a>' +
+        (pv ? '<a href="' + url('/p/' + pv.s + '/') + '">← 上一讲</a>' : '<span>← 上一讲</span>') +
+        (nx ? '<a href="' + url('/p/' + nx.s + '/') + '">下一讲 →</a>' : '<span>下一讲 →</span>');
+    }
+    var nb = document.querySelector('#evMode button[data-m="next"]');
+    if (nb) nb.disabled = !EPS[i + 1];
+    if (push !== false) {
+      try { history.pushState({ ev: i }, '', url('/p/' + e.s + '/')); } catch (err) {}
+    }
+    if (autoplay) { var pr = au.play(); if (pr && pr.catch) pr.catch(function () {}); }
+    return true;
+  }
+
+  function idxOfSlug(s) {
+    for (var i = 0; i < EPS.length; i++) { if (EPS[i].s === s) return i; }
+    return -1;
+  }
+  window.addEventListener('popstate', function () {
+    var m = (location.pathname || '').match(/\/p\/([^\/]+)\/?$/);
+    if (!m) return;
+    var i = idxOfSlug(m[1]);
+    if (i >= 0 && i !== cur) loadEp(i, false, false);
+  });
+
+  // ---- 播完后：循环本集 / 自动下一讲 / 不做处理 ----
+  var seg = document.getElementById('evMode');
+  var sw = document.getElementById('evBgm');
+  var snd = document.getElementById('evSnd');
+  var bgmAu = document.getElementById('evBgmAu');
+  var vol = document.getElementById('evVol');
+  var mode = ls(K_M, 'none');
+  if (!EPS.length) mode = (mode === 'next') ? 'none' : mode;   // 清单没加载到就不给连播
+
+  function paintMode() {
+    [].forEach.call(seg.querySelectorAll('button'), function (b) {
+      b.classList.toggle('on', b.getAttribute('data-m') === mode);
+      if (b.getAttribute('data-m') === 'next') b.disabled = !EPS[cur + 1];
+    });
+  }
+  seg.addEventListener('click', function (ev) {
+    var b = ev.target.closest ? ev.target.closest('button') : null;
+    if (!b || !seg.contains(b) || b.disabled) return;
+    mode = b.getAttribute('data-m');
+    ss(K_M, mode);
+    paintMode();
+  });
+  paintMode();
+
+  // ---- 背景音效（开关默认开 + 三选一音色）----
+  //
+  // 加载时机：小 wav（48 KB）随页面 preload="auto" 一起拉下来，切音色时换 src 并 load()。
+  // 播放时机：浏览器禁止无手势的有声自动播放，所以「默认开」只表示开关是开的，
+  //           真正的 play() 由三次机会补上：① 主音频首次 play；② 页面任意点击/触摸；
+  //           ③ 自动连播切下一讲时（此时激活态还在，play() 直接放行）。
+  // 循环：<audio loop>，不用 JS 定时调度（后台标签页会被节流，会走音）。
+  // 停止：① 用户关闭开关；② 播客播放结束（播完且不再继续：模式=不做处理 / 已是最后一讲）。
+  // 重复触发：startBgm() 幂等 —— 已在播就什么都不做，不重置进度、不叠加音量。
+  var sndCur = ls(K_S, 'woodfish-01.wav');
+  function paintSnd() {
+    if (!snd) return;
+    [].forEach.call(snd.querySelectorAll('button'), function (b) {
+      b.classList.toggle('on', b.getAttribute('data-s') === sndCur);
+    });
+  }
+  function applySnd(doPlay) {
+    if (!bgmAu) return;
+    bgmAu.src = url('/assets/' + sndCur);
+    try { bgmAu.load(); } catch (e) {}
+    if (on && doPlay) startBgm();
+  }
+  if (snd) {
+    // 存过的值若已不在选项里（素材改名/增删），回落到默认，不会静音
+    if (!snd.querySelector('button[data-s="' + sndCur + '"]')) sndCur = 'woodfish-01.wav';
+    paintSnd();
+    snd.addEventListener('click', function (ev) {
+      var b = ev.target.closest ? ev.target.closest('button') : null;
+      if (!b || !snd.contains(b)) return;
+      sndCur = b.getAttribute('data-s');
+      ss(K_S, sndCur);
+      paintSnd();
+      applySnd(true);
+    });
+    applySnd(false);
+  }
+
+  var on = ls(K_B, '1') === '1';          // ← 默认开启（但只是状态，不直接出声）
+  function startBgm() {
+    if (!on || !bgmAu) return false;
+    if (!bgmAu.paused) return true;       // 幂等闸门：已在播就不重复触发
+    var p = bgmAu.play();
+    if (p && p.catch) p.catch(function () {});
+    return true;
+  }
+  function stopBgm() { if (bgmAu) bgmAu.pause(); }
+  function setBgm(v, doPlay) {
+    on = v;
+    if (sw) sw.checked = v;
+    ctl.classList.toggle('on-bgm', v);
+    ss(K_B, v ? '1' : '0');
+    if (v) { if (doPlay) startBgm(); } else stopBgm();
+  }
+  if (sw) sw.addEventListener('change', function () { setBgm(sw.checked, true); });
+  if (vol && bgmAu) {
+    var v0 = parseInt(ls(K_V, '35'), 10);
+    if (isNaN(v0)) v0 = 35;
+    vol.value = v0;
+    bgmAu.volume = Math.max(0, Math.min(1, v0 / 100));
+    vol.addEventListener('input', function () {
+      bgmAu.volume = vol.value / 100;
+      ss(K_V, vol.value);
+    });
+  }
+  setBgm(on, false);                      // 只置开关状态，等手势再真正出声
+
+  // 手势补播：主音频一播放 / 页面任意一次点击，就把默认开的音效接上（只补一次）
+  var hooked = true;
+  function detach() {
+    if (!hooked) return;
+    hooked = false;
+    au.removeEventListener('play', tryStart);
+    document.removeEventListener('click', tryStart);
+    document.removeEventListener('touchstart', tryStart);
+  }
+  function tryStart() {
+    if (!on || !bgmAu) { detach(); return; }
+    if (!bgmAu.paused) { detach(); return; }
+    var p = bgmAu.play();
+    if (p && p.then) p.then(detach, function () {});
+  }
+  au.addEventListener('play', tryStart);
+  document.addEventListener('click', tryStart);
+  document.addEventListener('touchstart', tryStart);
+
+  au.addEventListener('ended', function () {
+    var cont = false;
+    if (mode === 'loop') {
+      try { au.currentTime = 0; } catch (e) {}
+      var p = au.play();
+      if (p && p.catch) p.catch(function () {});
+      cont = true;
+    } else if (mode === 'next' && EPS[cur + 1]) {
+      cont = loadEp(cur + 1, true, true);   // 主音轨自动续播（页内接续，激活态仍在）
+      if (cont) startBgm();                 // 切集时补一次；已在播则什么都不做
+    }
+    if (!cont) stopBgm();                   // 播客播放结束 → 停掉背景层
+  });
+
+  // ---- 耳机线控 / 锁屏 / 键盘媒体键（Media Session）----
+  //
+  // 能力边界（别向用户承诺做不到的）：网页**收不到**「长按音量键」这个原始事件，
+  // 系统先消费掉。网页能拿到的是 ROM 翻译后的标准媒体键（previoustrack / nexttrack）。
+  // 可靠生效的：耳机中键单击 = 播放/暂停；双击 = 下一首；iOS 三击 = 上一首。
+  var MS = ('mediaSession' in navigator) ? navigator.mediaSession : null;
+  var BRAND = 'Easy-Vibe 学习地图';
+  function msMeta(i) {
+    if (!MS || typeof MediaMetadata === 'undefined') return;
+    var e = EPS[i];
+    if (!e) return;
+    try {
+      MS.metadata = new MediaMetadata({
+        title: e.t, artist: BRAND, album: '第 ' + e.c + ' 章 · EP ' + e.n
+      });
+    } catch (err) {}
+  }
+  function msState() {
+    if (!MS) return;
+    try { MS.playbackState = au.paused ? 'paused' : 'playing'; } catch (e) {}
+  }
+  function msPos() {
+    if (!MS || !MS.setPositionState) return;
+    var d = au.duration;
+    if (!isFinite(d) || d <= 0) return;      // 非法 duration 会抛 TypeError
+    try {
+      MS.setPositionState({
+        duration: d, playbackRate: au.playbackRate || 1,
+        position: Math.max(0, Math.min(au.currentTime || 0, d))
+      });
+    } catch (e) {}
+  }
+  var msT = 0;                               // 去抖：媒体键与 keydown 可能同时到达
+  function deb(fn) {
+    return function (a) {
+      var t = Date.now();
+      if (t - msT < 250) return;
+      msT = t;
+      fn(a);
+    };
+  }
+  function msPrev() { if (cur > 0) loadEp(cur - 1, !au.paused, true); else seek(0); }
+  function msNext() { if (EPS[cur + 1]) loadEp(cur + 1, !au.paused, true); }
+  function msToggle() {
+    if (au.paused) { var p = au.play(); if (p && p.catch) p.catch(function () {}); }
+    else au.pause();
+  }
+  if (MS) {
+    msMeta(cur);
+    msState();
+    var A = {
+      play: function () { var p = au.play(); if (p && p.catch) p.catch(function () {}); },
+      pause: function () { au.pause(); },
+      stop: function () { au.pause(); seek(0); },
+      previoustrack: deb(msPrev),
+      nexttrack: deb(msNext),
+      seekbackward: function (d) { seek(Math.max(0, (au.currentTime || 0) - ((d && d.seekOffset) || 15))); },
+      seekforward: function (d) { seek(Math.min(au.duration || 0, (au.currentTime || 0) + ((d && d.seekOffset) || 15))); },
+      seekto: function (d) { if (d && typeof d.seekTime === 'number') seek(d.seekTime); }
+    };
+    for (var k in A) {
+      if (!Object.prototype.hasOwnProperty.call(A, k)) continue;
+      try { MS.setActionHandler(k, A[k]); } catch (e) {}
+    }
+    ['play', 'pause', 'ended', 'loadedmetadata', 'durationchange', 'ratechange', 'timeupdate']
+      .forEach(function (ev) { au.addEventListener(ev, function () { msState(); msPos(); }); });
+  }
+  document.addEventListener('keydown', function (ev) {
+    var k = ev && ev.key;
+    if (!k) return;
+    if (k === 'MediaPlayPause' || k === 'MediaPlay' || k === 'MediaPause') {
+      ev.preventDefault(); deb(msToggle)();
+    } else if (k === 'MediaTrackNext') { ev.preventDefault(); deb(msNext)();
+    } else if (k === 'MediaTrackPrevious') { ev.preventDefault(); deb(msPrev)();
+    } else if (k === 'MediaStop') { ev.preventDefault(); au.pause(); seek(0); }
+  });
+})();
+</script>
+
 </body>
 </html>

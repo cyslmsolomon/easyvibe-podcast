@@ -146,24 +146,47 @@
   var fbtn = document.getElementById('follow');
   if (!au || !box || !fbtn) return;
 
-  var chs = [].slice.call(document.querySelectorAll('.ch'));
+  // 章节列表改成「惰性取 + 事件委托」：
+  // 页内接续下一讲时会整块重建 #chapters 的 DOM，早期把 chs 抓成静态数组的话，
+  // 切集后 syncChapters / seps 全指向已被丢弃的旧节点，表现为高亮和分隔条全失效。
+  var chBox = document.getElementById('chapters');
+  function chs() {
+    return chBox ? [].slice.call(chBox.querySelectorAll('.ch')) : [];
+  }
 
-  chs.forEach(function (el) {
-    el.addEventListener('click', function () {
-      au.currentTime = parseFloat(el.dataset.t);
-      au.play();
+  // 原实现直接 au.currentTime = t，若元数据还没加载（readyState < 1）
+  // 赋值会被静默丢弃 —— 表现就是「点了没反应」。这里等 loadedmetadata 再跳。
+  function seek(t) {
+    var go = function () {
+      try { au.currentTime = t; } catch (e) {}
+      var p = au.play();
+      if (p && p.catch) p.catch(function () {});
+    };
+    if (au.readyState >= 1) go();
+    else au.addEventListener('loadedmetadata', go, { once: true });
+  }
+
+  if (chBox) {
+    chBox.addEventListener('click', function (e) {
+      var el = e.target;
+      while (el && el !== chBox && !(el.classList && el.classList.contains('ch'))) {
+        el = el.parentNode;
+      }
+      if (!el || el === chBox) return;
+      seek(parseFloat(el.dataset.t));
     });
-  });
+  }
 
   var chOn = null;
   function syncChapters(t) {
+    var list = chs();
     var a = null;
-    for (var i = 0; i < chs.length; i++) {
-      if (t >= parseFloat(chs[i].dataset.t)) a = chs[i];
+    for (var i = 0; i < list.length; i++) {
+      if (t >= parseFloat(list[i].dataset.t)) a = list[i];
     }
     if (a === chOn) return;
     chOn = a;
-    chs.forEach(function (el) {
+    list.forEach(function (el) {
       var on = el === a;
       el.style.background = on ? '#12101f' : '';
       el.style.borderColor = on ? '#7c3aed66' : 'transparent';
@@ -176,10 +199,14 @@
   var following = true;
   var smooth = 'scrollBehavior' in document.documentElement.style;
 
-  var seps = chs.map(function (el) {
-    var n = el.querySelector('.n');
-    return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
-  });
+  var seps = [];
+  function syncSeps() {
+    seps = chs().map(function (el) {
+      var n = el.querySelector('.n');
+      return { t: parseFloat(el.dataset.t), name: n ? n.textContent : '' };
+    });
+  }
+  syncSeps();
 
   function mmss(s) {
     s = Math.max(0, Math.floor(s));
@@ -207,6 +234,8 @@
   function build() {
     var frag = document.createDocumentFragment();
     rows = [];
+    cur = -1;
+    chOn = null;
     var si = 0;
     subs.forEach(function (s, i) {
       while (si < seps.length && seps[si].t <= s.t + 0.05) {
@@ -290,8 +319,7 @@
     if (sel.length) return;
     var i = +el.dataset.i;
     if (!subs[i]) return;
-    au.currentTime = subs[i].t;
-    au.play();
+    seek(subs[i].t);
     if (!following) resumeFollow();
   });
 
@@ -337,7 +365,11 @@
       });
   }
   load();
+  // 页内接续下一讲时由播放器脚本派发：先重建章节分隔条，再按新 data-srt 重拉字幕。
+  // 这是本站独有的一步 —— 参考实现（无滚动字幕）里没有。
+  box.addEventListener('ev:reload', function () { syncSeps(); load(); });
 })();
 </script>
+
 </body>
 </html>
