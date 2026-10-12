@@ -148,9 +148,11 @@
 
   // 原实现直接 au.currentTime = t，若元数据还没加载（readyState < 1）
   // 赋值会被静默丢弃 —— 表现就是「点了没反应」。这里等 loadedmetadata 再跳。
-  function seek(t) {
+  // announce=true 时跳完顺带播报新章节名（见 window.evAnnounceChapterAt）。
+  function seek(t, announce) {
     var go = function () {
       try { au.currentTime = t; } catch (e) {}
+      if (announce && window.evAnnounceChapterAt) window.evAnnounceChapterAt(t);
       var p = au.play();
       if (p && p.catch) p.catch(function () {});
     };
@@ -165,7 +167,7 @@
         el = el.parentNode;
       }
       if (!el || el === chBox) return;
-      seek(parseFloat(el.dataset.t));
+      seek(parseFloat(el.dataset.t), true);
     });
   }
 

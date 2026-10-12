@@ -344,9 +344,11 @@
 
   // 原实现直接 au.currentTime = t，若元数据还没加载（readyState < 1）
   // 赋值会被静默丢弃 —— 表现就是「点了没反应」。这里等 loadedmetadata 再跳。
-  function seek(t) {
+  // announce=true 时跳完顺带播报新章节名（见 window.evAnnounceChapterAt）。
+  function seek(t, announce) {
     var go = function () {
       try { au.currentTime = t; } catch (e) {}
+      if (announce && window.evAnnounceChapterAt) window.evAnnounceChapterAt(t);
       var p = au.play();
       if (p && p.catch) p.catch(function () {});
     };
@@ -361,7 +363,7 @@
         el = el.parentNode;
       }
       if (!el || el === chBox) return;
-      seek(parseFloat(el.dataset.t));
+      seek(parseFloat(el.dataset.t), true);
     });
   }
 
@@ -606,6 +608,7 @@
     var e = EPS[i];
     if (!e) return false;
     cur = i;
+    spokenKey = '';              // 换集后重新播报章节，哪怕章节下标与上一集相同
     au.src = e.a;
     msMeta(i);
     if (h1) h1.textContent = e.t;
@@ -658,6 +661,106 @@
     if (autoplay) { var pr = au.play(); if (pr && pr.catch) pr.catch(function () {}); }
     return true;
   }
+
+  // ---- 自动朗读（TTS）：播放开始报当前章节名，播完报结束语 ----
+  //
+  // 为什么用浏览器原生 speechSynthesis，而不是像主音轨那样预生成 mp3：
+  //   本站主音色走 edge-tts，但**构建机上微软的 WebSocket 端点返回 403**
+  //   （换 Sec-MS-GEC-Version 里的 Chromium 版本号无效，直连/走代理都一样）；
+  //   有道 dictvoice 可达但它是词典查询接口，含标点的章节名直接回 500，覆盖不完整。
+  //   两条预生成通道都不可用，于是改成浏览器语音合成：零构建、零体积、
+  //   不增加任何部署文件，且在 Edge 上能选到与主音色一致的 zh-CN 自然音。
+  //
+  // 触发时机：
+  //   ① 主音轨 play（首次播放 / 点章节跳转 / 自动连播切下一讲）→ 读「当前章节名」
+  //   ② 主音轨 ended 且不再继续（模式=不做处理 / 已是末讲）→ 读结束语
+  // 去重：同一「集下标 + 章节下标」只读一次，暂停后继续不会重复读。
+  //
+  // 两个坑：
+  //   - getVoices() 首次调用通常是空数组，音色要等 voiceschanged 才到位；
+  //     不等就直接 speak 会掉到浏览器默认音色（可能是英文）。所以有 ensureVoices()。
+  //   - 主音轨暂停时朗读也要跟着停，否则会出现「音频停了还有个声音在念」。
+  var TTS_CPREFIX = '当前章节：';
+  var TTS_DONE = '本机播放完毕';
+  var VOICE_PREF = [
+    /yunjian|云健/i,                                    // 与本站主音色一致（在线自然音）
+    /xiaoxiao|xiaoyi|yunxi|yunyang|xiaohan|xiaomo|xiaoxuan|xiaorui|xiaochen|xiaoshu/i,
+    /^(microsoft|google|apple)/i
+  ];
+  var voices = [];
+  var voicesReady = false;
+  function refreshVoices() {
+    try {
+      var v = speechSynthesis.getVoices() || [];
+      if (v.length) { voices = v; voicesReady = true; }
+    } catch (e) {}
+  }
+  refreshVoices();
+  try { speechSynthesis.addEventListener('voiceschanged', refreshVoices); } catch (e) {}
+
+  function pickVoice() {
+    if (!voices.length) return null;
+    var i, j;
+    for (i = 0; i < VOICE_PREF.length; i++) {
+      for (j = 0; j < voices.length; j++) {
+        if (VOICE_PREF[i].test(voices[j].name)) return voices[j];
+      }
+    }
+    for (j = 0; j < voices.length; j++) { if (/^zh-CN/i.test(voices[j].lang)) return voices[j]; }
+    for (j = 0; j < voices.length; j++) { if (/^zh/i.test(voices[j].lang)) return voices[j]; }
+    return null;
+  }
+  function ensureVoices(cb) {
+    if (voicesReady) { cb(); return; }
+    var done = false;
+    var fin = function () { if (done) return; done = true; cb(); };
+    try {
+      speechSynthesis.addEventListener('voiceschanged', function onvc() {
+        refreshVoices();
+        try { speechSynthesis.removeEventListener('voiceschanged', onvc); } catch (e) {}
+        fin();
+      });
+    } catch (e) {}
+    setTimeout(fin, 1500);     // 等不到就按默认音色念，别让朗读无限等
+  }
+  function speak(text) {
+    if (!text || !('speechSynthesis' in window)) return;
+    ensureVoices(function () {
+      try {
+        speechSynthesis.cancel();
+        var u = new SpeechSynthesisUtterance(text);
+        var v = pickVoice();
+        if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = 'zh-CN'; }
+        u.rate = 1;
+        u.volume = 1;
+        speechSynthesis.speak(u);
+      } catch (e) {}
+    });
+  }
+  var spokenKey = '';          // 已播报过的「集下标|章节下标」
+  function announceChapterAt(t) {
+    var secs = (EPS[cur] && EPS[cur].sec) || [];
+    var idx = -1;
+    for (var k = 0; k < secs.length; k++) {
+      if (t + 0.05 >= secs[k][0]) idx = k;
+    }
+    if (idx < 0) return;
+    var key = cur + '|' + idx;
+    if (key === spokenKey) return;
+    spokenKey = key;
+    speak(TTS_CPREFIX + secs[idx][1]);
+  }
+  function announceChapter() { announceChapterAt(au.currentTime || 0); }
+  // 给字幕 IIFE 用：点章节按钮跳转时，若音频已在播放，play 事件不会再次触发，
+  // 必须显式播报一次，否则「跳章不念章名」。
+  window.evAnnounceChapterAt = announceChapterAt;
+  au.addEventListener('play', function () {
+    try { if (speechSynthesis.paused) speechSynthesis.resume(); } catch (e) {}
+    announceChapter();
+  });
+  au.addEventListener('pause', function () {
+    try { speechSynthesis.pause(); } catch (e) {}
+  });
 
   function idxOfSlug(s) {
     for (var i = 0; i < EPS.length; i++) { if (EPS[i].s === s) return i; }
@@ -790,7 +893,10 @@
       cont = loadEp(cur + 1, true, true);   // 主音轨自动续播（页内接续，激活态仍在）
       if (cont) startBgm();                 // 切集时补一次；已在播则什么都不做
     }
-    if (!cont) stopBgm();                   // 播客播放结束 → 停掉背景层
+    if (!cont) {
+      stopBgm();                            // 播客播放结束 → 停掉背景层
+      speak(TTS_DONE);                      // 并朗读结束语
+    }
   });
 
   // ---- 耳机线控 / 锁屏 / 键盘媒体键（Media Session）----
